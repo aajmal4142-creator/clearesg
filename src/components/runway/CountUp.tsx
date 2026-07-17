@@ -1,30 +1,18 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { Metric } from "@/components/ui/metric";
 
-import { useMotionSafe } from "@/lib/motion";
-
-export function CountUp({ value, className }: { value: number; className?: string }) {
-  const transition = useMotionSafe();
-  const reduced = transition.type === "tween";
-  const [display, setDisplay] = useState(0);
-  const frameRef = useRef(0);
-
-  useEffect(() => {
-    if (reduced) return;
-
-    const start = performance.now();
-    const from = 0;
-    const duration = 900;
-    const tick = (now: number) => {
-      const t = Math.min(1, (now - start) / duration);
-      const eased = 1 - Math.pow(1 - t, 3);
-      setDisplay(Math.round(from + (value - from) * eased));
-      if (t < 1) frameRef.current = requestAnimationFrame(tick);
-    };
-    frameRef.current = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(frameRef.current);
-  }, [value, reduced]);
-
-  return <span className={className}>{reduced ? value : display}</span>;
+/** @deprecated Prefer `<Metric />` — kept as a thin wrapper for existing call sites. */
+export function CountUp({
+  value,
+  className,
+  unit,
+}: {
+  value: number;
+  className?: string;
+  unit?: string;
+}) {
+  return (
+    <Metric value={value} unit={unit} size="display" decimals={0} className={className} />
+  );
 }

@@ -4,7 +4,9 @@ import { motion, AnimatePresence } from "motion/react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-import { Gauge } from "@/components/gauge/Gauge";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Metric } from "@/components/ui/metric";
 import { useMotionSafe } from "@/lib/motion";
 
 const QUESTIONS = [
@@ -114,25 +116,32 @@ export function OnboardingWizard() {
     return (
       <div className="mx-auto flex max-w-2xl flex-col items-center px-6 py-16">
         <p className="label-caps mb-4">Baseline</p>
-        <Gauge score={estimate.score} estimated />
-        <p className="font-data mt-6 text-2xl text-amber">
-          {estimate.tCO2e.toLocaleString()} tCO2e
-        </p>
+        <Metric value={estimate.score} size="display" decimals={0} tone="amber" />
+        <p className="label-caps mt-2 text-amber">Estimated score</p>
+        <div className="mt-6">
+          <Metric
+            value={estimate.tCO2e}
+            unit="tCO2e"
+            size="xl"
+            decimals={0}
+            tone="amber"
+          />
+        </div>
         <p className="label-caps mt-1 text-amber">Estimated footprint</p>
-        <p className="mt-6 max-w-md text-center text-ash">
+        <p className="measure-body mt-6 text-center text-ash">
           Replace estimates with measured data to raise your confidence score. Your
           Compliance Runway is ready.
         </p>
-        <button
+        <Button
           type="button"
-          className="mt-10 border border-graphite bg-slate px-4 py-2 text-sm text-bone hover:border-ash"
+          className="mt-10"
           onClick={() => {
             router.refresh();
             router.push("/app");
           }}
         >
           Open runway
-        </button>
+        </Button>
       </div>
     );
   }
@@ -159,15 +168,15 @@ export function OnboardingWizard() {
           <h1 className="font-display text-3xl text-bone">{q.label}</h1>
           <div className="mt-8">
             {q.type === "number" ? (
-              <input
+              <Input
                 type="number"
-                className="font-data w-full border border-graphite bg-slate px-3 py-3 text-bone"
+                className="h-11"
                 value={values[q.key] ?? ""}
                 onChange={(e) => setValues((v) => ({ ...v, [q.key]: e.target.value }))}
               />
             ) : (
               <select
-                className="w-full border border-graphite bg-slate px-3 py-3 text-bone"
+                className="surface-inset h-11 w-full rounded-[4px] px-3 text-bone"
                 value={values[q.key] ?? ""}
                 onChange={(e) => setValues((v) => ({ ...v, [q.key]: e.target.value }))}
               >
@@ -180,24 +189,23 @@ export function OnboardingWizard() {
             )}
           </div>
           <div className="mt-10 flex gap-3">
-            <button
+            <Button
               type="button"
+              variant="secondary"
               disabled={step === 0}
-              className="border border-graphite px-4 py-2 text-sm text-ash disabled:opacity-40"
               onClick={() => setStep((s) => Math.max(0, s - 1))}
             >
               Back
-            </button>
-            <button
+            </Button>
+            <Button
               type="button"
-              className="border border-graphite bg-slate px-4 py-2 text-sm text-bone hover:border-ash"
               onClick={() => {
                 if (step >= QUESTIONS.length - 1) void finish();
                 else setStep((s) => s + 1);
               }}
             >
               {step >= QUESTIONS.length - 1 ? "See baseline" : "Continue"}
-            </button>
+            </Button>
           </div>
         </motion.div>
       </AnimatePresence>

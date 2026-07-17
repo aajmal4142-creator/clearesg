@@ -3,7 +3,8 @@
 import { motion } from "motion/react";
 import type { ReactNode } from "react";
 
-import { houseSpring, useMotionSafe } from "@/lib/motion";
+import { springSoft, usePrefersReducedMotion } from "@/lib/motion";
+import { cn } from "@/lib/utils";
 
 export function Reveal({
   children,
@@ -14,19 +15,77 @@ export function Reveal({
   delay?: number;
   className?: string;
 }) {
-  const transition = useMotionSafe();
+  const reduced = usePrefersReducedMotion();
   return (
     <motion.div
       className={className}
-      initial={transition.type === "tween" ? false : { opacity: 0, y: 16 }}
+      initial={reduced ? false : { opacity: 0, y: 16 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-40px" }}
-      transition={{
-        ...(transition.type === "tween" ? transition : houseSpring),
-        delay,
-      }}
+      transition={{ ...springSoft, delay: reduced ? 0 : delay }}
     >
       {children}
     </motion.div>
+  );
+}
+
+/** Self-drawing hairline rule — scaleX from left on viewport entry. */
+export function HairlineRule({
+  className,
+  delay = 0,
+}: {
+  className?: string;
+  delay?: number;
+}) {
+  const reduced = usePrefersReducedMotion();
+  return (
+    <motion.div
+      aria-hidden
+      className={cn("h-px origin-left bg-graphite", className)}
+      initial={reduced ? false : { scaleX: 0 }}
+      whileInView={{ scaleX: 1 }}
+      viewport={{ once: true, margin: "-20px" }}
+      transition={
+        reduced ? { duration: 0 } : { duration: 0.4, ease: [0.22, 1, 0.36, 1], delay }
+      }
+    />
+  );
+}
+
+/** Strikethrough that draws in on reveal — for anti-features. */
+export function StrikeReveal({
+  children,
+  className,
+  delay = 0,
+}: {
+  children: ReactNode;
+  className?: string;
+  delay?: number;
+}) {
+  const reduced = usePrefersReducedMotion();
+  return (
+    <motion.li
+      className={cn("relative text-graphite", className)}
+      initial={reduced ? false : { opacity: 0, y: 12 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ ...springSoft, delay: reduced ? 0 : delay }}
+    >
+      <span className="relative inline-block">
+        {children}
+        <motion.span
+          aria-hidden
+          className="absolute left-0 top-1/2 h-px w-full origin-left bg-graphite"
+          initial={reduced ? false : { scaleX: 0 }}
+          whileInView={{ scaleX: 1 }}
+          viewport={{ once: true }}
+          transition={
+            reduced
+              ? { duration: 0 }
+              : { duration: 0.45, ease: [0.22, 1, 0.36, 1], delay: delay + 0.15 }
+          }
+        />
+      </span>
+    </motion.li>
   );
 }

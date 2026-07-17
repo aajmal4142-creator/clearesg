@@ -1,5 +1,6 @@
 import { Document, Page, StyleSheet, Text, View } from "@react-pdf/renderer";
 
+import { PdfGauge } from "./PdfGauge";
 import type { ReportSnapshot } from "./types";
 
 const styles = StyleSheet.create({
@@ -52,6 +53,7 @@ export function ReportPdfDocument({
         <Text style={styles.muted}>
           {snapshot.periodLabel} · {snapshot.framework} · v{snapshot.version}
         </Text>
+        <PdfGauge score={snapshot.scores.overall} />
         <Text style={styles.mono}>
           Overall {snapshot.scores.overall} ({snapshot.band})
         </Text>

@@ -2,6 +2,7 @@ import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 import { getPayload } from "payload";
 
+import { Metric } from "@/components/ui/metric";
 import type { ReportSnapshot } from "@/lib/reports";
 import { rateLimit } from "@/lib/rate-limit";
 import config from "@/payload.config";
@@ -71,10 +72,10 @@ export default async function LivingReportPage({
         {snapshot.periodLabel} · {snapshot.framework} · v{snapshot.version}
       </p>
 
-      <p className="font-data mt-10 text-5xl">{snapshot.scores.overall}</p>
+      <Metric value={snapshot.scores.overall} size="display" decimals={0} />
       <p className="label-caps mt-1">Overall · {snapshot.band}</p>
 
-      <div className="mt-10 grid grid-cols-3 gap-4">
+      <div className="mt-10 grid grid-cols-3 gap-3">
         {(
           [
             ["E", snapshot.scores.e],
@@ -82,22 +83,55 @@ export default async function LivingReportPage({
             ["G", snapshot.scores.g],
           ] as const
         ).map(([k, v]) => (
-          <div key={k} className="border border-graphite p-3">
+          <div key={k} className="surface-1 rounded-[4px] p-3">
             <p className="label-caps">{k}</p>
-            <p className="font-data mt-2 text-2xl">{v}</p>
+            <Metric value={v} size="xl" decimals={0} className="mt-2" />
           </div>
         ))}
       </div>
 
-      <div className="mt-10 border border-graphite p-4">
+      <div className="surface-1 mt-10 rounded-[4px] p-4">
         <p className="label-caps mb-3">Emissions tCO2e</p>
-        <p className="font-data text-ash">
-          S1 {snapshot.emissions.scope1} · S2 {snapshot.emissions.scope2} · S3{" "}
-          {snapshot.emissions.scope3} · Total {snapshot.emissions.total}
-        </p>
-        <p className="font-data mt-2 text-sm text-ash">
-          Data quality {snapshot.emissions.dataQualityPct}%
-        </p>
+        <div className="flex flex-wrap gap-4 text-ash">
+          <Metric
+            value={snapshot.emissions.scope1}
+            unit="S1"
+            size="sm"
+            decimals={2}
+            animate={false}
+          />
+          <Metric
+            value={snapshot.emissions.scope2}
+            unit="S2"
+            size="sm"
+            decimals={2}
+            animate={false}
+          />
+          <Metric
+            value={snapshot.emissions.scope3}
+            unit="S3"
+            size="sm"
+            decimals={2}
+            animate={false}
+          />
+          <Metric
+            value={snapshot.emissions.total}
+            unit="total"
+            size="sm"
+            decimals={2}
+            animate={false}
+          />
+        </div>
+        <div className="mt-2">
+          <Metric
+            value={snapshot.emissions.dataQualityPct}
+            unit="% quality"
+            size="sm"
+            decimals={0}
+            animate={false}
+            tone="ash"
+          />
+        </div>
       </div>
 
       <div className="mt-10 border border-graphite p-4">

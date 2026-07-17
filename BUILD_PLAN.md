@@ -641,6 +641,7 @@ Update after every phase. This is how you resume if context is lost.
 | 12 — Billing        | [x]    | Stripe Checkout/Portal/webhooks; `lib/billing/can()`; usage meters; Free watermark PDF; DEV bypass upgrade when keys absent.                                                                             |
 | 13 — Marketing/SEO  | [x]    | Home+Gauge, pricing, glossary/answers/tools/csrd/compare/deadlines; sitemap/robots; llms.txt; JSON-LD; OG image. Seed corpus (expandable).                                                               |
 | 14 — Hardening      | [x]    | Health `/api/health`; Upstash/memory rate limits; Sentry init when DSN set; structured logs; focus-visible + reduced-motion; Playwright + axe smoke.                                                     |
+| Design depth pass   | [x]    | Five-surface elevation + noise; Metric primitive; bravura Gauge (hero/runway/PDF); springs+stagger; live marketing calc hero; chrome→structure→data.                                                     |
 
 ---
 

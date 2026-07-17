@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 
+import { Metric } from "@/components/ui/metric";
+
 export type SupplierRow = {
   id: string;
   name: string;
@@ -155,15 +157,19 @@ export function SuppliersClient({
         </div>
         <div className="flex gap-8">
           <div>
-            <p className="font-data text-3xl text-bone">
-              {coveragePct === null ? "—" : `${coveragePct}%`}
-            </p>
+            {coveragePct === null ? (
+              <span className="font-data text-3xl text-ash">—</span>
+            ) : (
+              <Metric value={coveragePct} unit="%" size="xl" decimals={0} />
+            )}
             <p className="label-caps mt-1">Spend covered</p>
           </div>
           <div>
-            <p className="font-data text-3xl text-bone">
-              {responseRate === null ? "—" : `${responseRate}%`}
-            </p>
+            {responseRate === null ? (
+              <span className="font-data text-3xl text-ash">—</span>
+            ) : (
+              <Metric value={responseRate} unit="%" size="xl" decimals={0} />
+            )}
             <p className="label-caps mt-1">Response rate</p>
           </div>
         </div>

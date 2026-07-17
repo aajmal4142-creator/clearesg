@@ -3,7 +3,7 @@
 import { motion } from "motion/react";
 import { useMemo, useRef, useState } from "react";
 
-import { houseSpringOptions, useMotionSafe } from "@/lib/motion";
+import { spring, useMotionSafe } from "@/lib/motion";
 import {
   ESRS_TOPICS,
   financialScoreOf,
@@ -297,9 +297,7 @@ export function MaterialityWorkshop({
                   );
                   setActive(idx);
                 }}
-                transition={
-                  transition.type === "spring" ? houseSpringOptions : { duration: 0 }
-                }
+                transition={transition.type === "spring" ? spring : transition}
                 className={`absolute -translate-x-1/2 translate-y-1/2 cursor-grab font-data text-xs active:cursor-grabbing ${
                   p.material ? "text-signal" : "text-ash"
                 }`}

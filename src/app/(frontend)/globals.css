@@ -1,7 +1,7 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
-/* ClearESG design tokens — §3. Every colour in the app references a var. */
+/* ClearESG design tokens — §3 + design depth pass. Hex lives only here. */
 
 :root {
   /* Chrome — achromatic */
@@ -12,13 +12,64 @@
   --bone: #e8e6e1;
   --paper: #f5f3ef;
 
+  /* Elevation — five surfaces */
+  --surface-0: #0b0d0e;
+  --surface-1: #101314;
+  --surface-2: #16191b;
+  --surface-3: #1d2124;
+  --surface-inset: #08090a;
+
+  /* Machined light / shadow (token layer only) */
+  --highlight-top: rgba(255, 255, 255, 0.04);
+  --highlight-border: rgba(255, 255, 255, 0.06);
+  --highlight-hover: rgba(255, 255, 255, 0.14);
+  --shade-border: rgba(0, 0, 0, 0.4);
+  --shade-float: rgba(0, 0, 0, 0.6);
+  --inset-well: rgba(0, 0, 0, 0.4);
+
   /* Data — measurement only, never chrome */
   --signal: #00e08a;
   --amber: #ffb020;
   --rust: #ff5c4d;
   --ultramarine: #4d7cff;
 
-  /* Semantic aliases (light mode default) */
+  /* Semantic aliases (dark product default) */
+  --background: var(--surface-0);
+  --foreground: var(--bone);
+  --card: var(--surface-1);
+  --card-foreground: var(--bone);
+  --popover: var(--surface-2);
+  --popover-foreground: var(--bone);
+  --primary: var(--bone);
+  --primary-foreground: var(--ink);
+  --secondary: transparent;
+  --secondary-foreground: var(--bone);
+  --muted: var(--surface-1);
+  --muted-foreground: var(--ash);
+  --accent: var(--surface-1);
+  --accent-foreground: var(--bone);
+  --destructive: var(--rust);
+  --border: var(--graphite);
+  --input: var(--graphite);
+  --ring: var(--ultramarine);
+  --radius: 0.25rem;
+
+  --chart-1: var(--signal);
+  --chart-2: var(--amber);
+  --chart-3: var(--ultramarine);
+  --chart-4: var(--rust);
+  --chart-5: var(--ash);
+  --sidebar: var(--surface-0);
+  --sidebar-foreground: var(--bone);
+  --sidebar-primary: var(--bone);
+  --sidebar-primary-foreground: var(--ink);
+  --sidebar-accent: var(--surface-1);
+  --sidebar-accent-foreground: var(--bone);
+  --sidebar-border: var(--graphite);
+  --sidebar-ring: var(--ash);
+}
+
+[data-theme="light"] {
   --background: var(--paper);
   --foreground: var(--ink);
   --card: var(--bone);
@@ -37,49 +88,12 @@
   --border: var(--graphite);
   --input: var(--graphite);
   --ring: var(--ash);
-  --radius: 0.25rem;
-
-  /* shadcn chart / sidebar stubs — remapped to tokens */
-  --chart-1: var(--signal);
-  --chart-2: var(--amber);
-  --chart-3: var(--ultramarine);
-  --chart-4: var(--rust);
-  --chart-5: var(--ash);
   --sidebar: var(--paper);
   --sidebar-foreground: var(--ink);
   --sidebar-primary: var(--ink);
   --sidebar-primary-foreground: var(--bone);
   --sidebar-accent: var(--bone);
   --sidebar-accent-foreground: var(--ink);
-  --sidebar-border: var(--graphite);
-  --sidebar-ring: var(--ash);
-}
-
-[data-theme="dark"] {
-  --background: var(--ink);
-  --foreground: var(--bone);
-  --card: var(--slate);
-  --card-foreground: var(--bone);
-  --popover: var(--slate);
-  --popover-foreground: var(--bone);
-  --primary: var(--bone);
-  --primary-foreground: var(--ink);
-  --secondary: var(--slate);
-  --secondary-foreground: var(--bone);
-  --muted: var(--slate);
-  --muted-foreground: var(--ash);
-  --accent: var(--slate);
-  --accent-foreground: var(--bone);
-  --destructive: var(--rust);
-  --border: var(--graphite);
-  --input: var(--graphite);
-  --ring: var(--ash);
-  --sidebar: var(--ink);
-  --sidebar-foreground: var(--bone);
-  --sidebar-primary: var(--bone);
-  --sidebar-primary-foreground: var(--ink);
-  --sidebar-accent: var(--slate);
-  --sidebar-accent-foreground: var(--bone);
   --sidebar-border: var(--graphite);
   --sidebar-ring: var(--ash);
 }
@@ -95,6 +109,11 @@
   --color-amber: var(--amber);
   --color-rust: var(--rust);
   --color-ultramarine: var(--ultramarine);
+  --color-surface-0: var(--surface-0);
+  --color-surface-1: var(--surface-1);
+  --color-surface-2: var(--surface-2);
+  --color-surface-3: var(--surface-3);
+  --color-surface-inset: var(--surface-inset);
 
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -137,7 +156,7 @@
   --font-mono: var(--font-geist-mono);
   --font-display: var(--font-instrument-serif);
 
-  --text-xs: 0.75rem;
+  --text-xs: 0.6875rem;
   --text-sm: 0.875rem;
   --text-base: 1rem;
   --text-lg: 1.25rem;
@@ -158,21 +177,69 @@
 
   body {
     @apply bg-background text-foreground font-sans text-base leading-relaxed;
+    position: relative;
   }
 
-  /* Every number in the product is monospaced — §3 */
+  /* Every number — monospaced, tabular, slashed zero */
   .font-data {
     font-family: var(--font-geist-mono), ui-monospace, monospace;
-    font-variant-numeric: tabular-nums;
+    font-variant-numeric: tabular-nums slashed-zero;
   }
 
+  /* Instrument silkscreen labels */
   .label-caps {
-    @apply text-xs uppercase tracking-[0.08em] text-ash;
+    font-size: 11px;
+    line-height: 1.2;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ash);
   }
 
-  /* Keyboard focus — visible ring, hairline instrument chrome */
+  /* Display optical tracking */
+  .display-48 {
+    font-family: var(--font-instrument-serif), serif;
+    font-size: 48px;
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+    margin-left: -0.04em;
+  }
+
+  .display-64 {
+    font-family: var(--font-instrument-serif), serif;
+    font-size: 64px;
+    line-height: 1.02;
+    letter-spacing: -0.03em;
+    margin-left: -0.04em;
+  }
+
+  .display-96 {
+    font-family: var(--font-instrument-serif), serif;
+    font-size: 96px;
+    line-height: 0.98;
+    letter-spacing: -0.04em;
+    margin-left: -0.04em;
+  }
+
+  .measure-body {
+    max-width: 68ch;
+  }
+
+  .measure-prose {
+    max-width: 58ch;
+  }
+
+  /* Keyboard focus — Ultramarine instrument ring */
   :focus-visible {
-    outline: 2px solid var(--bone);
+    outline: 1px solid var(--ultramarine);
+    outline-offset: 0;
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ultramarine) 40%, transparent);
+  }
+
+  button:focus-visible,
+  a:focus-visible,
+  [role="button"]:focus-visible {
+    outline: 1px solid var(--ultramarine);
     outline-offset: 2px;
   }
 
@@ -184,6 +251,139 @@
       animation-iteration-count: 1 !important;
       transition-duration: 0.01ms !important;
       scroll-behavior: auto !important;
+    }
+  }
+}
+
+@layer components {
+  /* Elevation system */
+  .surface-0 {
+    background-color: var(--surface-0);
+  }
+
+  .surface-1 {
+    background-color: var(--surface-1);
+    border-top: 1px solid var(--highlight-border);
+    border-bottom: 1px solid var(--shade-border);
+    border-left: 1px solid color-mix(in srgb, var(--graphite) 60%, transparent);
+    border-right: 1px solid color-mix(in srgb, var(--graphite) 60%, transparent);
+    box-shadow: inset 0 1px 0 var(--highlight-top);
+  }
+
+  .surface-2 {
+    background-color: var(--surface-2);
+    border-top: 1px solid var(--highlight-border);
+    border-bottom: 1px solid var(--shade-border);
+    border-left: 1px solid color-mix(in srgb, var(--graphite) 60%, transparent);
+    border-right: 1px solid color-mix(in srgb, var(--graphite) 60%, transparent);
+    box-shadow:
+      inset 0 1px 0 var(--highlight-top),
+      0 8px 24px -8px var(--shade-float);
+  }
+
+  .surface-3 {
+    background-color: var(--surface-3);
+    border-top: 1px solid var(--highlight-border);
+    border-bottom: 1px solid var(--shade-border);
+    border-left: 1px solid color-mix(in srgb, var(--graphite) 60%, transparent);
+    border-right: 1px solid color-mix(in srgb, var(--graphite) 60%, transparent);
+    box-shadow:
+      inset 0 1px 0 var(--highlight-top),
+      0 8px 24px -8px var(--shade-float);
+  }
+
+  .surface-inset {
+    background-color: var(--surface-inset);
+    border-top: 1px solid var(--shade-border);
+    border-bottom: 1px solid var(--highlight-border);
+    border-left: 1px solid var(--shade-border);
+    border-right: 1px solid var(--shade-border);
+    box-shadow: inset 0 1px 2px var(--inset-well);
+  }
+
+  .panel-hover {
+    transition:
+      border-color 120ms ease,
+      transform 120ms ease,
+      box-shadow 120ms ease;
+  }
+
+  .panel-hover:hover {
+    border-color: var(--highlight-hover);
+    transform: translateY(-1px);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  }
+
+  /* Fixed noise overlay — kills flat-vector plasticity */
+  .noise-overlay {
+    pointer-events: none;
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    opacity: 0.015;
+    mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  /* Skeleton — hairline outline pulse, not grey shimmer */
+  @keyframes skeleton-pulse {
+    0%,
+    100% {
+      opacity: 0.3;
+    }
+    50% {
+      opacity: 0.6;
+    }
+  }
+
+  .skeleton-outline {
+    background: transparent;
+    border: 1px solid var(--graphite);
+    border-radius: var(--radius);
+    animation: skeleton-pulse 1.6s ease-in-out infinite;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .skeleton-outline {
+      animation: none;
+      opacity: 0.45;
+    }
+  }
+
+  .gauge-dish {
+    background: var(--surface-inset);
+    box-shadow:
+      inset 0 2px 6px var(--inset-well),
+      inset 0 1px 0 var(--highlight-top),
+      0 0 0 1px var(--highlight-top);
+  }
+
+  .gauge-hub-rim {
+    stroke: var(--highlight-hover);
+  }
+
+  /* Marketing hero — the only gradient in the product */
+  .hero-backlight {
+    background: radial-gradient(
+      1200px circle at 65% 45%,
+      color-mix(in srgb, var(--ultramarine) 4%, transparent),
+      transparent 70%
+    );
+    animation: backlight-drift 12s ease-in-out infinite alternate;
+  }
+
+  @keyframes backlight-drift {
+    from {
+      transform: translate(0, 0);
+    }
+    to {
+      transform: translate(-24px, 12px);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hero-backlight {
+      animation: none;
     }
   }
 }

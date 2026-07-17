@@ -3,6 +3,9 @@
 import { useState } from "react";
 import Link from "next/link";
 
+import { Input } from "@/components/ui/input";
+import { Metric } from "@/components/ui/metric";
+
 /** Open illustrative factors — educational; production calc uses registry. */
 const FACTORS: Record<string, { label: string; kgPerKwh: number; source: string }> = {
   IE: { label: "Ireland", kgPerKwh: 0.3, source: "Illustrative grid factor, 2024" },
@@ -23,12 +26,12 @@ export function Scope2Calculator() {
   const tco2e = (kwh * f.kgPerKwh) / 1000;
 
   return (
-    <div className="space-y-4 border border-graphite p-4">
+    <div className="surface-1 space-y-4 rounded-[4px] p-4">
       <label className="block text-sm text-ash">
         Electricity (kWh)
-        <input
+        <Input
           type="number"
-          className="mt-1 w-full border border-graphite bg-slate px-3 py-2 font-data text-bone"
+          className="mt-1"
           value={kwh}
           onChange={(e) => setKwh(Number(e.target.value))}
         />
@@ -36,7 +39,7 @@ export function Scope2Calculator() {
       <label className="block text-sm text-ash">
         Region
         <select
-          className="mt-1 w-full border border-graphite bg-slate px-3 py-2 text-bone"
+          className="surface-inset mt-1 h-9 w-full rounded-[4px] px-3 text-bone"
           value={region}
           onChange={(e) => setRegion(e.target.value)}
         >
@@ -47,12 +50,20 @@ export function Scope2Calculator() {
           ))}
         </select>
       </label>
-      <div className="border border-graphite bg-slate p-3">
+      <div className="surface-inset rounded-[4px] p-3">
         <p className="text-sm text-ash">Location-based Scope 2</p>
-        <p className="font-data text-3xl text-signal">{tco2e.toFixed(2)} tCO2e</p>
-        <p className="mt-2 font-data text-xs text-ash">
-          {f.kgPerKwh} kgCO2e/kWh · {f.source}
-        </p>
+        <Metric value={tco2e} unit="tCO2e" size="xl" decimals={2} tone="signal" />
+        <div className="mt-2">
+          <Metric
+            value={f.kgPerKwh}
+            unit="kgCO2e/kWh"
+            size="sm"
+            decimals={2}
+            animate={false}
+            tone="ash"
+          />
+        </div>
+        <p className="mt-1 text-xs text-ash">{f.source}</p>
         <p className="mt-4 text-sm text-ash">
           Save this and track it over time →{" "}
           <Link href="/sign-up" className="text-bone underline">

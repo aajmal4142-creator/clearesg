@@ -76,6 +76,7 @@ export default function RootLayout({
     >
       {/* Extensions (e.g. ColorZilla cz-shortcut-listen) inject attrs on <body> */}
       <body className="flex min-h-full flex-col" suppressHydrationWarning>
+        <div className="noise-overlay" aria-hidden />
         {children}
       </body>
     </html>

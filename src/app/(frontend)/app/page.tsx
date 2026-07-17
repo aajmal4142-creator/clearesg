@@ -3,8 +3,8 @@ import { redirect } from "next/navigation";
 import { getPayload } from "payload";
 
 import { Gauge } from "@/components/gauge/Gauge";
-import { CountUp } from "@/components/runway/CountUp";
 import { AppShell } from "@/components/shell/AppShell";
+import { Assemble, Metric } from "@/components/ui/metric";
 import { getCurrentContext } from "@/lib/auth";
 import { spendCoveragePct } from "@/lib/suppliers";
 import config from "@/payload.config";
@@ -99,7 +99,7 @@ export default async function RunwayPage() {
       activeOrgId={ctx.activeOrg.id}
     >
       <main className="mx-auto grid max-w-6xl gap-12 px-6 py-12 lg:grid-cols-[1.1fr_0.9fr]">
-        <section>
+        <Assemble layer="structure" as="section">
           <p className="label-caps">Compliance runway</p>
           <p className="mt-2 text-ash">{ctx.activeOrg.name}</p>
           {days === null ? (
@@ -108,31 +108,45 @@ export default async function RunwayPage() {
               countdown.
             </p>
           ) : (
-            <>
-              <p className="font-data mt-6 text-[64px] leading-none text-bone md:text-[96px]">
-                <CountUp value={days} />
-              </p>
+            <Assemble layer="data" className="mt-6">
+              <Metric value={days} size="display" decimals={0} />
               <p className="label-caps mt-2">Days to filing</p>
-              <p className="font-data mt-8 text-xl text-bone">
-                {collected}
-                <span className="text-ash"> / {required}</span>
-              </p>
+              <div className="mt-8 flex items-baseline gap-1">
+                <Metric value={collected} size="lg" decimals={0} />
+                <span className="font-data text-xl text-ash">/</span>
+                <Metric
+                  value={required}
+                  size="lg"
+                  decimals={0}
+                  animate={false}
+                  tone="ash"
+                />
+              </div>
               <p className="label-caps mt-1">Datapoints collected</p>
               {coveragePct !== null ? (
                 <>
-                  <p className="font-data mt-6 text-xl text-bone">{coveragePct}%</p>
+                  <div className="mt-6">
+                    <Metric value={coveragePct} unit="%" size="lg" decimals={0} />
+                  </div>
                   <p className="label-caps mt-1">Supplier spend covered</p>
                 </>
               ) : null}
               {projectedMiss > 0 ? (
                 <p className="mt-4 text-rust">
                   At your current rate you will miss the deadline by{" "}
-                  <span className="font-data">{projectedMiss}</span> days.
+                  <Metric
+                    value={projectedMiss}
+                    size="sm"
+                    decimals={0}
+                    tone="rust"
+                    className="inline-flex"
+                  />{" "}
+                  days.
                 </p>
               ) : (
                 <p className="mt-4 text-signal">On track at current collection rate.</p>
               )}
-            </>
+            </Assemble>
           )}
 
           <div className="mt-12">
@@ -142,7 +156,7 @@ export default async function RunwayPage() {
                 <li key={a.href}>
                   <Link
                     href={a.href}
-                    className="block border border-graphite px-3 py-2 text-sm text-bone hover:border-ash"
+                    className="surface-1 panel-hover block rounded-[4px] px-3 py-2 text-sm text-bone"
                   >
                     {a.label}
                   </Link>
@@ -150,13 +164,13 @@ export default async function RunwayPage() {
               ))}
             </ul>
           </div>
-        </section>
+        </Assemble>
 
-        <section className="flex flex-col items-center">
+        <Assemble layer="data" as="section" className="flex flex-col items-center">
           <Gauge score={62} previousScore={58} />
           <div className="mt-10 w-full max-w-sm">
             <p className="label-caps mb-3">Emissions stack (illustrative)</p>
-            <div className="flex h-8 w-full overflow-hidden border border-graphite">
+            <div className="surface-inset flex h-8 w-full overflow-hidden rounded-[4px]">
               <div className="bg-rust/80" style={{ width: "28%" }} title="Scope 1" />
               <div className="bg-amber/80" style={{ width: "22%" }} title="Scope 2" />
               <div
@@ -165,13 +179,13 @@ export default async function RunwayPage() {
                 title="Scope 3"
               />
             </div>
-            <div className="mt-2 flex justify-between text-xs text-ash">
+            <div className="mt-2 flex justify-between text-[11px] uppercase tracking-[0.1em] text-ash">
               <span>S1</span>
               <span>S2</span>
               <span>S3</span>
             </div>
           </div>
-        </section>
+        </Assemble>
       </main>
     </AppShell>
   );

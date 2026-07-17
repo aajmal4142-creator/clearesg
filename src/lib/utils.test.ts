@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { cn } from "@/lib/utils";
-import { houseSpring } from "@/lib/motion";
+import { houseSpring, spring, springSnap, springSoft } from "@/lib/motion";
 
 describe("cn", () => {
   it("merges class names", () => {
@@ -9,12 +9,16 @@ describe("cn", () => {
   });
 });
 
+describe("spring", () => {
+  it("exports house / soft / snap springs", () => {
+    expect(spring).toEqual({ type: "spring", stiffness: 260, damping: 30 });
+    expect(springSoft.stiffness).toBe(180);
+    expect(springSnap.stiffness).toBe(400);
+  });
+});
+
 describe("houseSpring", () => {
-  it("uses the §3 house spring defaults", () => {
-    expect(houseSpring).toEqual({
-      type: "spring",
-      stiffness: 260,
-      damping: 30,
-    });
+  it("aliases the house spring", () => {
+    expect(houseSpring).toEqual(spring);
   });
 });

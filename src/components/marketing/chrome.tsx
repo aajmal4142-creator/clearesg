@@ -1,5 +1,8 @@
 import Link from "next/link";
 
+import { Button } from "@/components/ui/button";
+import { Metric } from "@/components/ui/metric";
+
 export function MarketingNav() {
   return (
     <header className="border-b border-graphite px-6 py-3">
@@ -7,7 +10,7 @@ export function MarketingNav() {
         <Link href="/" className="label-caps text-bone">
           ClearESG
         </Link>
-        <nav className="flex flex-wrap gap-4 text-sm text-ash">
+        <nav className="flex flex-wrap items-center gap-4 text-sm text-ash">
           <Link href="/pricing" className="hover:text-bone">
             Pricing
           </Link>
@@ -23,12 +26,9 @@ export function MarketingNav() {
           <Link href="/sign-in" className="hover:text-bone">
             Sign in
           </Link>
-          <Link
-            href="/app"
-            className="border border-graphite px-2 py-1 text-bone hover:border-ash"
-          >
-            Open app
-          </Link>
+          <Button asChild size="sm" variant="secondary">
+            <Link href="/app">Open app</Link>
+          </Button>
         </nav>
       </div>
     </header>
@@ -57,7 +57,9 @@ export function MarketingFooter() {
             llms.txt
           </Link>
         </div>
-        <p className="font-data text-xs">© {new Date().getFullYear()}</p>
+        <p className="font-data text-xs text-ash">
+          © <Metric value={new Date().getFullYear()} size="sm" animate={false} />
+        </p>
       </div>
     </footer>
   );
