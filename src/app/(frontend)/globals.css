@@ -1,0 +1,189 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+/* ClearESG design tokens — §3. Every colour in the app references a var. */
+
+:root {
+  /* Chrome — achromatic */
+  --ink: #0b0d0e;
+  --slate: #1a1d1f;
+  --graphite: #3a4044;
+  --ash: #8a9299;
+  --bone: #e8e6e1;
+  --paper: #f5f3ef;
+
+  /* Data — measurement only, never chrome */
+  --signal: #00e08a;
+  --amber: #ffb020;
+  --rust: #ff5c4d;
+  --ultramarine: #4d7cff;
+
+  /* Semantic aliases (light mode default) */
+  --background: var(--paper);
+  --foreground: var(--ink);
+  --card: var(--bone);
+  --card-foreground: var(--ink);
+  --popover: var(--paper);
+  --popover-foreground: var(--ink);
+  --primary: var(--ink);
+  --primary-foreground: var(--bone);
+  --secondary: var(--bone);
+  --secondary-foreground: var(--ink);
+  --muted: var(--bone);
+  --muted-foreground: var(--ash);
+  --accent: var(--bone);
+  --accent-foreground: var(--ink);
+  --destructive: var(--rust);
+  --border: var(--graphite);
+  --input: var(--graphite);
+  --ring: var(--ash);
+  --radius: 0.25rem;
+
+  /* shadcn chart / sidebar stubs — remapped to tokens */
+  --chart-1: var(--signal);
+  --chart-2: var(--amber);
+  --chart-3: var(--ultramarine);
+  --chart-4: var(--rust);
+  --chart-5: var(--ash);
+  --sidebar: var(--paper);
+  --sidebar-foreground: var(--ink);
+  --sidebar-primary: var(--ink);
+  --sidebar-primary-foreground: var(--bone);
+  --sidebar-accent: var(--bone);
+  --sidebar-accent-foreground: var(--ink);
+  --sidebar-border: var(--graphite);
+  --sidebar-ring: var(--ash);
+}
+
+[data-theme="dark"] {
+  --background: var(--ink);
+  --foreground: var(--bone);
+  --card: var(--slate);
+  --card-foreground: var(--bone);
+  --popover: var(--slate);
+  --popover-foreground: var(--bone);
+  --primary: var(--bone);
+  --primary-foreground: var(--ink);
+  --secondary: var(--slate);
+  --secondary-foreground: var(--bone);
+  --muted: var(--slate);
+  --muted-foreground: var(--ash);
+  --accent: var(--slate);
+  --accent-foreground: var(--bone);
+  --destructive: var(--rust);
+  --border: var(--graphite);
+  --input: var(--graphite);
+  --ring: var(--ash);
+  --sidebar: var(--ink);
+  --sidebar-foreground: var(--bone);
+  --sidebar-primary: var(--bone);
+  --sidebar-primary-foreground: var(--ink);
+  --sidebar-accent: var(--slate);
+  --sidebar-accent-foreground: var(--bone);
+  --sidebar-border: var(--graphite);
+  --sidebar-ring: var(--ash);
+}
+
+@theme inline {
+  --color-ink: var(--ink);
+  --color-slate: var(--slate);
+  --color-graphite: var(--graphite);
+  --color-ash: var(--ash);
+  --color-bone: var(--bone);
+  --color-paper: var(--paper);
+  --color-signal: var(--signal);
+  --color-amber: var(--amber);
+  --color-rust: var(--rust);
+  --color-ultramarine: var(--ultramarine);
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+
+  --radius-sm: calc(var(--radius) - 2px);
+  --radius-md: var(--radius);
+  --radius-lg: var(--radius);
+  --radius-xl: var(--radius);
+
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+  --font-display: var(--font-instrument-serif);
+
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-lg: 1.25rem;
+  --text-xl: 1.75rem;
+  --text-2xl: 2.5rem;
+  --text-3xl: 4rem;
+  --text-4xl: 6rem;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  html {
+    @apply antialiased;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans text-base leading-relaxed;
+  }
+
+  /* Every number in the product is monospaced — §3 */
+  .font-data {
+    font-family: var(--font-geist-mono), ui-monospace, monospace;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .label-caps {
+    @apply text-xs uppercase tracking-[0.08em] text-ash;
+  }
+
+  /* Keyboard focus — visible ring, hairline instrument chrome */
+  :focus-visible {
+    outline: 2px solid var(--bone);
+    outline-offset: 2px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
