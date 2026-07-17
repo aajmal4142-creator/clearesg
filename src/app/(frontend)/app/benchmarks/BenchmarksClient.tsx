@@ -46,26 +46,26 @@ export function BenchmarksClient({ initial }: { initial: BenchmarkPayload }) {
     <div className="mx-auto max-w-3xl space-y-8 px-6 py-12">
       <div>
         <p className="label-caps">Benchmarking</p>
-        <h1 className="font-display mt-2 text-3xl text-bone">Sector position</h1>
-        <p className="mt-2 text-ash">
+        <h1 className="font-display mt-2 text-3xl text-ink">Sector position</h1>
+        <p className="mt-2 text-ink-muted">
           Cohorts with fewer than 8 organisations are never shown.
         </p>
-        {status ? <p className="mt-3 text-sm text-ash">{status}</p> : null}
+        {status ? <p className="mt-3 text-sm text-ink-muted">{status}</p> : null}
       </div>
 
       <button
         type="button"
         onClick={() => void recompute()}
-        className="border border-graphite px-3 py-2 text-sm text-ash hover:border-ash hover:text-bone"
+        className="border border-rule px-3 py-2 text-sm text-ink-muted hover:border-rule-strong hover:text-ink"
       >
         Recompute cohorts
       </button>
 
       {!data.available ? (
-        <p className="text-ash">{data.reason}</p>
+        <p className="text-ink-muted">{data.reason}</p>
       ) : (
         <>
-          <div className="border border-graphite p-4">
+          <div className="border border-rule p-4">
             <p className="label-caps">
               {data.metricKey} · sector {data.sector} · n={data.cohortSize}
             </p>
@@ -84,7 +84,7 @@ export function BenchmarksClient({ initial }: { initial: BenchmarkPayload }) {
                       height: `${Math.max(8, (value / (data.p75 * 1.4)) * 120)}px`,
                     }}
                   />
-                  <p className="font-data mt-2 text-sm text-bone">
+                  <p className="font-data mt-2 text-sm text-ink">
                     {value.toLocaleString()}
                   </p>
                   <p className="label-caps">{label}</p>
@@ -92,14 +92,14 @@ export function BenchmarksClient({ initial }: { initial: BenchmarkPayload }) {
               ))}
             </div>
             {data.userValue !== null ? (
-              <p className="mt-6 font-data text-bone">
+              <p className="mt-6 font-data text-ink">
                 You: {data.userValue.toLocaleString()}
                 {data.percentileRank !== null
                   ? ` · ~${data.percentileRank}th percentile`
                   : ""}
               </p>
             ) : (
-              <p className="mt-6 text-sm text-ash">
+              <p className="mt-6 text-sm text-ink-muted">
                 Enter {data.metricKey} to mark your position.
               </p>
             )}
@@ -112,7 +112,7 @@ export function BenchmarksClient({ initial }: { initial: BenchmarkPayload }) {
                 <li key={a.href}>
                   <a
                     href={a.href}
-                    className="block border border-graphite px-3 py-2 text-sm text-bone hover:border-ash"
+                    className="block border border-rule px-3 py-2 text-sm text-ink hover:border-rule-strong"
                   >
                     {a.label}
                   </a>

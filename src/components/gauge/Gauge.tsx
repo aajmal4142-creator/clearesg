@@ -1,7 +1,7 @@
 "use client";
 
 import { motion, useMotionValue, useSpring, useTransform } from "motion/react";
-import { useEffect, useId, useMemo } from "react";
+import { useEffect, useMemo } from "react";
 
 import { Metric } from "@/components/ui/metric";
 import {
@@ -18,7 +18,6 @@ type GaugeProps = {
   estimated?: boolean;
   size?: number;
   className?: string;
-  /** When true, skip entrance and snap to value (interactive hero). */
   live?: boolean;
 };
 
@@ -38,9 +37,9 @@ function polar(
   return { x: cx + radius * Math.cos(rad), y: cy + radius * Math.sin(rad) };
 }
 
-/** Tapered needle: 6px at hub → 1.5px at tip, with dark centre spine. */
+/** Tapered needle: 7px at hub → 1.5px at tip */
 function needlePath(cx: number, cy: number, length: number): string {
-  const hubHalf = 3;
+  const hubHalf = 3.5;
   const tipHalf = 0.75;
   return [
     `M ${cx - hubHalf} ${cy}`,
@@ -52,8 +51,8 @@ function needlePath(cx: number, cy: number, length: number): string {
 }
 
 /**
- * Precision 240° instrument dial.
- * Placements only: marketing hero, dashboard runway, PDF page 1.
+ * Printed dial on good paper — three placements: marketing hero, dashboard, PDF page 1.
+ * No glow. Underdamped needle with mass.
  */
 export function Gauge({
   score,
@@ -64,7 +63,6 @@ export function Gauge({
   live = false,
 }: GaugeProps) {
   const reduced = usePrefersReducedMotion();
-  const glowId = useId();
   const clamped = Math.max(0, Math.min(100, score));
   const startAngle = -210;
   const sweep = 240;
@@ -106,7 +104,6 @@ export function Gauge({
 
   const rotation = useTransform(needleSpring, (p) => startAngle + 90 + sweep * p);
   const arcLength = arcSpring;
-
   const ticks = useMemo(() => Array.from({ length: 21 }, (_, i) => i * 5), []);
 
   const start = polar(cx, cy, startAngle, r);
@@ -119,12 +116,10 @@ export function Gauge({
       : startAngle + 90 + sweep * (Math.max(0, Math.min(100, previousScore)) / 100);
 
   const band = bandColor(clamped);
-  /** Readout lands ~100ms after needle rest (~1.2s) */
   const readoutDelay = reduced || live ? 0 : 1.3;
 
   return (
     <div className={cn("relative inline-flex flex-col items-center", className)}>
-      {/* Recessed dish */}
       <div className="relative" style={{ width: size, height: size * 0.72 }}>
         <div
           className="gauge-dish pointer-events-none absolute left-1/2 top-[52%] -translate-x-1/2 -translate-y-1/2 rounded-full"
@@ -139,34 +134,17 @@ export function Gauge({
           role="img"
           aria-label={`ESG score ${Math.round(clamped)}${estimated ? ", estimated" : ""}`}
         >
-          <defs>
-            <filter id={glowId} x="-40%" y="-40%" width="180%" height="180%">
-              <feDropShadow
-                dx="0"
-                dy="0"
-                stdDeviation="3"
-                floodColor={band}
-                floodOpacity="0.4"
-              />
-            </filter>
-          </defs>
-
-          {/* Track */}
-          <path d={arcPath} fill="none" stroke="var(--graphite)" strokeWidth={2} />
-
-          {/* Band fill */}
+          <path d={arcPath} fill="none" stroke="var(--rule)" strokeWidth={2} />
           <motion.path
             d={arcPath}
             fill="none"
             stroke={band}
-            strokeWidth={3}
+            strokeWidth={4}
             strokeLinecap="butt"
             pathLength={1}
             style={{ pathLength: arcLength }}
-            filter={`url(#${glowId})`}
           />
 
-          {/* Ticks — hang inside the arc */}
           {ticks.map((v, i) => {
             const a = startAngle + sweep * (v / 100);
             const major = v % 20 === 0;
@@ -188,7 +166,7 @@ export function Gauge({
                   y1={inner.y}
                   x2={outer.x}
                   y2={outer.y}
-                  stroke={major ? "var(--ash)" : "var(--graphite)"}
+                  stroke={major ? "var(--ink-muted)" : "var(--rule-strong)"}
                   strokeWidth={1}
                 />
                 {major ? (
@@ -197,9 +175,9 @@ export function Gauge({
                     y={label.y}
                     textAnchor="middle"
                     dominantBaseline="middle"
-                    fill="var(--ash)"
-                    fontSize={11}
-                    fontFamily="var(--font-geist-mono)"
+                    fill="var(--ink-muted)"
+                    fontSize={12}
+                    fontFamily="var(--font-jetbrains-mono)"
                   >
                     {v}
                   </text>
@@ -208,7 +186,6 @@ export function Gauge({
             );
           })}
 
-          {/* Ghost needle — previous period, at rest */}
           {ghostRotation !== null ? (
             <g transform={`rotate(${ghostRotation} ${cx} ${cy})`}>
               <line
@@ -216,42 +193,37 @@ export function Gauge({
                 y1={cy}
                 x2={cx}
                 y2={cy - needleLen}
-                stroke="var(--graphite)"
+                stroke="var(--rule-strong)"
                 strokeWidth={1}
-                strokeOpacity={0.5}
+                strokeOpacity={0.6}
               />
             </g>
           ) : null}
 
-          {/* Live needle — tapered polygon + spine */}
           <motion.g style={{ rotate: rotation, transformOrigin: `${cx}px ${cy}px` }}>
-            <path d={needlePath(cx, cy, needleLen)} fill="var(--bone)" />
+            <path d={needlePath(cx, cy, needleLen)} fill="var(--ink)" />
             <line
               x1={cx}
               y1={cy}
               x2={cx}
               y2={cy - needleLen}
-              stroke="var(--ink)"
-              strokeWidth={0.6}
-              strokeOpacity={0.55}
+              stroke="var(--canvas)"
+              strokeWidth={0.7}
             />
           </motion.g>
 
-          {/* Hub — screw head */}
           <circle
             cx={cx}
             cy={cy}
-            r={6}
-            fill="var(--slate)"
-            className="gauge-hub-rim"
+            r={7}
+            fill="var(--surface-1)"
+            stroke="var(--rule)"
             strokeWidth={1}
-            stroke="var(--highlight-hover)"
           />
-          <circle cx={cx} cy={cy} r={2.5} fill="var(--ink)" />
+          <circle cx={cx} cy={cy} r={3} fill="var(--ink)" />
         </svg>
 
-        {/* Centre readout — below hub */}
-        <div className="pointer-events-none absolute inset-x-0 bottom-[8%] flex flex-col items-center">
+        <div className="pointer-events-none absolute inset-x-0 bottom-[6%] flex flex-col items-center">
           <Metric
             value={clamped}
             decimals={0}

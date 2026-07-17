@@ -103,59 +103,69 @@ const ANTI = [
 
 export default function Home() {
   return (
-    <div className="surface-0 flex min-h-full flex-col text-bone">
+    <div className="flex min-h-full flex-col bg-canvas text-ink">
       <JsonLd data={[organizationJsonLd, softwareApplicationJsonLd()]} />
       <MarketingNav />
       <main>
-        <section className="relative mx-auto grid max-w-5xl gap-12 overflow-hidden px-6 py-16 md:grid-cols-2 md:items-center md:py-24">
-          <div>
-            <p className="label-caps mb-6">ClearESG</p>
-            <h1 className="font-display ml-[-0.04em] text-[clamp(2.75rem,7vw,6rem)] leading-[1.02] tracking-[-0.04em] text-bone max-md:tracking-[-0.02em]">
-              Enterprise ESG software costs six figures and takes six months.
-              <br className="hidden md:block" /> ClearESG gets you audit-ready this
-              quarter.
-            </h1>
-            <p className="measure-prose mt-8 text-ash">
-              Precision instrument for mandatory disclosure. Collect once, derive ESRS
-              views, publish a living report — achromatic chrome, colour only for data.
-            </p>
-            <div className="mt-10 flex flex-wrap gap-3">
-              <Button asChild>
-                <Link href="/sign-up">Start free</Link>
-              </Button>
-              <Button variant="secondary" asChild>
-                <Link href="/tools/csrd-scope">CSRD scope checker</Link>
-              </Button>
-              <Button variant="ghost" asChild>
-                <Link href="/pricing">Pricing</Link>
-              </Button>
-            </div>
+        <section className="mx-auto max-w-3xl px-6 py-20 md:py-28">
+          <p className="label-caps mb-6">ClearESG</p>
+          <h1 className="display-80 text-ink">
+            Enterprise ESG software costs six figures and takes six months.
+            <br />
+            ClearESG gets you audit-ready this quarter.
+          </h1>
+          <p className="measure-prose mt-8 text-ink-muted">
+            Collect once, derive ESRS views, publish a living report. Built like an annual
+            report — warm paper, oxblood chrome, colour reserved for measurements that
+            matter.
+          </p>
+          <div className="mt-10 flex flex-wrap gap-3">
+            <Button asChild>
+              <Link href="/sign-up">Start free</Link>
+            </Button>
+            <Button variant="secondary" asChild>
+              <Link href="/tools/csrd-scope">CSRD scope checker</Link>
+            </Button>
+            <Button variant="ghost" asChild>
+              <Link href="/pricing">Pricing</Link>
+            </Button>
           </div>
-          <LiveHeroGauge />
+          <div className="mt-16 flex justify-center">
+            <LiveHeroGauge />
+          </div>
         </section>
 
-        <HairlineRule className="mx-auto max-w-5xl" />
+        <HairlineRule accent className="w-full" />
 
         <Reveal delay={0.06}>
-          <section className="mx-auto max-w-5xl px-6 py-16">
-            <h2 className="display-48 text-bone">Built as equipment</h2>
-            <p className="measure-prose mt-4 text-ash">
-              Achromatic chrome. The only saturated colour on screen is a measurement.
-              Geist Mono for every number. Factors from a versioned registry — missing
-              data is marked missing, never silently zero.
+          <section className="mx-auto max-w-3xl px-6 py-16">
+            <h2 className="display-40 section-rule pb-4 text-ink">Built for filing</h2>
+            <p className="measure-prose mt-6 text-ink-muted">
+              The artefact that matters is the report shared with banks, buyers, and
+              auditors. ClearESG is designed as that document — not as a dashboard that
+              happens to export.
             </p>
-            <ul className="mt-10 grid gap-3 md:grid-cols-3">
-              {(["Collect", "Derive", "Publish"] as const).map((label, i) => (
+            <ul className="mt-10 space-y-6">
+              {(
+                [
+                  [
+                    "Collect",
+                    "18 core metrics, evidence vault, supplier request chains.",
+                  ],
+                  [
+                    "Derive",
+                    "Approved E1–E5 mappings only — no invented raw→ESRS bridges.",
+                  ],
+                  [
+                    "Publish",
+                    "Living report links, watermarked Free PDF, version diffs.",
+                  ],
+                ] as const
+              ).map(([label, copy], i) => (
                 <Reveal key={label} delay={0.06 + i * 0.06}>
-                  <li className="surface-1 panel-hover rounded-[4px] p-4">
-                    <p className="label-caps text-bone">{label}</p>
-                    <p className="mt-2 text-sm text-ash">
-                      {label === "Collect"
-                        ? "18 core metrics, evidence vault, supplier request chains."
-                        : label === "Derive"
-                          ? "Approved E1–E5 mappings only — no invented raw→ESRS bridges."
-                          : "Living report links, watermarked Free PDF, version diffs."}
-                    </p>
+                  <li className="section-rule pb-6">
+                    <p className="label-caps">{label}</p>
+                    <p className="mt-2 font-display text-lg text-ink">{copy}</p>
                   </li>
                 </Reveal>
               ))}
@@ -163,21 +173,23 @@ export default function Home() {
           </section>
         </Reveal>
 
-        <HairlineRule className="mx-auto max-w-5xl" delay={0.05} />
+        <HairlineRule />
 
-        <section className="mx-auto max-w-5xl px-6 py-16">
+        <section className="mx-auto max-w-3xl px-6 py-16">
           <Reveal>
-            <h2 className="display-48 text-bone">Twelve gaps. Twelve answers.</h2>
-            <p className="measure-prose mt-4 text-ash">
+            <h2 className="display-40 section-rule pb-4 text-ink">
+              Twelve gaps. Twelve answers.
+            </h2>
+            <p className="measure-prose mt-6 text-ink-muted">
               What the market leaves blank — and what ClearESG ships as product.
             </p>
           </Reveal>
-          <ul className="mt-10 space-y-3">
+          <ul className="mt-10">
             {GAPS.map((g, i) => (
               <Reveal key={g.gap} delay={i * 0.06}>
-                <li className="surface-1 rounded-[4px] px-4 py-4">
-                  <p className="text-sm text-ash">{g.gap}</p>
-                  <p className="mt-2 text-bone">{g.answer}</p>
+                <li className="section-rule py-6">
+                  <p className="label-caps">{g.gap}</p>
+                  <p className="mt-2 font-display text-lg text-ink">{g.answer}</p>
                   <div className="mt-3">
                     <Metric
                       value={g.figure}
@@ -193,12 +205,14 @@ export default function Home() {
           </ul>
         </section>
 
-        <HairlineRule className="mx-auto max-w-5xl" />
+        <HairlineRule />
 
-        <section className="mx-auto max-w-5xl px-6 py-16">
+        <section className="mx-auto max-w-3xl px-6 py-16">
           <Reveal>
-            <h2 className="display-48 text-bone">Deliberately not building</h2>
-            <p className="measure-prose mt-4 text-ash">
+            <h2 className="display-40 section-rule pb-4 text-ink">
+              Deliberately not building
+            </h2>
+            <p className="measure-prose mt-6 text-ink-muted">
               Confidence is more attractive than a feature list.
             </p>
           </Reveal>

@@ -9,13 +9,15 @@ Single source of truth: `BUILD_PLAN.md`. Follow phases 0→14 in order. Do not s
 
 ## Design (§3) — non-negotiable
 
-- **Instrument aesthetic:** achromatic chrome. The only saturated colour on screen is a measurement.
-- **Tokens only:** every colour references a CSS variable (`var(--ink)`, `bg-signal`, etc.). **Zero hex values in components.** Hex lives only in the token definition (`globals.css` `:root`).
-- **Token names:** ink, slate, graphite, ash, bone, paper | signal, amber, rust, ultramarine.
-- **Type:** Instrument Serif (display 48px+ only), Geist (UI), Geist Mono (**every number** — scores, tonnes, dates, %, deltas, IDs). Tabular figures on.
-- **Layout:** dense, 8px grid, hairline borders, `border-radius` ≤ 4px.
-- **Gauge:** 240° dial, one bravura moment — marketing hero, dashboard, PDF page 1 only.
-- **Motion:** house spring `stiffness: 260, damping: 30` via `lib/motion.ts` / `useMotionSafe()`. Honour `prefers-reduced-motion`.
+- **Editorial aesthetic:** warm paper report / financial newspaper. Authority, not austerity. Colour is chrome (oxblood `--accent`); data colours are louder still.
+- **Tokens only:** every colour references a CSS variable. **Zero hex in components** (exception: white-label `--accent` injection; React-PDF light tokens).
+- **Token names:** canvas, surface-1/2, ink, ink-muted, rule, rule-strong | accent, accent-hover, accent-quiet | signal, amber, rust, cobalt.
+- **Dual theme:** light (default, the report) + dark (warm terminal). Cookie `clearesg-theme`; no flash; first visit respects `prefers-color-scheme`.
+- **Type:** Fraunces (display/headings, opsz + SOFT/WONK on display), Inter Tight (UI), JetBrains Mono (**every number** — tabular + slashed-zero).
+- **Layout:** editorial density, 8px grid, rules over boxes. Radius 6px panels / 4px controls / 2px chips.
+- **Gauge:** 240° printed dial — marketing hero, dashboard, PDF page 1 only. Underdamped needle. No glow.
+- **Motion:** `spring` / `springSoft` / `springSnap` + stagger via `lib/motion.ts` / `useMotionSafe()`. Honour `prefers-reduced-motion`.
+- **PDF:** always light theme cover. Flagship artefact.
 - **Copy:** direct, technical, calm. No exclamation marks. No "Oops". Errors state what happened and what to do. Verbs keep their names through the flow.
 
 ## Auth (§2 / Phase 2)

@@ -12,10 +12,10 @@ export function OrgSwitcher({
   if (orgs.length === 0) return null;
 
   return (
-    <label className="flex items-center gap-2 text-sm text-ash">
+    <label className="flex items-center gap-2 text-sm text-ink-muted">
       <span className="label-caps">Organisation</span>
       <select
-        className="border border-graphite bg-slate px-2 py-1 text-bone"
+        className="border border-rule bg-surface-1 px-2 py-1 text-ink"
         value={activeOrgId ?? ""}
         onChange={async (e) => {
           await fetch("/api/org/switch", {

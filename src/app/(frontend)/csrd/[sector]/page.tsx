@@ -29,7 +29,7 @@ export default async function CsrdSectorPage({ params }: Props) {
   if (!s) notFound();
 
   return (
-    <div className="flex min-h-full flex-col bg-ink text-bone">
+    <div className="flex min-h-full flex-col bg-canvas text-ink">
       <JsonLd
         data={{
           "@context": "https://schema.org",
@@ -43,27 +43,27 @@ export default async function CsrdSectorPage({ params }: Props) {
       />
       <MarketingNav />
       <main className="mx-auto max-w-3xl flex-1 px-6 py-16">
-        <p className="label-caps text-ash">CSRD · NACE {s.nace}</p>
-        <h1 className="mt-2 font-display text-[40px] text-bone">
+        <p className="label-caps text-ink-muted">CSRD · NACE {s.nace}</p>
+        <h1 className="mt-2 font-display text-[40px] text-ink">
           CSRD compliance for {s.name}
         </h1>
-        <p className="mt-6 text-bone">{s.answer}</p>
-        <h2 className="mt-10 text-lg text-bone">Focus topics</h2>
-        <ul className="mt-3 space-y-2 font-data text-sm text-ash">
+        <p className="mt-6 text-ink">{s.answer}</p>
+        <h2 className="mt-10 text-lg text-ink">Focus topics</h2>
+        <ul className="mt-3 space-y-2 font-data text-sm text-ink-muted">
           {s.focusTopics.map((t) => (
             <li key={t}>{t}</li>
           ))}
         </ul>
-        <p className="mt-8 text-sm text-ash">
-          <Link href="/tools/csrd-scope" className="text-bone underline">
+        <p className="mt-8 text-sm text-ink-muted">
+          <Link href="/tools/csrd-scope" className="text-ink underline">
             Run the scope checker
           </Link>
           {" · "}
-          <Link href="/glossary/esrs-e1" className="text-bone underline">
+          <Link href="/glossary/esrs-e1" className="text-ink underline">
             ESRS E1
           </Link>
           {" · "}
-          <Link href="/sign-up" className="text-bone underline">
+          <Link href="/sign-up" className="text-ink underline">
             Start free
           </Link>
         </p>

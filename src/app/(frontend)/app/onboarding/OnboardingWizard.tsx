@@ -128,7 +128,7 @@ export function OnboardingWizard() {
           />
         </div>
         <p className="label-caps mt-1 text-amber">Estimated footprint</p>
-        <p className="measure-body mt-6 text-center text-ash">
+        <p className="measure-body mt-6 text-center text-ink-muted">
           Replace estimates with measured data to raise your confidence score. Your
           Compliance Runway is ready.
         </p>
@@ -165,7 +165,7 @@ export function OnboardingWizard() {
           <p className="label-caps mb-3">
             Question {step + 1} of {QUESTIONS.length}
           </p>
-          <h1 className="font-display text-3xl text-bone">{q.label}</h1>
+          <h1 className="font-display text-3xl text-ink">{q.label}</h1>
           <div className="mt-8">
             {q.type === "number" ? (
               <Input
@@ -176,7 +176,7 @@ export function OnboardingWizard() {
               />
             ) : (
               <select
-                className="surface-inset h-11 w-full rounded-[4px] px-3 text-bone"
+                className="surface-2 h-11 w-full rounded-[4px] px-3 text-ink"
                 value={values[q.key] ?? ""}
                 onChange={(e) => setValues((v) => ({ ...v, [q.key]: e.target.value }))}
               >

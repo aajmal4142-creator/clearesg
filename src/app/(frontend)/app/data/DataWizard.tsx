@@ -215,12 +215,12 @@ export function DataWizard({
     <div className="mx-auto max-w-3xl space-y-12 px-6 py-12">
       <div>
         <p className="label-caps">Data collection</p>
-        <h1 className="font-display mt-2 text-3xl text-bone">Enter once</h1>
-        <p className="mt-2 text-ash">
+        <h1 className="font-display mt-2 text-3xl text-ink">Enter once</h1>
+        <p className="mt-2 text-ink-muted">
           Quality is required on every field. Raw energy inputs derive into ESRS E1-5
           shapes — they are not mapped directly.
         </p>
-        {status ? <p className="mt-3 text-sm text-ash">{status}</p> : null}
+        {status ? <p className="mt-3 text-sm text-ink-muted">{status}</p> : null}
       </div>
 
       {(["E", "S", "G"] as const).map((cat) => (
@@ -230,21 +230,21 @@ export function DataWizard({
           </p>
           <div className="space-y-6">
             {grouped[cat].map((m) => (
-              <div key={m.key} id={m.key} className="border border-graphite p-4">
+              <div key={m.key} id={m.key} className="border border-rule p-4">
                 <div className="flex flex-wrap items-baseline justify-between gap-2">
-                  <label className="text-bone" htmlFor={`field-${m.key}`}>
+                  <label className="text-ink" htmlFor={`field-${m.key}`}>
                     {m.label}
                   </label>
                   {m.unit ? (
-                    <span className="font-data text-sm text-ash">{m.unit}</span>
+                    <span className="font-data text-sm text-ink-muted">{m.unit}</span>
                   ) : null}
                 </div>
-                <p className="mt-1 text-xs text-ash">{mappingNote(m.key)}</p>
+                <p className="mt-1 text-xs text-ink-muted">{mappingNote(m.key)}</p>
                 <div className="mt-3 flex flex-wrap gap-3">
                   {m.inputType === "boolean" ? (
                     <select
                       id={`field-${m.key}`}
-                      className="border border-graphite bg-slate px-2 py-2 text-bone"
+                      className="border border-rule bg-surface-1 px-2 py-2 text-ink"
                       value={
                         rows[m.key]?.value === 1
                           ? "1"
@@ -271,7 +271,7 @@ export function DataWizard({
                     <input
                       id={`field-${m.key}`}
                       type="number"
-                      className="font-data border border-graphite bg-slate px-2 py-2 text-bone"
+                      className="font-data border border-rule bg-surface-1 px-2 py-2 text-ink"
                       value={rows[m.key]?.value ?? ""}
                       onChange={(e) =>
                         setRows((r) => ({
@@ -286,7 +286,7 @@ export function DataWizard({
                     />
                   )}
                   <select
-                    className="border border-graphite bg-slate px-2 py-2 text-sm text-bone"
+                    className="border border-rule bg-surface-1 px-2 py-2 text-sm text-ink"
                     value={rows[m.key]?.quality ?? "estimated"}
                     onChange={(e) =>
                       setRows((r) => ({
@@ -310,13 +310,13 @@ export function DataWizard({
         </section>
       ))}
 
-      <section className="border border-dashed border-graphite p-6">
+      <section className="border border-dashed border-rule p-6">
         <p className="label-caps mb-2">Evidence</p>
-        <p className="mb-4 text-sm text-ash">
+        <p className="mb-4 text-sm text-ink-muted">
           Attach a bill or certificate. SHA-256 is stored as the audit anchor.
         </p>
         <select
-          className="mb-3 border border-graphite bg-slate px-2 py-2 text-sm text-bone"
+          className="mb-3 border border-rule bg-surface-1 px-2 py-2 text-sm text-ink"
           value={evidenceMetric}
           onChange={(e) => setEvidenceMetric(e.target.value)}
         >
@@ -328,20 +328,20 @@ export function DataWizard({
         </select>
         <input
           type="file"
-          className="block text-sm text-ash"
+          className="block text-sm text-ink-muted"
           onChange={(e) => void onEvidence(evidenceMetric, e.target.files)}
         />
       </section>
 
-      <section className="border border-graphite p-6">
+      <section className="border border-rule p-6">
         <p className="label-caps mb-2">CSV import</p>
-        <p className="mb-4 text-sm text-ash">
+        <p className="mb-4 text-sm text-ink-muted">
           Dry-run only — review the parsed rows before committing.
         </p>
         <input
           type="file"
           accept=".csv,text/csv"
-          className="text-sm text-ash"
+          className="text-sm text-ink-muted"
           onChange={async (e) => {
             const file = e.target.files?.[0];
             if (!file) return;
@@ -356,12 +356,12 @@ export function DataWizard({
         />
         {csvPreview ? (
           <div className="mt-4 overflow-x-auto">
-            <table className="w-full text-left text-sm text-ash">
+            <table className="w-full text-left text-sm text-ink-muted">
               <tbody>
                 {csvPreview.map((row, i) => (
-                  <tr key={i} className="border-t border-graphite">
+                  <tr key={i} className="border-t border-rule">
                     {row.map((cell, j) => (
-                      <td key={j} className="px-2 py-1 font-data text-bone">
+                      <td key={j} className="px-2 py-1 font-data text-ink">
                         {cell}
                       </td>
                     ))}
@@ -369,7 +369,9 @@ export function DataWizard({
                 ))}
               </tbody>
             </table>
-            <p className="mt-2 text-xs text-ash">Dry-run preview — not committed.</p>
+            <p className="mt-2 text-xs text-ink-muted">
+              Dry-run preview — not committed.
+            </p>
           </div>
         ) : null}
       </section>

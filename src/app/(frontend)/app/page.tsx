@@ -98,28 +98,32 @@ export default async function RunwayPage() {
       }))}
       activeOrgId={ctx.activeOrg.id}
     >
-      <main className="mx-auto grid max-w-6xl gap-12 px-6 py-12 lg:grid-cols-[1.1fr_0.9fr]">
+      <main className="mx-auto grid max-w-6xl gap-12 px-6 py-12 lg:grid-cols-[minmax(0,66ch)_280px]">
         <Assemble layer="structure" as="section">
-          <p className="label-caps">Compliance runway</p>
-          <p className="mt-2 text-ash">{ctx.activeOrg.name}</p>
+          <div className="title-rule pt-4">
+            <p className="label-caps">Compliance runway</p>
+            <h1 className="font-display mt-2 text-[28px] tracking-[-0.01em] text-ink">
+              {ctx.activeOrg.name}
+            </h1>
+          </div>
           {days === null ? (
-            <p className="mt-8 text-ash">
+            <p className="mt-8 text-ink-muted">
               No filing deadline on file. Add a compliance obligation to start the
               countdown.
             </p>
           ) : (
-            <Assemble layer="data" className="mt-6">
+            <Assemble layer="data" className="mt-8">
               <Metric value={days} size="display" decimals={0} />
               <p className="label-caps mt-2">Days to filing</p>
               <div className="mt-8 flex items-baseline gap-1">
                 <Metric value={collected} size="lg" decimals={0} />
-                <span className="font-data text-xl text-ash">/</span>
+                <span className="font-data text-xl text-ink-muted">/</span>
                 <Metric
                   value={required}
                   size="lg"
                   decimals={0}
                   animate={false}
-                  tone="ash"
+                  tone="muted"
                 />
               </div>
               <p className="label-caps mt-1">Datapoints collected</p>
@@ -150,13 +154,13 @@ export default async function RunwayPage() {
           )}
 
           <div className="mt-12">
-            <p className="label-caps mb-4">Next actions</p>
-            <ul className="space-y-2">
+            <p className="label-caps section-rule mb-4 pb-2">Next actions</p>
+            <ul className="space-y-0">
               {nextActions.map((a) => (
-                <li key={a.href}>
+                <li key={a.href} className="border-b border-rule">
                   <Link
                     href={a.href}
-                    className="surface-1 panel-hover block rounded-[4px] px-3 py-2 text-sm text-bone"
+                    className="panel-hover block px-1 py-3 text-sm text-ink"
                   >
                     {a.label}
                   </Link>
@@ -166,20 +170,20 @@ export default async function RunwayPage() {
           </div>
         </Assemble>
 
-        <Assemble layer="data" as="section" className="flex flex-col items-center">
+        <Assemble
+          layer="data"
+          as="section"
+          className="flex flex-col border-l border-rule pl-8 max-lg:border-l-0 max-lg:pl-0"
+        >
           <Gauge score={62} previousScore={58} />
-          <div className="mt-10 w-full max-w-sm">
-            <p className="label-caps mb-3">Emissions stack (illustrative)</p>
-            <div className="surface-inset flex h-8 w-full overflow-hidden rounded-[4px]">
+          <div className="mt-10 w-full">
+            <p className="label-caps section-rule mb-3 pb-2">Emissions stack</p>
+            <div className="flex h-8 w-full overflow-hidden border border-rule bg-surface-2">
               <div className="bg-rust/80" style={{ width: "28%" }} title="Scope 1" />
               <div className="bg-amber/80" style={{ width: "22%" }} title="Scope 2" />
-              <div
-                className="bg-ultramarine/80"
-                style={{ width: "50%" }}
-                title="Scope 3"
-              />
+              <div className="bg-cobalt/80" style={{ width: "50%" }} title="Scope 3" />
             </div>
-            <div className="mt-2 flex justify-between text-[11px] uppercase tracking-[0.1em] text-ash">
+            <div className="mt-2 flex justify-between text-xs font-semibold uppercase tracking-[0.08em] text-ink-muted">
               <span>S1</span>
               <span>S2</span>
               <span>S3</span>

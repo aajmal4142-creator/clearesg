@@ -24,10 +24,10 @@ export default async function LivingReportPage({
   });
   if (!limited.ok) {
     return (
-      <main className="mx-auto max-w-2xl px-6 py-16 text-bone">
+      <main className="mx-auto max-w-2xl px-6 py-16 text-ink">
         <p className="label-caps">Living report</p>
         <h1 className="font-display mt-4 text-3xl">Too many requests</h1>
-        <p className="mt-4 text-ash">Retry after {limited.retryAfterSec}s.</p>
+        <p className="mt-4 text-ink-muted">Retry after {limited.retryAfterSec}s.</p>
       </main>
     );
   }
@@ -46,10 +46,10 @@ export default async function LivingReportPage({
 
   if (report.shareExpiresAt && new Date(String(report.shareExpiresAt)) < new Date()) {
     return (
-      <main className="mx-auto max-w-2xl px-6 py-16 text-bone">
+      <main className="mx-auto max-w-2xl px-6 py-16 text-ink">
         <p className="label-caps">Living report</p>
         <h1 className="font-display mt-4 text-3xl">Link expired</h1>
-        <p className="mt-4 text-ash">Ask the organisation for a new share link.</p>
+        <p className="mt-4 text-ink-muted">Ask the organisation for a new share link.</p>
       </main>
     );
   }
@@ -65,10 +65,10 @@ export default async function LivingReportPage({
   if (!snapshot) notFound();
 
   return (
-    <main className="mx-auto max-w-3xl px-6 py-16 text-bone">
+    <main className="mx-auto max-w-3xl px-6 py-16 text-ink">
       <p className="label-caps">ClearESG living report</p>
       <h1 className="font-display mt-4 text-4xl">{snapshot.organisationName}</h1>
-      <p className="mt-2 text-ash">
+      <p className="mt-2 text-ink-muted">
         {snapshot.periodLabel} · {snapshot.framework} · v{snapshot.version}
       </p>
 
@@ -92,7 +92,7 @@ export default async function LivingReportPage({
 
       <div className="surface-1 mt-10 rounded-[4px] p-4">
         <p className="label-caps mb-3">Emissions tCO2e</p>
-        <div className="flex flex-wrap gap-4 text-ash">
+        <div className="flex flex-wrap gap-4 text-ink-muted">
           <Metric
             value={snapshot.emissions.scope1}
             unit="S1"
@@ -134,14 +134,14 @@ export default async function LivingReportPage({
         </div>
       </div>
 
-      <div className="mt-10 border border-graphite p-4">
+      <div className="mt-10 border border-rule p-4">
         <p className="label-caps mb-2">Materiality</p>
-        <p className="text-sm text-ash">
+        <p className="text-sm text-ink-muted">
           {snapshot.materiality.narrative ?? "No materiality narrative on this version."}
         </p>
       </div>
 
-      <p className="mt-12 text-xs text-ash">{snapshot.disclaimer}</p>
+      <p className="mt-12 text-xs text-ink-muted">{snapshot.disclaimer}</p>
     </main>
   );
 }

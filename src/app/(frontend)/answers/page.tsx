@@ -14,21 +14,21 @@ export const metadata: Metadata = {
 
 export default function AnswersIndexPage() {
   return (
-    <div className="flex min-h-full flex-col bg-ink text-bone">
+    <div className="flex min-h-full flex-col bg-canvas text-ink">
       <MarketingNav />
       <main className="mx-auto max-w-3xl flex-1 px-6 py-16">
-        <h1 className="font-display text-[48px] text-bone">Answers</h1>
-        <p className="mt-4 text-ash">
+        <h1 className="font-display text-[48px] text-ink">Answers</h1>
+        <p className="mt-4 text-ink-muted">
           One question per page. The first paragraph stands alone so answer engines can
           lift it.
         </p>
         <ul className="mt-10 space-y-6">
           {ANSWERS.map((a) => (
             <li key={a.slug}>
-              <Link href={`/answers/${a.slug}`} className="text-bone hover:underline">
+              <Link href={`/answers/${a.slug}`} className="text-ink hover:underline">
                 {a.question}
               </Link>
-              <p className="mt-2 text-sm text-ash">{a.answer}</p>
+              <p className="mt-2 text-sm text-ink-muted">{a.answer}</p>
             </li>
           ))}
         </ul>

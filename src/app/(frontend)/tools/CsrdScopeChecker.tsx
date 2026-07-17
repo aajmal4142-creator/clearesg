@@ -38,45 +38,45 @@ export function CsrdScopeChecker() {
   }
 
   return (
-    <div className="space-y-4 border border-graphite p-4">
-      <label className="block text-sm text-ash">
+    <div className="space-y-4 border border-rule p-4">
+      <label className="block text-sm text-ink-muted">
         Employees
         <input
           type="number"
-          className="mt-1 w-full border border-graphite bg-slate px-3 py-2 font-data text-bone"
+          className="mt-1 w-full border border-rule bg-surface-1 px-3 py-2 font-data text-ink"
           value={employees}
           onChange={(e) => setEmployees(Number(e.target.value))}
         />
       </label>
-      <label className="block text-sm text-ash">
+      <label className="block text-sm text-ink-muted">
         Turnover (€m)
         <input
           type="number"
-          className="mt-1 w-full border border-graphite bg-slate px-3 py-2 font-data text-bone"
+          className="mt-1 w-full border border-rule bg-surface-1 px-3 py-2 font-data text-ink"
           value={turnoverM}
           onChange={(e) => setTurnoverM(Number(e.target.value))}
         />
       </label>
-      <label className="flex items-center gap-2 text-sm text-ash">
+      <label className="flex items-center gap-2 text-sm text-ink-muted">
         <input type="checkbox" checked={eu} onChange={(e) => setEu(e.target.checked)} />
         EU undertaking
       </label>
       <button
         type="button"
         onClick={run}
-        className="border border-graphite bg-slate px-3 py-2 text-sm text-bone hover:border-ash"
+        className="border border-rule bg-surface-1 px-3 py-2 text-sm text-ink hover:border-rule-strong"
       >
         Check scope
       </button>
       {result ? (
-        <div className="border border-graphite bg-slate p-3 text-sm">
-          <p className={`font-data ${result.inScope ? "text-amber" : "text-bone"}`}>
+        <div className="border border-rule bg-surface-1 p-3 text-sm">
+          <p className={`font-data ${result.inScope ? "text-amber" : "text-ink"}`}>
             {result.inScope ? "Likely in scope" : "Not directly in scope (heuristic)"}
           </p>
-          <p className="mt-2 text-ash">{result.detail}</p>
-          <p className="mt-4 text-ash">
+          <p className="mt-2 text-ink-muted">{result.detail}</p>
+          <p className="mt-4 text-ink-muted">
             Save this and track it over time →{" "}
-            <Link href="/sign-up" className="text-bone underline">
+            <Link href="/sign-up" className="text-ink underline">
               Start free
             </Link>
           </p>

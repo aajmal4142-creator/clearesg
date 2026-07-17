@@ -13,7 +13,7 @@ import { Toaster as Sonner, type ToasterProps } from "sonner";
 const Toaster = ({ ...props }: ToasterProps) => {
   return (
     <Sonner
-      theme="dark"
+      theme="system"
       className="toaster group"
       position="bottom-right"
       icons={{
@@ -25,16 +25,15 @@ const Toaster = ({ ...props }: ToasterProps) => {
       }}
       toastOptions={{
         classNames: {
-          toast:
-            "surface-2 !rounded-[4px] !border-t-[color:var(--highlight-border)] !border-b-[color:var(--shade-border)] !text-bone",
+          toast: "panel float-shadow !rounded-md !text-ink",
         },
       }}
       style={
         {
-          "--normal-bg": "var(--surface-2)",
-          "--normal-text": "var(--bone)",
-          "--normal-border": "var(--graphite)",
-          "--border-radius": "4px",
+          "--normal-bg": "var(--surface-1)",
+          "--normal-text": "var(--ink)",
+          "--normal-border": "var(--rule)",
+          "--border-radius": "6px",
         } as React.CSSProperties
       }
       {...props}

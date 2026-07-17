@@ -45,16 +45,16 @@ export default async function ToolPage({ params }: Props) {
   const Component = tool.Component;
 
   return (
-    <div className="flex min-h-full flex-col bg-ink text-bone">
+    <div className="flex min-h-full flex-col bg-canvas text-ink">
       <MarketingNav />
       <main className="mx-auto max-w-xl flex-1 px-6 py-16">
-        <p className="label-caps text-ash">Tools</p>
-        <h1 className="mt-2 font-display text-[40px] text-bone">{tool.title}</h1>
-        <p className="mt-4 text-ash">{tool.description}</p>
+        <p className="label-caps text-ink-muted">Tools</p>
+        <h1 className="mt-2 font-display text-[40px] text-ink">{tool.title}</h1>
+        <p className="mt-4 text-ink-muted">{tool.description}</p>
         <div className="mt-8">
           <Component />
         </div>
-        <p className="mt-6 text-xs text-ash">
+        <p className="mt-6 text-xs text-ink-muted">
           Not legal or assurance advice. Production ClearESG calculations use the
           versioned factor registry.
         </p>

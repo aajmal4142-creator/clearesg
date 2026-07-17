@@ -29,7 +29,7 @@ export default async function GlossaryTermPage({ params }: Props) {
   if (!t) notFound();
 
   return (
-    <div className="flex min-h-full flex-col bg-ink text-bone">
+    <div className="flex min-h-full flex-col bg-canvas text-ink">
       <JsonLd
         data={{
           "@context": "https://schema.org",
@@ -42,31 +42,31 @@ export default async function GlossaryTermPage({ params }: Props) {
       />
       <MarketingNav />
       <main className="mx-auto max-w-3xl flex-1 px-6 py-16">
-        <p className="label-caps text-ash">Glossary</p>
-        <h1 className="mt-2 font-display text-[48px] text-bone">{t.term}</h1>
-        <p className="mt-6 text-bone">{t.answer}</p>
-        <p className="mt-2 font-data text-xs text-ash">Updated {t.updatedAt}</p>
+        <p className="label-caps text-ink-muted">Glossary</p>
+        <h1 className="mt-2 font-display text-[48px] text-ink">{t.term}</h1>
+        <p className="mt-6 text-ink">{t.answer}</p>
+        <p className="mt-2 font-data text-xs text-ink-muted">Updated {t.updatedAt}</p>
         {t.body.map((para) => (
-          <p key={para.slice(0, 24)} className="mt-6 text-ash">
+          <p key={para.slice(0, 24)} className="mt-6 text-ink-muted">
             {para}
           </p>
         ))}
-        <h2 className="mt-10 text-sm text-bone">Related</h2>
-        <ul className="mt-2 flex flex-wrap gap-3 text-sm text-ash">
+        <h2 className="mt-10 text-sm text-ink">Related</h2>
+        <ul className="mt-2 flex flex-wrap gap-3 text-sm text-ink-muted">
           {t.related.map((r) => (
             <li key={r}>
-              <Link href={`/glossary/${r}`} className="hover:text-bone">
+              <Link href={`/glossary/${r}`} className="hover:text-ink">
                 {r}
               </Link>
             </li>
           ))}
           <li>
-            <Link href="/tools/csrd-scope" className="hover:text-bone">
+            <Link href="/tools/csrd-scope" className="hover:text-ink">
               CSRD scope checker
             </Link>
           </li>
           <li>
-            <Link href="/pricing" className="hover:text-bone">
+            <Link href="/pricing" className="hover:text-ink">
               Pricing
             </Link>
           </li>

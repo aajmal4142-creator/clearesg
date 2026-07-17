@@ -129,12 +129,12 @@ export function MaterialityWorkshop({
     <div className="mx-auto grid max-w-6xl gap-10 px-6 py-12 lg:grid-cols-[1fr_1.1fr]">
       <section>
         <p className="label-caps">Double materiality</p>
-        <h1 className="font-display mt-2 text-3xl text-bone">Workshop</h1>
-        <p className="mt-2 text-ash">
+        <h1 className="font-display mt-2 text-3xl text-ink">Workshop</h1>
+        <p className="mt-2 text-ink-muted">
           Score impact (severity × scope × irremediability) and financial (magnitude ×
           likelihood). Threshold {MATERIALITY_THRESHOLD} on either axis.
         </p>
-        {status ? <p className="mt-3 text-sm text-ash">{status}</p> : null}
+        {status ? <p className="mt-3 text-sm text-ink-muted">{status}</p> : null}
         {locked ? (
           <p className="mt-3 text-sm text-signal">Final — locked for this period.</p>
         ) : null}
@@ -149,10 +149,10 @@ export function MaterialityWorkshop({
                 onClick={() => setActive(i)}
                 className={`border px-2 py-1 font-data text-xs ${
                   i === active
-                    ? "border-bone text-bone"
+                    ? "border-bone text-ink"
                     : c?.material
                       ? "border-signal/60 text-signal"
-                      : "border-graphite text-ash"
+                      : "border-rule text-ink-muted"
                 }`}
               >
                 {t.id}
@@ -162,11 +162,11 @@ export function MaterialityWorkshop({
         </div>
 
         {topic && row ? (
-          <div className="mt-8 space-y-4 border border-graphite p-4">
-            <h2 className="text-lg text-bone">
+          <div className="mt-8 space-y-4 border border-rule p-4">
+            <h2 className="text-lg text-ink">
               {topic.id} — {topic.label}
             </h2>
-            <p className="text-sm text-ash">{topic.description}</p>
+            <p className="text-sm text-ink-muted">{topic.description}</p>
             {(
               [
                 ["impactSeverity", "Impact severity"],
@@ -188,20 +188,20 @@ export function MaterialityWorkshop({
                   value={Number(row[key])}
                   onChange={(e) => setField(key, Number(e.target.value))}
                 />
-                <span className="font-data text-sm text-bone">{row[key]}</span>
+                <span className="font-data text-sm text-ink">{row[key]}</span>
               </label>
             ))}
             <label className="block">
               <span className="label-caps">Rationale</span>
               <textarea
                 disabled={locked}
-                className="mt-2 w-full border border-graphite bg-slate px-2 py-2 text-sm text-bone"
+                className="mt-2 w-full border border-rule bg-surface-1 px-2 py-2 text-sm text-ink"
                 rows={3}
                 value={row.rationale}
                 onChange={(e) => setField("rationale", e.target.value)}
               />
             </label>
-            <p className="font-data text-sm text-ash">
+            <p className="font-data text-sm text-ink-muted">
               Impact {computed[active]?.impactScore} · Financial{" "}
               {computed[active]?.financialScore}
               {computed[active]?.material ? " · material" : ""}
@@ -214,14 +214,14 @@ export function MaterialityWorkshop({
             <button
               type="button"
               onClick={() => void save(false)}
-              className="border border-graphite px-3 py-2 text-sm text-ash hover:border-ash hover:text-bone"
+              className="border border-rule px-3 py-2 text-sm text-ink-muted hover:border-rule-strong hover:text-ink"
             >
               Save draft
             </button>
             <button
               type="button"
               onClick={() => void save(true)}
-              className="border border-graphite bg-slate px-3 py-2 text-sm text-bone hover:border-ash"
+              className="border border-rule bg-surface-1 px-3 py-2 text-sm text-ink hover:border-rule-strong"
             >
               Finalise
             </button>
@@ -229,9 +229,9 @@ export function MaterialityWorkshop({
         ) : null}
 
         {narrative ? (
-          <div className="mt-8 border border-graphite p-4">
+          <div className="mt-8 border border-rule p-4">
             <p className="label-caps mb-2">Narrative</p>
-            <p className="text-sm text-ash">{narrative}</p>
+            <p className="text-sm text-ink-muted">{narrative}</p>
           </div>
         ) : null}
       </section>
@@ -240,18 +240,22 @@ export function MaterialityWorkshop({
         <p className="label-caps mb-4">Matrix</p>
         <div
           ref={matrixRef}
-          className="relative aspect-square w-full max-w-xl border border-graphite bg-slate"
+          className="relative aspect-square w-full max-w-xl border border-rule bg-surface-1"
         >
           <div
-            className="absolute left-0 right-0 border-t border-dashed border-graphite"
+            className="absolute left-0 right-0 border-t border-dashed border-rule"
             style={{ bottom: `${(MATERIALITY_THRESHOLD / 5) * 100}%` }}
           />
           <div
-            className="absolute top-0 bottom-0 border-l border-dashed border-graphite"
+            className="absolute top-0 bottom-0 border-l border-dashed border-rule"
             style={{ left: `${(MATERIALITY_THRESHOLD / 5) * 100}%` }}
           />
-          <span className="absolute bottom-2 left-2 text-xs text-ash">Impact →</span>
-          <span className="absolute left-2 top-2 text-xs text-ash">Financial ↑</span>
+          <span className="absolute bottom-2 left-2 text-xs text-ink-muted">
+            Impact →
+          </span>
+          <span className="absolute left-2 top-2 text-xs text-ink-muted">
+            Financial ↑
+          </span>
 
           {computed.map((p) => {
             const left = `${(p.impactScore / 5) * 100}%`;
@@ -299,7 +303,7 @@ export function MaterialityWorkshop({
                 }}
                 transition={transition.type === "spring" ? spring : transition}
                 className={`absolute -translate-x-1/2 translate-y-1/2 cursor-grab font-data text-xs active:cursor-grabbing ${
-                  p.material ? "text-signal" : "text-ash"
+                  p.material ? "text-signal" : "text-ink-muted"
                 }`}
                 style={{ left, bottom }}
                 onClick={() =>
@@ -311,7 +315,7 @@ export function MaterialityWorkshop({
             );
           })}
         </div>
-        <p className="mt-3 text-sm text-ash">
+        <p className="mt-3 text-sm text-ink-muted">
           Drag a topic to reposition. Material topics render in signal green.
         </p>
       </section>

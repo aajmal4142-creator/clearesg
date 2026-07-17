@@ -27,7 +27,7 @@ export function Scope2Calculator() {
 
   return (
     <div className="surface-1 space-y-4 rounded-[4px] p-4">
-      <label className="block text-sm text-ash">
+      <label className="block text-sm text-ink-muted">
         Electricity (kWh)
         <Input
           type="number"
@@ -36,10 +36,10 @@ export function Scope2Calculator() {
           onChange={(e) => setKwh(Number(e.target.value))}
         />
       </label>
-      <label className="block text-sm text-ash">
+      <label className="block text-sm text-ink-muted">
         Region
         <select
-          className="surface-inset mt-1 h-9 w-full rounded-[4px] px-3 text-bone"
+          className="surface-2 mt-1 h-9 w-full rounded-[4px] px-3 text-ink"
           value={region}
           onChange={(e) => setRegion(e.target.value)}
         >
@@ -50,8 +50,8 @@ export function Scope2Calculator() {
           ))}
         </select>
       </label>
-      <div className="surface-inset rounded-[4px] p-3">
-        <p className="text-sm text-ash">Location-based Scope 2</p>
+      <div className="surface-2 rounded-[4px] p-3">
+        <p className="text-sm text-ink-muted">Location-based Scope 2</p>
         <Metric value={tco2e} unit="tCO2e" size="xl" decimals={2} tone="signal" />
         <div className="mt-2">
           <Metric
@@ -63,10 +63,10 @@ export function Scope2Calculator() {
             tone="ash"
           />
         </div>
-        <p className="mt-1 text-xs text-ash">{f.source}</p>
-        <p className="mt-4 text-sm text-ash">
+        <p className="mt-1 text-xs text-ink-muted">{f.source}</p>
+        <p className="mt-4 text-sm text-ink-muted">
           Save this and track it over time →{" "}
-          <Link href="/sign-up" className="text-bone underline">
+          <Link href="/sign-up" className="text-ink underline">
             Start free
           </Link>
         </p>

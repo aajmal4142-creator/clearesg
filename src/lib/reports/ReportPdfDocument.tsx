@@ -1,39 +1,170 @@
-import { Document, Page, StyleSheet, Text, View } from "@react-pdf/renderer";
+import {
+  Circle,
+  Document,
+  G,
+  Line,
+  Page,
+  Path,
+  StyleSheet,
+  Svg,
+  Text,
+  View,
+} from "@react-pdf/renderer";
 
-import { PdfGauge } from "./PdfGauge";
 import type { ReportSnapshot } from "./types";
+
+/** PDF always renders LIGHT — printed document tokens (hex OK in React-PDF). */
+const C = {
+  canvas: "#FBF9F5",
+  surface1: "#FFFFFF",
+  surface2: "#F5F2EC",
+  ink: "#1A1714",
+  muted: "#6B635A",
+  rule: "#E0DAD0",
+  ruleStrong: "#C4BBAE",
+  accent: "#7A2E2E",
+  signal: "#0E7C4A",
+  amber: "#B87309",
+  rust: "#B03A2E",
+} as const;
 
 const styles = StyleSheet.create({
   page: {
-    padding: 40,
+    padding: 48,
     fontSize: 10,
     fontFamily: "Helvetica",
-    color: "#0B0D0E",
+    color: C.ink,
+    backgroundColor: C.canvas,
   },
-  h1: { fontSize: 22, marginBottom: 8 },
-  h2: { fontSize: 14, marginTop: 16, marginBottom: 6 },
-  muted: { color: "#3A4044", marginBottom: 4 },
+  accentRule: {
+    height: 2,
+    backgroundColor: C.accent,
+    marginBottom: 28,
+  },
+  title: {
+    fontSize: 28,
+    fontFamily: "Times-Roman",
+    marginBottom: 6,
+    color: C.ink,
+  },
+  mono: { fontFamily: "Courier", fontSize: 10, color: C.ink },
+  muted: { color: C.muted, marginBottom: 4, fontSize: 9 },
+  h2: {
+    fontSize: 12,
+    marginTop: 20,
+    marginBottom: 8,
+    color: C.ink,
+    borderBottomWidth: 1,
+    borderBottomColor: C.rule,
+    paddingBottom: 4,
+  },
   row: { flexDirection: "row", justifyContent: "space-between", marginBottom: 3 },
-  mono: { fontFamily: "Courier", fontSize: 10 },
   box: {
     borderWidth: 1,
-    borderColor: "#3A4044",
-    padding: 8,
-    marginTop: 8,
+    borderColor: C.rule,
+    backgroundColor: C.surface1,
+    padding: 10,
+    marginTop: 4,
   },
-  disclaimer: { marginTop: 24, fontSize: 8, color: "#8A9299" },
+  disclaimer: { marginTop: 28, fontSize: 8, color: C.muted },
   watermark: {
     position: "absolute",
     top: 360,
     left: 60,
     right: 60,
-    fontSize: 28,
-    color: "#C8CED4",
-    opacity: 0.45,
+    fontSize: 22,
+    color: C.ruleStrong,
+    opacity: 0.5,
     textAlign: "center",
     transform: "rotate(-28deg)",
   },
+  scoreBig: {
+    fontFamily: "Courier",
+    fontSize: 36,
+    textAlign: "center",
+    marginTop: 4,
+  },
+  label: {
+    fontSize: 8,
+    letterSpacing: 1.2,
+    color: C.muted,
+    textAlign: "center",
+    textTransform: "uppercase",
+  },
 });
+
+function PdfGauge({ score, size = 180 }: { score: number; size?: number }) {
+  const clamped = Math.max(0, Math.min(100, score));
+  const startAngle = -210;
+  const sweep = 240;
+  const cx = size / 2;
+  const cy = size / 2 + size * 0.06;
+  const r = size * 0.38;
+  const progress = clamped / 100;
+  const band = clamped >= 70 ? C.signal : clamped >= 45 ? C.amber : C.rust;
+
+  function polar(angleDeg: number, radius: number) {
+    const rad = (angleDeg * Math.PI) / 180;
+    return { x: cx + radius * Math.cos(rad), y: cy + radius * Math.sin(rad) };
+  }
+
+  const start = polar(startAngle, r);
+  const end = polar(startAngle + sweep, r);
+  const mid = polar(startAngle + sweep * progress, r);
+  const large = sweep * progress > 180 ? 1 : 0;
+  const fillPath = `M ${start.x} ${start.y} A ${r} ${r} 0 ${large} 1 ${mid.x} ${mid.y}`;
+  const trackPath = `M ${start.x} ${start.y} A ${r} ${r} 0 1 1 ${end.x} ${end.y}`;
+  const needleAngle = startAngle + 90 + sweep * progress;
+  const tip = polar(needleAngle - 90, r - 14);
+  const ticks = [0, 20, 40, 60, 80, 100];
+
+  return (
+    <View style={{ alignItems: "center", marginVertical: 16 }}>
+      <Svg width={size} height={size * 0.72} viewBox={`0 0 ${size} ${size * 0.72}`}>
+        <Circle
+          cx={cx}
+          cy={cy}
+          r={r + 22}
+          fill={C.surface2}
+          stroke={C.rule}
+          strokeWidth={1}
+        />
+        <Path d={trackPath} stroke={C.rule} strokeWidth={2} fill="none" />
+        <Path d={fillPath} stroke={band} strokeWidth={4} fill="none" />
+        {ticks.map((v) => {
+          const a = startAngle + sweep * (v / 100);
+          const outer = polar(a, r - 2);
+          const inner = polar(a, r - 14);
+          const label = polar(a, r - 26);
+          return (
+            <G key={v}>
+              <Line
+                x1={inner.x}
+                y1={inner.y}
+                x2={outer.x}
+                y2={outer.y}
+                stroke={C.muted}
+                strokeWidth={1}
+              />
+              <Text
+                x={label.x - 6}
+                y={label.y + 3}
+                style={{ fontSize: 7, fontFamily: "Courier", color: C.muted }}
+              >
+                {String(v)}
+              </Text>
+            </G>
+          );
+        })}
+        <Line x1={cx} y1={cy} x2={tip.x} y2={tip.y} stroke={C.ink} strokeWidth={1.5} />
+        <Circle cx={cx} cy={cy} r={7} fill={C.surface1} stroke={C.rule} strokeWidth={1} />
+        <Circle cx={cx} cy={cy} r={3} fill={C.ink} />
+      </Svg>
+      <Text style={styles.scoreBig}>{Math.round(clamped)}</Text>
+      <Text style={styles.label}>Overall</Text>
+    </View>
+  );
+}
 
 export function ReportPdfDocument({
   snapshot,
@@ -48,15 +179,14 @@ export function ReportPdfDocument({
         {watermarked ? (
           <Text style={styles.watermark}>ClearESG Free — upgrade for clean PDF</Text>
         ) : null}
-        <Text style={styles.h1}>ClearESG Report</Text>
-        <Text style={styles.muted}>{snapshot.organisationName}</Text>
+        <View style={styles.accentRule} />
+        <Text style={styles.title}>ClearESG Report</Text>
+        <Text style={styles.mono}>{snapshot.organisationName}</Text>
         <Text style={styles.muted}>
           {snapshot.periodLabel} · {snapshot.framework} · v{snapshot.version}
         </Text>
+
         <PdfGauge score={snapshot.scores.overall} />
-        <Text style={styles.mono}>
-          Overall {snapshot.scores.overall} ({snapshot.band})
-        </Text>
 
         <Text style={styles.h2}>Scores</Text>
         <View style={styles.box}>

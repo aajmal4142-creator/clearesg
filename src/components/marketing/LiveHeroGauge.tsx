@@ -74,16 +74,13 @@ function SliderField({
         step={step}
         value={value}
         onChange={(e) => onChange(Number(e.target.value))}
-        className="mt-2 h-1 w-full cursor-pointer appearance-none rounded-none bg-graphite accent-bone"
+        className="mt-2 h-1 w-full cursor-pointer appearance-none rounded-none bg-rule accent-accent"
       />
     </label>
   );
 }
 
-/**
- * Marketing hero — live Gauge driven by real lib/calc.
- * Three sliders: headcount / diesel L / renewable %.
- */
+/** Marketing hero — live Gauge driven by real lib/calc. */
 export function LiveHeroGauge() {
   const [headcount, setHeadcount] = useState(120);
   const [dieselL, setDieselL] = useState(18000);
@@ -95,15 +92,9 @@ export function LiveHeroGauge() {
   );
 
   return (
-    <div className="relative flex w-full flex-col items-center">
-      <div
-        className="hero-backlight pointer-events-none absolute inset-0 -z-0"
-        aria-hidden
-      />
-      <div className="relative z-[1]">
-        <Gauge score={score} previousScore={null} size={320} live />
-      </div>
-      <div className="relative z-[1] mt-8 grid w-full max-w-sm gap-5">
+    <div className="flex w-full max-w-md flex-col items-center">
+      <Gauge score={score} previousScore={null} size={320} live />
+      <div className="mt-8 grid w-full gap-5">
         <SliderField
           label="Headcount"
           value={headcount}

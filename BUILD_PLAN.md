@@ -100,85 +100,142 @@ The brief: high-class, heavily animated, and it must be loved more than the comp
 enterprise SaaS — Workiva and Persefoni look like 2016 Salesforce. Greenly and Plan A are the modern-startup
 default: white, rounded, soft-green, Inter, blob illustrations. **Both are what we are not.**
 
-### The concept: _Instrument_
+### The concept: _Editorial_
 
-ClearESG is not a friendly green app. It is a **precision instrument** — a piece of measurement equipment for
-people whose job now depends on the reading being right and defensible. Think a Leica light meter, a Braun
-calculator, a laboratory oscilloscope, a Bloomberg terminal built by someone with taste. Warm, dense,
-confident, absolutely legible, slightly serious. Green is not the theme. **Green is data.**
+The Instrument concept — achromatic chrome, colour only for data — executed correctly and read as unfinished
+rather than restrained. The buyer is a frightened CFO, not a designer. The core artefact is a report filed with
+a regulator and shared with banks and buyers. **Authority, not austerity.**
 
-This is the single most important design decision in the file: **the entire chrome is achromatic.
-The only saturated colour on screen is a number that means something.** When you see green, you're looking at
-a measurement. That's the signature, and it's why the product feels like an instrument rather than a brochure.
+ClearESG’s visual language is a well-made annual report or a serious financial newspaper. Warm, dense,
+typographic, confident. Colour is promoted to chrome. Enterprise competitors are cold; startup competitors are
+white-and-soft-green. We are neither. The Gauge survives — it moves from lab equipment to a printed instrument
+on good paper.
 
-### Tokens
+### Fonts
+
+Via `next/font` — remove Instrument Serif, Geist, Geist Mono:
+
+- **Display + headings:** `Fraunces` (variable). Use the opsz axis. Weight 400–600.
+  `font-variation-settings: "SOFT" 30, "WONK" 1` on display sizes only.
+- **Body/UI:** `Inter Tight` (variable). Tighter than Inter, more editorial.
+- **Data:** `JetBrains Mono`. Warmer than Geist Mono, unmistakably data.
+  `font-variant-numeric: tabular-nums slashed-zero` always.
+
+Scale: 12 / 14 / 16 / 18 / 22 / 28 / 40 / 56 / 80 / 112.
+Body 17/1.65. Measure 66ch body, 58ch marketing prose.
+Fraunces tracking: 40px → -0.01em, 56px → -0.02em, 80px+ → -0.03em.
+Labels: 12px, uppercase, 0.08em, weight 600, `--ink-muted`.
+
+### Tokens — dual theme, every token pairs
+
+Both themes are first-class. Neither is “the dark version of” the other. CSS custom properties on
+`[data-theme="light"]` and `[data-theme="dark"]`, mapped through Tailwind v4 `@theme inline`.
+**Zero hex in components** — hex only in `globals.css` (exception: white-label `--accent` injection).
+
+**LIGHT (default — the report)**
 
 ```
-Ink            #0B0D0E   near-black, the primary surface in dark; text in light
-Slate          #1A1D1F   raised surfaces, cards
-Graphite       #3A4044   borders, dividers, disabled
-Ash            #8A9299   secondary text, labels
-Bone           #E8E6E1   primary text on dark / page background in light
-Paper          #F5F3EF   light-mode canvas
-
--- data colours, used ONLY for measurement, never chrome --
-Signal         #00E08A   good / on-track / verified          (the one saturated accent)
-Amber          #FFB020   estimated / at-risk / needs evidence
-Rust           #FF5C4D   gap / overdue / missing
-Ultramarine    #4D7CFF   informational / benchmark cohort line
+--canvas:        #FBF9F5   warm cream, not white
+--surface-1:     #FFFFFF   raised panels
+--surface-2:     #F5F2EC   recessed wells, table zebra
+--ink:           #1A1714   warm near-black, body text
+--ink-muted:     #6B635A   secondary text, labels
+--rule:          #E0DAD0   hairlines, borders
+--rule-strong:   #C4BBAE   emphasis rules
 ```
 
-**Rationale for the risk:** an achromatic UI where colour = data is genuinely uncommon in this category and it
-does real work — a user can scan a dense page and instantly find every problem, because problems are the only
-things that are coloured. It also makes white-labelling trivial: the consultant's brand colour slots into a
-chrome that has no colour of its own to fight it.
+**DARK (the terminal)**
 
-### Type
+```
+--canvas:        #14120F   warm near-black — NOT blue-black
+--surface-1:     #1C1916
+--surface-2:     #100E0C
+--ink:           #F0EBE3
+--ink-muted:     #9A9188
+--rule:          #322D27
+--rule-strong:   #4A443C
+```
 
-- **Display:** `Instrument Serif` — high-contrast, sharp, a little editorial. Used at 48px+ **only**. Hero,
-  section openers, the big score. Restraint is the whole point. (The name is a coincidence and a gift.)
-- **Body/UI:** `Geist` — neutral, excellent at small sizes, doesn't perform.
-- **Data:** `Geist Mono` — **every number in the product is monospaced.** Scores, tonnes, dates, percentages,
-  deltas, IDs. This is the tell that you're using an instrument. Tabular figures on, always.
+**BRAND — chrome colour, both themes**
 
-Scale: 12 / 14 / 16 / 20 / 28 / 40 / 64 / 96. Body 16/1.6. Labels 12px, uppercase, `letter-spacing: 0.08em`, Ash.
+```
+--accent:        #7A2E2E   oxblood — buttons, links, active nav, emphasis rules, PDF cover
+--accent-hover:  #8F3838
+--accent-quiet:  #7A2E2E at 8%   backgrounds, active row tint
+```
+
+**DATA — louder than chrome, both themes** (adjust lightness per theme only if contrast fails 4.5:1)
+
+```
+--signal:        #0E7C4A   good / on-track / verified
+--amber:         #B87309   estimated / at-risk
+--rust:          #B03A2E   gap / overdue / missing
+--cobalt:        #2C5AA0   benchmark cohort / informational
+```
+
+Theme toggle in the app shell. Persist to a cookie, read server-side, set `data-theme` on `<html>` before paint —
+no flash. Respect `prefers-color-scheme` on first visit only. White-label consultant colour overrides `--accent`
+only, never the data colours.
+
+### Surface & material
+
+- Elevation via warmth and rules, not shadow. `--surface-1` on `--canvas` with a 1px `--rule` border.
+- Floating elements: soft warm shadow — light `0 12px 32px -8px rgba(26,23,20,0.14)`, dark
+  `0 12px 32px -8px rgba(0,0,0,0.6)`.
+- Inputs recessed: `--surface-2` fill, 1px `--rule`, no inner shadow.
+- Radius: 6px panels, 4px inputs/buttons, 2px chips.
+- Paper grain: fixed root overlay, inline SVG `feTurbulence` (baseFrequency 0.9, numOctaves 4), opacity 0.02
+  light / 0.03 dark, `mix-blend-mode: multiply` light / `overlay` dark.
+- Rules do structural work: 1px `--rule` under section headings; 2px `--accent` rule above page titles.
 
 ### Layout
 
-Dense over airy. 8px base grid. Hairline borders (`1px Graphite`), `border-radius: 4px` maximum — this is
-equipment, not a pillow. Generous _internal_ padding, tight _external_ gaps. Data tables are first-class
-citizens, not an afterthought: sticky headers, monospace columns, right-aligned numerics, zebra via a 2%
-lightness shift rather than a different colour.
+Editorial density: generous type, tight gutters, 8px grid.
+
+- **App:** 2-column where content allows — primary 66ch, secondary rail 280px (metadata, evidence, factors),
+  separated by a 1px `--rule`, not a card.
+- **Marketing:** single 58ch measure, centred, long-form.
+- **Tables:** no card wrapper, full-bleed, hairline rules. Header 12px uppercase `--ink-muted` with 2px
+  `--rule-strong` beneath. Numerics right-aligned, JetBrains Mono, tabular. Zebra via `--surface-2`.
+
+### The `<Metric>` primitive
+
+`<Metric value={4.2} unit="tCO2e" />` — integer at full `--ink` weight 500; decimal at `--ink-muted` 0.85em;
+unit as 12px uppercase `--ink-muted` with 0.4em left margin. JetBrains Mono, tabular, slashed zero.
+**Zero raw number renders** anywhere — every score, tonne, date, percentage, delta, ID.
 
 ### Signature element: **The Gauge**
 
-The overall ESG score renders as a **precision instrument dial** — a 240° arc, hairline tick marks every 5
-points with labelled majors every 20, a single thin needle, the score in 96px Geist Mono at centre, and a
-faint "previous period" ghost needle behind it. On load, the needle **sweeps from 0 past the target, overshoots
-by ~4%, and settles** with a spring — the physical behaviour of a real analogue meter. The arc segment behind
-the needle fills in the band colour (Rust <45, Amber 45–69, Signal ≥70).
+Three placements only: marketing hero, dashboard, PDF page 1. SVG. Printed dial on good paper — no glow.
 
-This appears exactly three places: the marketing hero (live, driven by a real interactive demo), the dashboard,
-and page 1 of the PDF. Nowhere else. It is the thing people screenshot and the thing they remember.
+- Dish: `--surface-2` circle, 1px `--rule`.
+- 240° arc opening downward. Track 2px `--rule`. Fill 4px band colour (signal/amber/rust by score).
+- Ticks inside: minor every 5, major every 20 with 12px JetBrains Mono labels.
+- Needle: tapered 7px→1.5px, `--ink`, hairline `--canvas` spine.
+- Hub: outer 14px `--surface-1` + 1px `--rule`, inner 6px `--ink`.
+- Ghost needle: previous period, `--rule-strong`, 1px, opacity 0.6, static.
+- Centre readout: `<Metric>`, 112px JetBrains Mono weight 500, below the hub.
+
+Motion (the one bravura moment): underdamped needle spring `{ stiffness: 180, damping: 12, mass: 1.2 }` with
+visible overshoot; arc trails by 40ms; ticks stagger opacity; readout counts and lands 100ms after needle rest.
+`prefers-reduced-motion` → final position, full arc, no count.
 
 ### Motion
 
-Deliberate, orchestrated, never scattered. Motion is used to communicate _measurement settling_ — things arrive
-at their value, they don't just appear.
+`lib/motion.ts` exports exactly three springs plus stagger. Zero per-component transition objects.
 
-- **Global:** every transition uses spring physics, not duration-eased CSS. `stiffness: 260, damping: 30` house default.
-- **Numbers count up** on enter (`useSpring` + `useTransform`), monospace so nothing reflows.
-- **Page load** is an orchestrated stagger: chrome → structure → data, 40ms apart. Never all at once.
-- **Charts draw in** — lines trace via `pathLength`, bars grow from baseline.
-- **Scroll reveals** on marketing: translateY(16px) + opacity, spring, `once: true`, stagger 60ms.
-- **The Gauge** sweep as described. This is the one _bravura_ moment. Everything else is quiet.
-- **Hover:** 1px border lightens + 2px lift. Nothing more.
-- **`prefers-reduced-motion: reduce` → all of the above become instant state changes.** Non-negotiable, wire it
-  into a `useReducedMotion` check in the shared motion config, not per-component.
+- Page assembly: chrome → structure → data, 40ms apart.
+- Hover on rows/panels: `--accent-quiet` tint + left 2px `--accent` bar (scaleY, springSnap). No lift/scale/shadow.
+- Numbers never fade — they count.
+- Section rules draw in (scaleX, origin left, 400ms) on scroll reveal.
 
-**Restraint check (Chanel's rule — remove one accessory):** no gradient meshes, no glassmorphism, no floating
-blobs, no parallax, no cursor followers, no scroll-jacking, no card tilt. The Gauge is the accessory. Everything
-else stays quiet so it lands.
+Forbidden: glassmorphism, blobs, parallax, cursor followers, card tilt, scroll-jacking, gradient meshes,
+floating 3D, soft green.
+
+### PDF (React-PDF)
+
+Always renders **LIGHT**, regardless of app theme. Cover: `--canvas`, 2px `--accent` rule at top, Fraunces
+56px title, Gauge at final position, org/period in JetBrains Mono. Flagship artefact for banks, buyers, auditors.
 
 ### Copy voice
 
@@ -642,6 +699,7 @@ Update after every phase. This is how you resume if context is lost.
 | 13 — Marketing/SEO  | [x]    | Home+Gauge, pricing, glossary/answers/tools/csrd/compare/deadlines; sitemap/robots; llms.txt; JSON-LD; OG image. Seed corpus (expandable).                                                               |
 | 14 — Hardening      | [x]    | Health `/api/health`; Upstash/memory rate limits; Sentry init when DSN set; structured logs; focus-visible + reduced-motion; Playwright + axe smoke.                                                     |
 | Design depth pass   | [x]    | Five-surface elevation + noise; Metric primitive; bravura Gauge (hero/runway/PDF); springs+stagger; live marketing calc hero; chrome→structure→data.                                                     |
+| Editorial redesign  | [x]    | §3 Editorial: Fraunces/Inter Tight/JetBrains Mono; dual theme cookie; oxblood accent; restyled Gauge; light PDF cover; paper grain.                                                                      |
 
 ---
 

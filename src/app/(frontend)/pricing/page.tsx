@@ -41,22 +41,24 @@ const ROWS: Array<{ plan: keyof typeof PLAN_LIMITS; points: string[] }> = [
 
 export default function PricingPage() {
   return (
-    <div className="surface-0 flex min-h-full flex-col text-bone">
+    <div className="flex min-h-full flex-col bg-canvas text-ink">
       <JsonLd data={softwareApplicationJsonLd()} />
       <MarketingNav />
-      <main className="mx-auto max-w-5xl flex-1 px-6 py-16">
-        <h1 className="display-48 text-bone">Pricing</h1>
-        <p className="measure-prose mt-4 text-ash">
+      <main className="mx-auto max-w-3xl flex-1 px-6 py-16">
+        <div className="title-rule pt-4">
+          <h1 className="display-40 text-ink">Pricing</h1>
+        </div>
+        <p className="measure-prose mt-6 text-ink-muted">
           Free is real: full insight, watermarked output. Paid unlocks clean PDF, periods,
           evidence, and consultant tooling. Prices in EUR; India (INR / Razorpay) remains
           an open commercial decision.
         </p>
-        <div className="mt-12 grid gap-3 md:grid-cols-3">
+        <div className="mt-12 space-y-0">
           {ROWS.map(({ plan, points }) => (
-            <div key={plan} className="surface-1 panel-hover rounded-[4px] p-5">
+            <div key={plan} className="section-rule py-8">
               <p className="label-caps">{PLAN_LIMITS[plan].label}</p>
               <div className="mt-2 flex items-baseline gap-1">
-                <span className="font-data text-ash">€</span>
+                <span className="font-data text-ink-muted">€</span>
                 <Metric
                   value={PLAN_LIMITS[plan].priceEur}
                   size="xl"
@@ -65,7 +67,7 @@ export default function PricingPage() {
                 />
                 <span className="label-caps">/mo</span>
               </div>
-              <ul className="mt-4 space-y-2 text-sm text-ash">
+              <ul className="mt-4 space-y-2 text-sm text-ink-muted">
                 {points.map((p) => (
                   <li key={p}>{p}</li>
                 ))}

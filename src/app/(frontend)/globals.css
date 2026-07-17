@@ -1,119 +1,146 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
-/* ClearESG design tokens — §3 + design depth pass. Hex lives only here. */
+/* ClearESG Editorial tokens — BUILD_PLAN §3. Hex lives only here. */
 
 :root {
-  /* Chrome — achromatic */
-  --ink: #0b0d0e;
-  --slate: #1a1d1f;
-  --graphite: #3a4044;
-  --ash: #8a9299;
-  --bone: #e8e6e1;
-  --paper: #f5f3ef;
+  /* Brand — chrome, both themes */
+  --accent: #7a2e2e;
+  --accent-hover: #8f3838;
+  --accent-quiet: color-mix(in srgb, #7a2e2e 8%, transparent);
 
-  /* Elevation — five surfaces */
-  --surface-0: #0b0d0e;
-  --surface-1: #101314;
-  --surface-2: #16191b;
-  --surface-3: #1d2124;
-  --surface-inset: #08090a;
+  /* Data — louder than chrome; light theme values (4.5:1 on --canvas) */
+  --signal: #0e7c4a;
+  --amber: #b87309;
+  --rust: #b03a2e;
+  --cobalt: #2c5aa0;
 
-  /* Machined light / shadow (token layer only) */
-  --highlight-top: rgba(255, 255, 255, 0.04);
-  --highlight-border: rgba(255, 255, 255, 0.06);
-  --highlight-hover: rgba(255, 255, 255, 0.14);
-  --shade-border: rgba(0, 0, 0, 0.4);
-  --shade-float: rgba(0, 0, 0, 0.6);
-  --inset-well: rgba(0, 0, 0, 0.4);
-
-  /* Data — measurement only, never chrome */
-  --signal: #00e08a;
-  --amber: #ffb020;
-  --rust: #ff5c4d;
-  --ultramarine: #4d7cff;
-
-  /* Semantic aliases (dark product default) */
-  --background: var(--surface-0);
-  --foreground: var(--bone);
-  --card: var(--surface-1);
-  --card-foreground: var(--bone);
-  --popover: var(--surface-2);
-  --popover-foreground: var(--bone);
-  --primary: var(--bone);
-  --primary-foreground: var(--ink);
-  --secondary: transparent;
-  --secondary-foreground: var(--bone);
-  --muted: var(--surface-1);
-  --muted-foreground: var(--ash);
-  --accent: var(--surface-1);
-  --accent-foreground: var(--bone);
-  --destructive: var(--rust);
-  --border: var(--graphite);
-  --input: var(--graphite);
-  --ring: var(--ultramarine);
+  --radius-panel: 0.375rem;
   --radius: 0.25rem;
+  --radius-chip: 0.125rem;
 
-  --chart-1: var(--signal);
-  --chart-2: var(--amber);
-  --chart-3: var(--ultramarine);
-  --chart-4: var(--rust);
-  --chart-5: var(--ash);
-  --sidebar: var(--surface-0);
-  --sidebar-foreground: var(--bone);
-  --sidebar-primary: var(--bone);
-  --sidebar-primary-foreground: var(--ink);
-  --sidebar-accent: var(--surface-1);
-  --sidebar-accent-foreground: var(--bone);
-  --sidebar-border: var(--graphite);
-  --sidebar-ring: var(--ash);
+  --shadow-float: 0 12px 32px -8px rgba(26, 23, 20, 0.14);
+  --grain-opacity: 0.02;
+  --grain-blend: multiply;
 }
 
+/* LIGHT — the report (default) */
 [data-theme="light"] {
-  --background: var(--paper);
+  --canvas: #fbf9f5;
+  --surface-1: #ffffff;
+  --surface-2: #f5f2ec;
+  --ink: #1a1714;
+  --ink-muted: #6b635a;
+  --rule: #e0dad0;
+  --rule-strong: #c4bbae;
+
+  --signal: #0e7c4a;
+  --amber: #b87309;
+  --rust: #b03a2e;
+  --cobalt: #2c5aa0;
+
+  --accent-quiet: color-mix(in srgb, var(--accent) 8%, transparent);
+  --shadow-float: 0 12px 32px -8px rgba(26, 23, 20, 0.14);
+  --grain-opacity: 0.02;
+  --grain-blend: multiply;
+
+  --background: var(--canvas);
   --foreground: var(--ink);
-  --card: var(--bone);
+  --card: var(--surface-1);
   --card-foreground: var(--ink);
-  --popover: var(--paper);
+  --popover: var(--surface-1);
   --popover-foreground: var(--ink);
-  --primary: var(--ink);
-  --primary-foreground: var(--bone);
-  --secondary: var(--bone);
+  --primary: var(--accent);
+  --primary-foreground: var(--canvas);
+  --secondary: transparent;
   --secondary-foreground: var(--ink);
-  --muted: var(--bone);
-  --muted-foreground: var(--ash);
-  --accent: var(--bone);
-  --accent-foreground: var(--ink);
+  --muted: var(--surface-2);
+  --muted-foreground: var(--ink-muted);
   --destructive: var(--rust);
-  --border: var(--graphite);
-  --input: var(--graphite);
-  --ring: var(--ash);
-  --sidebar: var(--paper);
+  --border: var(--rule);
+  --input: var(--rule);
+  --ring: var(--accent);
+  --sidebar: var(--canvas);
   --sidebar-foreground: var(--ink);
-  --sidebar-primary: var(--ink);
-  --sidebar-primary-foreground: var(--bone);
-  --sidebar-accent: var(--bone);
+  --sidebar-primary: var(--accent);
+  --sidebar-primary-foreground: var(--canvas);
+  --sidebar-accent: var(--surface-2);
   --sidebar-accent-foreground: var(--ink);
-  --sidebar-border: var(--graphite);
-  --sidebar-ring: var(--ash);
+  --sidebar-border: var(--rule);
+  --sidebar-ring: var(--accent);
+}
+
+/* DARK — the terminal (warm near-black, not blue-black) */
+[data-theme="dark"] {
+  --canvas: #14120f;
+  --surface-1: #1c1916;
+  --surface-2: #100e0c;
+  --ink: #f0ebe3;
+  --ink-muted: #9a9188;
+  --rule: #322d27;
+  --rule-strong: #4a443c;
+
+  /* Slightly lifted for ≥4.5:1 on warm dark canvas */
+  --signal: #2a9a5c;
+  --amber: #d4922a;
+  --rust: #d45a4e;
+  --cobalt: #4a7ec4;
+
+  --accent-quiet: color-mix(in srgb, var(--accent) 14%, transparent);
+  --shadow-float: 0 12px 32px -8px rgba(0, 0, 0, 0.6);
+  --grain-opacity: 0.03;
+  --grain-blend: overlay;
+
+  --background: var(--canvas);
+  --foreground: var(--ink);
+  --card: var(--surface-1);
+  --card-foreground: var(--ink);
+  --popover: var(--surface-1);
+  --popover-foreground: var(--ink);
+  --primary: var(--accent);
+  --primary-foreground: var(--canvas);
+  --secondary: transparent;
+  --secondary-foreground: var(--ink);
+  --muted: var(--surface-2);
+  --muted-foreground: var(--ink-muted);
+  --destructive: var(--rust);
+  --border: var(--rule);
+  --input: var(--rule);
+  --ring: var(--accent);
+  --sidebar: var(--canvas);
+  --sidebar-foreground: var(--ink);
+  --sidebar-primary: var(--accent);
+  --sidebar-primary-foreground: var(--canvas);
+  --sidebar-accent: var(--surface-2);
+  --sidebar-accent-foreground: var(--ink);
+  --sidebar-border: var(--rule);
+  --sidebar-ring: var(--accent);
 }
 
 @theme inline {
+  --color-canvas: var(--canvas);
+  --color-surface-1: var(--surface-1);
+  --color-surface-2: var(--surface-2);
   --color-ink: var(--ink);
-  --color-slate: var(--slate);
-  --color-graphite: var(--graphite);
-  --color-ash: var(--ash);
-  --color-bone: var(--bone);
-  --color-paper: var(--paper);
+  --color-ink-muted: var(--ink-muted);
+  --color-rule: var(--rule);
+  --color-rule-strong: var(--rule-strong);
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --color-accent-quiet: var(--accent-quiet);
   --color-signal: var(--signal);
   --color-amber: var(--amber);
   --color-rust: var(--rust);
-  --color-ultramarine: var(--ultramarine);
-  --color-surface-0: var(--surface-0);
-  --color-surface-1: var(--surface-1);
-  --color-surface-2: var(--surface-2);
-  --color-surface-3: var(--surface-3);
-  --color-surface-inset: var(--surface-inset);
+  --color-cobalt: var(--cobalt);
+
+  /* Compat aliases for gradual migration */
+  --color-bone: var(--ink);
+  --color-ash: var(--ink-muted);
+  --color-graphite: var(--rule);
+  --color-slate: var(--surface-1);
+  --color-paper: var(--canvas);
+  --color-ultramarine: var(--cobalt);
+  --color-surface-0: var(--canvas);
 
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -127,17 +154,15 @@
   --color-secondary-foreground: var(--secondary-foreground);
   --color-muted: var(--muted);
   --color-muted-foreground: var(--muted-foreground);
-  --color-accent: var(--accent);
-  --color-accent-foreground: var(--accent-foreground);
   --color-destructive: var(--destructive);
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
-  --color-chart-1: var(--chart-1);
-  --color-chart-2: var(--chart-2);
-  --color-chart-3: var(--chart-3);
-  --color-chart-4: var(--chart-4);
-  --color-chart-5: var(--chart-5);
+  --color-chart-1: var(--signal);
+  --color-chart-2: var(--amber);
+  --color-chart-3: var(--cobalt);
+  --color-chart-4: var(--rust);
+  --color-chart-5: var(--ink-muted);
   --color-sidebar: var(--sidebar);
   --color-sidebar-foreground: var(--sidebar-foreground);
   --color-sidebar-primary: var(--sidebar-primary);
@@ -147,23 +172,25 @@
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
 
-  --radius-sm: calc(var(--radius) - 2px);
+  --radius-sm: var(--radius-chip);
   --radius-md: var(--radius);
-  --radius-lg: var(--radius);
-  --radius-xl: var(--radius);
+  --radius-lg: var(--radius-panel);
+  --radius-xl: var(--radius-panel);
 
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-  --font-display: var(--font-instrument-serif);
+  --font-sans: var(--font-inter-tight);
+  --font-mono: var(--font-jetbrains-mono);
+  --font-display: var(--font-fraunces);
 
-  --text-xs: 0.6875rem;
+  --text-xs: 0.75rem;
   --text-sm: 0.875rem;
-  --text-base: 1rem;
-  --text-lg: 1.25rem;
-  --text-xl: 1.75rem;
-  --text-2xl: 2.5rem;
-  --text-3xl: 4rem;
-  --text-4xl: 6rem;
+  --text-base: 1.0625rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.375rem;
+  --text-2xl: 1.75rem;
+  --text-3xl: 2.5rem;
+  --text-4xl: 3.5rem;
+  --text-5xl: 5rem;
+  --text-6xl: 7rem;
 }
 
 @layer base {
@@ -176,71 +203,110 @@
   }
 
   body {
-    @apply bg-background text-foreground font-sans text-base leading-relaxed;
-    position: relative;
+    background-color: var(--canvas);
+    color: var(--ink);
+    font-family: var(--font-inter-tight), system-ui, sans-serif;
+    font-size: 1.0625rem;
+    line-height: 1.65;
   }
 
-  /* Every number — monospaced, tabular, slashed zero */
   .font-data {
-    font-family: var(--font-geist-mono), ui-monospace, monospace;
+    font-family: var(--font-jetbrains-mono), ui-monospace, monospace;
     font-variant-numeric: tabular-nums slashed-zero;
   }
 
-  /* Instrument silkscreen labels */
   .label-caps {
-    font-size: 11px;
+    font-size: 12px;
     line-height: 1.2;
-    font-weight: 500;
-    letter-spacing: 0.1em;
+    font-weight: 600;
+    letter-spacing: 0.08em;
     text-transform: uppercase;
-    color: var(--ash);
+    color: var(--ink-muted);
   }
 
-  /* Display optical tracking */
-  .display-48 {
-    font-family: var(--font-instrument-serif), serif;
-    font-size: 48px;
+  .font-display {
+    font-family: var(--font-fraunces), Georgia, serif;
+  }
+
+  .display-40 {
+    font-family: var(--font-fraunces), Georgia, serif;
+    font-size: 40px;
+    line-height: 1.1;
+    letter-spacing: -0.01em;
+    font-variation-settings:
+      "SOFT" 30,
+      "WONK" 1,
+      "opsz" 40;
+  }
+
+  .display-56 {
+    font-family: var(--font-fraunces), Georgia, serif;
+    font-size: 56px;
     line-height: 1.05;
     letter-spacing: -0.02em;
-    margin-left: -0.04em;
+    font-variation-settings:
+      "SOFT" 30,
+      "WONK" 1,
+      "opsz" 56;
   }
 
-  .display-64 {
-    font-family: var(--font-instrument-serif), serif;
-    font-size: 64px;
+  .display-80 {
+    font-family: var(--font-fraunces), Georgia, serif;
+    font-size: clamp(2.75rem, 6vw, 5rem);
     line-height: 1.02;
     letter-spacing: -0.03em;
-    margin-left: -0.04em;
+    font-variation-settings:
+      "SOFT" 30,
+      "WONK" 1,
+      "opsz" 80;
   }
 
-  .display-96 {
-    font-family: var(--font-instrument-serif), serif;
-    font-size: 96px;
-    line-height: 0.98;
-    letter-spacing: -0.04em;
-    margin-left: -0.04em;
+  @media (min-width: 1440px) {
+    .display-80 {
+      font-size: 7rem;
+      font-variation-settings:
+        "SOFT" 30,
+        "WONK" 1,
+        "opsz" 112;
+    }
   }
 
   .measure-body {
-    max-width: 68ch;
+    max-width: 66ch;
   }
 
   .measure-prose {
     max-width: 58ch;
   }
 
-  /* Keyboard focus — Ultramarine instrument ring */
-  :focus-visible {
-    outline: 1px solid var(--ultramarine);
-    outline-offset: 0;
-    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ultramarine) 40%, transparent);
+  .editorial-link {
+    color: var(--accent);
+    text-decoration: underline;
+    text-underline-offset: 0.15em;
+    text-decoration-thickness: 1px;
   }
 
-  button:focus-visible,
-  a:focus-visible,
-  [role="button"]:focus-visible {
-    outline: 1px solid var(--ultramarine);
-    outline-offset: 2px;
+  .editorial-link:hover {
+    text-decoration-thickness: 2px;
+  }
+
+  .title-rule {
+    border-top: 2px solid var(--accent);
+  }
+
+  .section-rule {
+    border-bottom: 1px solid var(--rule);
+  }
+
+  a:not([class]) {
+    color: var(--accent);
+    text-decoration: underline;
+    text-underline-offset: 0.15em;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 0;
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -256,76 +322,41 @@
 }
 
 @layer components {
-  /* Elevation system */
-  .surface-0 {
-    background-color: var(--surface-0);
-  }
-
-  .surface-1 {
+  .panel {
     background-color: var(--surface-1);
-    border-top: 1px solid var(--highlight-border);
-    border-bottom: 1px solid var(--shade-border);
-    border-left: 1px solid color-mix(in srgb, var(--graphite) 60%, transparent);
-    border-right: 1px solid color-mix(in srgb, var(--graphite) 60%, transparent);
-    box-shadow: inset 0 1px 0 var(--highlight-top);
-  }
-
-  .surface-2 {
-    background-color: var(--surface-2);
-    border-top: 1px solid var(--highlight-border);
-    border-bottom: 1px solid var(--shade-border);
-    border-left: 1px solid color-mix(in srgb, var(--graphite) 60%, transparent);
-    border-right: 1px solid color-mix(in srgb, var(--graphite) 60%, transparent);
-    box-shadow:
-      inset 0 1px 0 var(--highlight-top),
-      0 8px 24px -8px var(--shade-float);
-  }
-
-  .surface-3 {
-    background-color: var(--surface-3);
-    border-top: 1px solid var(--highlight-border);
-    border-bottom: 1px solid var(--shade-border);
-    border-left: 1px solid color-mix(in srgb, var(--graphite) 60%, transparent);
-    border-right: 1px solid color-mix(in srgb, var(--graphite) 60%, transparent);
-    box-shadow:
-      inset 0 1px 0 var(--highlight-top),
-      0 8px 24px -8px var(--shade-float);
-  }
-
-  .surface-inset {
-    background-color: var(--surface-inset);
-    border-top: 1px solid var(--shade-border);
-    border-bottom: 1px solid var(--highlight-border);
-    border-left: 1px solid var(--shade-border);
-    border-right: 1px solid var(--shade-border);
-    box-shadow: inset 0 1px 2px var(--inset-well);
+    border: 1px solid var(--rule);
+    border-radius: var(--radius-panel);
   }
 
   .panel-hover {
-    transition:
-      border-color 120ms ease,
-      transform 120ms ease,
-      box-shadow 120ms ease;
+    transition: background-color 120ms ease;
   }
 
   .panel-hover:hover {
-    border-color: var(--highlight-hover);
-    transform: translateY(-1px);
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    background-color: var(--accent-quiet);
   }
 
-  /* Fixed noise overlay — kills flat-vector plasticity */
+  .input-well {
+    background-color: var(--surface-2);
+    border: 1px solid var(--rule);
+    border-radius: var(--radius);
+  }
+
+  .float-shadow {
+    box-shadow: var(--shadow-float);
+  }
+
+  /* Paper grain — cream reads as paper */
   .noise-overlay {
     pointer-events: none;
     position: fixed;
     inset: 0;
     z-index: 9999;
-    opacity: 0.015;
-    mix-blend-mode: overlay;
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    opacity: var(--grain-opacity);
+    mix-blend-mode: var(--grain-blend);
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
   }
 
-  /* Skeleton — hairline outline pulse, not grey shimmer */
   @keyframes skeleton-pulse {
     0%,
     100% {
@@ -338,7 +369,7 @@
 
   .skeleton-outline {
     background: transparent;
-    border: 1px solid var(--graphite);
+    border: 1px solid var(--rule);
     border-radius: var(--radius);
     animation: skeleton-pulse 1.6s ease-in-out infinite;
   }
@@ -351,39 +382,7 @@
   }
 
   .gauge-dish {
-    background: var(--surface-inset);
-    box-shadow:
-      inset 0 2px 6px var(--inset-well),
-      inset 0 1px 0 var(--highlight-top),
-      0 0 0 1px var(--highlight-top);
-  }
-
-  .gauge-hub-rim {
-    stroke: var(--highlight-hover);
-  }
-
-  /* Marketing hero — the only gradient in the product */
-  .hero-backlight {
-    background: radial-gradient(
-      1200px circle at 65% 45%,
-      color-mix(in srgb, var(--ultramarine) 4%, transparent),
-      transparent 70%
-    );
-    animation: backlight-drift 12s ease-in-out infinite alternate;
-  }
-
-  @keyframes backlight-drift {
-    from {
-      transform: translate(0, 0);
-    }
-    to {
-      transform: translate(-24px, 12px);
-    }
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .hero-backlight {
-      animation: none;
-    }
+    background: var(--surface-2);
+    border: 1px solid var(--rule);
   }
 }

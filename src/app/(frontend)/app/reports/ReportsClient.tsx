@@ -60,36 +60,36 @@ export function ReportsClient({ initial }: { initial: ReportRow[] }) {
     <div className="mx-auto max-w-4xl space-y-8 px-6 py-12">
       <div>
         <p className="label-caps">Reports</p>
-        <h1 className="font-display mt-2 text-3xl text-bone">Publish</h1>
-        <p className="mt-2 max-w-xl text-ash">
+        <h1 className="font-display mt-2 text-3xl text-ink">Publish</h1>
+        <p className="mt-2 max-w-xl text-ink-muted">
           Publishing snapshots scores, emissions, materiality, evidence, and factor
           versions. Published versions are immutable. ClearESG is not an assurance
           provider.
         </p>
-        {status ? <p className="mt-3 text-sm text-ash">{status}</p> : null}
+        {status ? <p className="mt-3 text-sm text-ink-muted">{status}</p> : null}
       </div>
 
       <div className="flex flex-wrap gap-3">
         <button
           type="button"
           onClick={() => void publish("CSRD_SIMPLIFIED")}
-          className="border border-graphite bg-slate px-3 py-2 text-sm text-bone hover:border-ash"
+          className="border border-rule bg-surface-1 px-3 py-2 text-sm text-ink hover:border-rule-strong"
         >
           Publish CSRD (simplified)
         </button>
         <button
           type="button"
           onClick={() => void publish("BRSR")}
-          className="border border-graphite px-3 py-2 text-sm text-ash hover:border-ash hover:text-bone"
+          className="border border-rule px-3 py-2 text-sm text-ink-muted hover:border-rule-strong hover:text-ink"
         >
           Publish BRSR
         </button>
       </div>
 
       {diff.length > 0 ? (
-        <div className="border border-graphite p-4">
+        <div className="border border-rule p-4">
           <p className="label-caps mb-2">Diff vs previous version</p>
-          <ul className="space-y-1 font-data text-sm text-ash">
+          <ul className="space-y-1 font-data text-sm text-ink-muted">
             {diff.map((d) => (
               <li key={d.path}>
                 {d.path}: {d.from} → {d.to}
@@ -100,11 +100,11 @@ export function ReportsClient({ initial }: { initial: ReportRow[] }) {
       ) : null}
 
       {rows.length === 0 ? (
-        <p className="text-ash">No published reports yet.</p>
+        <p className="text-ink-muted">No published reports yet.</p>
       ) : (
-        <div className="overflow-x-auto border border-graphite">
+        <div className="overflow-x-auto border border-rule">
           <table className="w-full text-left text-sm">
-            <thead className="border-b border-graphite text-ash">
+            <thead className="border-b border-rule text-ink-muted">
               <tr>
                 <th className="px-3 py-2 font-normal">Version</th>
                 <th className="px-3 py-2 font-normal">Framework</th>
@@ -115,17 +115,17 @@ export function ReportsClient({ initial }: { initial: ReportRow[] }) {
             </thead>
             <tbody>
               {rows.map((r) => (
-                <tr key={r.id} className="border-b border-graphite/60">
-                  <td className="px-3 py-3 font-data text-bone">v{r.version}</td>
-                  <td className="px-3 py-3 text-ash">{r.framework}</td>
-                  <td className="px-3 py-3 font-data text-bone">
+                <tr key={r.id} className="border-b border-rule/60">
+                  <td className="px-3 py-3 font-data text-ink">v{r.version}</td>
+                  <td className="px-3 py-3 text-ink-muted">{r.framework}</td>
+                  <td className="px-3 py-3 font-data text-ink">
                     {r.scores?.overall ?? "—"}
                   </td>
-                  <td className="px-3 py-3 font-data text-ash">{r.viewCount}</td>
+                  <td className="px-3 py-3 font-data text-ink-muted">{r.viewCount}</td>
                   <td className="px-3 py-3">
                     <div className="flex flex-wrap gap-3">
                       <a
-                        className="text-bone underline-offset-2 hover:underline"
+                        className="text-ink underline-offset-2 hover:underline"
                         href={`/api/app/reports/${r.id}/pdf`}
                         target="_blank"
                         rel="noreferrer"
@@ -133,7 +133,7 @@ export function ReportsClient({ initial }: { initial: ReportRow[] }) {
                         PDF
                       </a>
                       <a
-                        className="text-ash underline-offset-2 hover:underline"
+                        className="text-ink-muted underline-offset-2 hover:underline"
                         href={`/api/app/reports/${r.id}/export?format=json`}
                         target="_blank"
                         rel="noreferrer"
@@ -141,7 +141,7 @@ export function ReportsClient({ initial }: { initial: ReportRow[] }) {
                         JSON
                       </a>
                       <a
-                        className="text-ash underline-offset-2 hover:underline"
+                        className="text-ink-muted underline-offset-2 hover:underline"
                         href={`/api/app/reports/${r.id}/export?format=csv`}
                         target="_blank"
                         rel="noreferrer"

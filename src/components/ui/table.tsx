@@ -22,10 +22,7 @@ function TableHeader({ className, ...props }: React.ComponentProps<"thead">) {
   return (
     <thead
       data-slot="table-header"
-      className={cn(
-        "sticky top-0 z-10 border-b border-graphite bg-surface-1/90 backdrop-blur-[8px] [&_tr]:border-b-0",
-        className,
-      )}
+      className={cn("border-b-2 border-rule-strong [&_tr]:border-b-0", className)}
       {...props}
     />
   );
@@ -45,7 +42,7 @@ function TableFooter({ className, ...props }: React.ComponentProps<"tfoot">) {
   return (
     <tfoot
       data-slot="table-footer"
-      className={cn("border-t border-graphite bg-surface-1 font-medium", className)}
+      className={cn("border-t border-rule bg-surface-2 font-medium", className)}
       {...props}
     />
   );
@@ -65,7 +62,8 @@ function TableRow({
     <tr
       data-slot="table-row"
       className={cn(
-        "relative border-b border-graphite/60 odd:bg-[color-mix(in_srgb,var(--surface-1)_40%,transparent)] data-[state=selected]:bg-surface-1",
+        "relative border-b border-rule odd:bg-surface-2 data-[state=selected]:bg-accent-quiet",
+        hovered && "bg-accent-quiet",
         className,
       )}
       onMouseEnter={(e) => {
@@ -81,7 +79,7 @@ function TableRow({
       {!reduced ? (
         <motion.span
           aria-hidden
-          className="pointer-events-none absolute inset-y-0 left-0 w-0.5 origin-top bg-signal"
+          className="pointer-events-none absolute inset-y-0 left-0 w-0.5 origin-top bg-accent"
           initial={false}
           animate={{ scaleY: hovered ? 1 : 0 }}
           transition={springSnap}
@@ -122,7 +120,7 @@ function TableCaption({ className, ...props }: React.ComponentProps<"caption">) 
   return (
     <caption
       data-slot="table-caption"
-      className={cn("mt-4 text-sm text-ash", className)}
+      className={cn("mt-4 text-sm text-ink-muted", className)}
       {...props}
     />
   );

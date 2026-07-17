@@ -14,7 +14,7 @@ export const metadata: Metadata = {
 
 export default function GlossaryIndexPage() {
   return (
-    <div className="flex min-h-full flex-col bg-ink text-bone">
+    <div className="flex min-h-full flex-col bg-canvas text-ink">
       <JsonLd
         data={{
           "@context": "https://schema.org",
@@ -30,18 +30,18 @@ export default function GlossaryIndexPage() {
       />
       <MarketingNav />
       <main className="mx-auto max-w-3xl flex-1 px-6 py-16">
-        <h1 className="font-display text-[48px] text-bone">Glossary</h1>
-        <p className="mt-4 text-ash">
+        <h1 className="font-display text-[48px] text-ink">Glossary</h1>
+        <p className="mt-4 text-ink-muted">
           Short, dated definitions written so answer engines can cite them. Each term
           links to related entries and product tools.
         </p>
         <ul className="mt-10 space-y-4">
           {GLOSSARY.map((t) => (
-            <li key={t.slug} className="border-b border-graphite pb-4">
-              <Link href={`/glossary/${t.slug}`} className="text-bone hover:underline">
+            <li key={t.slug} className="border-b border-rule pb-4">
+              <Link href={`/glossary/${t.slug}`} className="text-ink hover:underline">
                 {t.term}
               </Link>
-              <p className="mt-2 text-sm text-ash">{t.answer}</p>
+              <p className="mt-2 text-sm text-ink-muted">{t.answer}</p>
             </li>
           ))}
         </ul>

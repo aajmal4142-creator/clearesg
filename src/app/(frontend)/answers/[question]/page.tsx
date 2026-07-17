@@ -29,7 +29,7 @@ export default async function AnswerPage({ params }: Props) {
   if (!a) notFound();
 
   return (
-    <div className="flex min-h-full flex-col bg-ink text-bone">
+    <div className="flex min-h-full flex-col bg-canvas text-ink">
       <JsonLd
         data={{
           "@context": "https://schema.org",
@@ -50,34 +50,34 @@ export default async function AnswerPage({ params }: Props) {
       />
       <MarketingNav />
       <main className="mx-auto max-w-3xl flex-1 px-6 py-16">
-        <p className="label-caps text-ash">Answers</p>
-        <h1 className="mt-2 font-display text-[40px] leading-tight text-bone">
+        <p className="label-caps text-ink-muted">Answers</p>
+        <h1 className="mt-2 font-display text-[40px] leading-tight text-ink">
           {a.question}
         </h1>
-        <p className="mt-6 text-bone">{a.answer}</p>
-        <p className="mt-2 font-data text-xs text-ash">Updated {a.updatedAt}</p>
+        <p className="mt-6 text-ink">{a.answer}</p>
+        <p className="mt-2 font-data text-xs text-ink-muted">Updated {a.updatedAt}</p>
         {a.sections.map((s) => (
           <section key={s.h2} className="mt-10">
-            <h2 className="text-lg text-bone">{s.h2}</h2>
-            <p className="mt-3 text-ash">{s.body}</p>
+            <h2 className="text-lg text-ink">{s.h2}</h2>
+            <p className="mt-3 text-ink-muted">{s.body}</p>
           </section>
         ))}
-        <h2 className="mt-12 text-sm text-bone">Related</h2>
-        <ul className="mt-2 space-y-2 text-sm text-ash">
+        <h2 className="mt-12 text-sm text-ink">Related</h2>
+        <ul className="mt-2 space-y-2 text-sm text-ink-muted">
           {a.related.map((r) => (
             <li key={r}>
-              <Link href={`/answers/${r}`} className="hover:text-bone">
+              <Link href={`/answers/${r}`} className="hover:text-ink">
                 {r}
               </Link>
             </li>
           ))}
           <li>
-            <Link href="/glossary/csrd" className="hover:text-bone">
+            <Link href="/glossary/csrd" className="hover:text-ink">
               CSRD glossary
             </Link>
           </li>
           <li>
-            <Link href="/app" className="hover:text-bone">
+            <Link href="/app" className="hover:text-ink">
               Open ClearESG
             </Link>
           </li>

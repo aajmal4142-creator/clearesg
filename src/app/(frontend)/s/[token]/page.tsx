@@ -55,7 +55,7 @@ export default async function SupplierTokenPage({
   }
 
   return (
-    <div className="min-h-full bg-ink">
+    <div className="min-h-full bg-canvas">
       <SupplierPublicForm token={token} initial={initial} />
     </div>
   );

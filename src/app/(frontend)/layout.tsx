@@ -1,29 +1,32 @@
 import { ClerkProvider } from "@clerk/nextjs";
 import type { Metadata } from "next";
-import { Geist, Geist_Mono, Instrument_Serif } from "next/font/google";
+import { cookies } from "next/headers";
+import { Fraunces, Inter_Tight, JetBrains_Mono } from "next/font/google";
+
+import { isTheme, THEME_BOOT_SCRIPT, type Theme } from "@/lib/theme";
 
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const interTight = Inter_Tight({
+  variable: "--font-inter-tight",
   subsets: ["latin"],
   display: "swap",
   preload: true,
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const jetbrainsMono = JetBrains_Mono({
+  variable: "--font-jetbrains-mono",
   subsets: ["latin"],
   display: "swap",
   preload: true,
 });
 
-const instrumentSerif = Instrument_Serif({
-  variable: "--font-instrument-serif",
+const fraunces = Fraunces({
+  variable: "--font-fraunces",
   subsets: ["latin"],
-  weight: "400",
   display: "swap",
   preload: true,
+  axes: ["SOFT", "WONK", "opsz"],
 });
 
 export const metadata: Metadata = {
@@ -47,34 +50,40 @@ const hasClerk = Boolean(
 
 const clerkAppearance = {
   variables: {
-    colorPrimary: "#E8E6E1",
-    colorBackground: "#0B0D0E",
-    colorText: "#E8E6E1",
-    colorInputBackground: "#1A1D1F",
-    colorInputText: "#E8E6E1",
+    colorPrimary: "#7A2E2E",
+    colorBackground: "#FBF9F5",
+    colorText: "#1A1714",
+    colorInputBackground: "#F5F2EC",
+    colorInputText: "#1A1714",
     borderRadius: "0.25rem",
-    fontFamily: "var(--font-geist-sans)",
+    fontFamily: "var(--font-inter-tight)",
   },
   elements: {
-    card: "bg-slate border border-graphite shadow-none",
-    headerTitle: "font-display text-bone",
-    formButtonPrimary: "bg-bone text-ink hover:bg-bone/90",
+    card: "bg-surface-1 border border-rule shadow-none",
+    headerTitle: "font-display text-ink",
+    formButtonPrimary: "bg-accent text-canvas hover:bg-accent-hover",
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const jar = await cookies();
+  const raw = jar.get("clearesg-theme")?.value;
+  const theme: Theme = isTheme(raw) ? raw : "light";
+
   const body = (
     <html
       lang="en"
-      data-theme="dark"
-      className={`${geistSans.variable} ${geistMono.variable} ${instrumentSerif.variable} h-full`}
+      data-theme={theme}
+      className={`${interTight.variable} ${jetbrainsMono.variable} ${fraunces.variable} h-full`}
       suppressHydrationWarning
     >
-      {/* Extensions (e.g. ColorZilla cz-shortcut-listen) inject attrs on <body> */}
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: THEME_BOOT_SCRIPT }} />
+      </head>
       <body className="flex min-h-full flex-col" suppressHydrationWarning>
         <div className="noise-overlay" aria-hidden />
         {children}

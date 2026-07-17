@@ -29,7 +29,7 @@ export default async function ComparePage({ params }: Props) {
   if (!c) notFound();
 
   return (
-    <div className="flex min-h-full flex-col bg-ink text-bone">
+    <div className="flex min-h-full flex-col bg-canvas text-ink">
       <JsonLd
         data={{
           "@context": "https://schema.org",
@@ -42,37 +42,37 @@ export default async function ComparePage({ params }: Props) {
       />
       <MarketingNav />
       <main className="mx-auto max-w-3xl flex-1 px-6 py-16">
-        <p className="label-caps text-ash">Compare</p>
-        <h1 className="mt-2 font-display text-[40px] text-bone">ClearESG vs {c.name}</h1>
-        <p className="mt-6 text-bone">{c.answer}</p>
+        <p className="label-caps text-ink-muted">Compare</p>
+        <h1 className="mt-2 font-display text-[40px] text-ink">ClearESG vs {c.name}</h1>
+        <p className="mt-6 text-ink">{c.answer}</p>
         <div className="mt-10 grid gap-6 md:grid-cols-2">
           <div>
-            <h2 className="text-sm text-bone">Where {c.name} wins</h2>
-            <ul className="mt-3 space-y-2 text-sm text-ash">
+            <h2 className="text-sm text-ink">Where {c.name} wins</h2>
+            <ul className="mt-3 space-y-2 text-sm text-ink-muted">
               {c.whereTheyWin.map((w) => (
                 <li key={w}>{w}</li>
               ))}
             </ul>
           </div>
           <div>
-            <h2 className="text-sm text-bone">Where ClearESG wins</h2>
-            <ul className="mt-3 space-y-2 text-sm text-ash">
+            <h2 className="text-sm text-ink">Where ClearESG wins</h2>
+            <ul className="mt-3 space-y-2 text-sm text-ink-muted">
               {c.whereWeWin.map((w) => (
                 <li key={w}>{w}</li>
               ))}
             </ul>
           </div>
         </div>
-        <p className="mt-10 text-sm text-ash">
-          <Link href="/pricing" className="text-bone underline">
+        <p className="mt-10 text-sm text-ink-muted">
+          <Link href="/pricing" className="text-ink underline">
             Pricing
           </Link>
           {" · "}
-          <Link href="/compare/persefoni" className="text-bone underline">
+          <Link href="/compare/persefoni" className="text-ink underline">
             vs Persefoni
           </Link>
           {" · "}
-          <Link href="/compare/greenly" className="text-bone underline">
+          <Link href="/compare/greenly" className="text-ink underline">
             vs Greenly
           </Link>
         </p>

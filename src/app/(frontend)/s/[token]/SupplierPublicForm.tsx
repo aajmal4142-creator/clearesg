@@ -56,18 +56,18 @@ export function SupplierPublicForm({
 
   if (meta.error) {
     return (
-      <main className="mx-auto max-w-lg px-6 py-16 text-bone">
-        <p className="text-ash">{meta.error}</p>
+      <main className="mx-auto max-w-lg px-6 py-16 text-ink">
+        <p className="text-ink-muted">{meta.error}</p>
       </main>
     );
   }
 
   if (done || meta.used) {
     return (
-      <main className="mx-auto max-w-lg px-6 py-16 text-bone">
+      <main className="mx-auto max-w-lg px-6 py-16 text-ink">
         <p className="label-caps">{meta.orgName}</p>
         <h1 className="font-display mt-4 text-3xl">Received</h1>
-        <p className="mt-4 text-ash">
+        <p className="mt-4 text-ink-muted">
           Thank you. Your response is recorded for {meta.orgName}. This link cannot be
           used again.
         </p>
@@ -77,19 +77,19 @@ export function SupplierPublicForm({
 
   if (meta.expired) {
     return (
-      <main className="mx-auto max-w-lg px-6 py-16 text-bone">
+      <main className="mx-auto max-w-lg px-6 py-16 text-ink">
         <p className="label-caps">{meta.orgName}</p>
         <h1 className="font-display mt-4 text-3xl">Link expired</h1>
-        <p className="mt-4 text-ash">Ask {meta.orgName} to send a new request.</p>
+        <p className="mt-4 text-ink-muted">Ask {meta.orgName} to send a new request.</p>
       </main>
     );
   }
 
   return (
-    <main className="mx-auto max-w-lg px-6 py-12 text-bone">
+    <main className="mx-auto max-w-lg px-6 py-12 text-ink">
       <p className="label-caps">{meta.orgName}</p>
       <h1 className="font-display mt-4 text-3xl">Supplier data return</h1>
-      <p className="mt-3 text-ash">
+      <p className="mt-3 text-ink-muted">
         For {meta.supplierName}. Six fields. About 90 seconds. Numbers only — measured
         where possible.
       </p>
@@ -103,7 +103,7 @@ export function SupplierPublicForm({
                 {f.label}
                 {f.required ? "" : " (optional)"}
               </span>
-              <span className="font-data text-sm text-ash">{f.unit}</span>
+              <span className="font-data text-sm text-ink-muted">{f.unit}</span>
             </label>
             <input
               id={f.key}
@@ -111,7 +111,7 @@ export function SupplierPublicForm({
               min={0}
               step="any"
               required={f.required}
-              className="mt-2 w-full border border-graphite bg-slate px-3 py-2 font-data text-bone"
+              className="mt-2 w-full border border-rule bg-surface-1 px-3 py-2 font-data text-ink"
               value={values[f.key] ?? ""}
               onChange={(e) => setValues((v) => ({ ...v, [f.key]: e.target.value }))}
             />
@@ -120,7 +120,7 @@ export function SupplierPublicForm({
         <button
           type="submit"
           disabled={saving}
-          className="border border-graphite bg-slate px-4 py-2 text-sm text-bone hover:border-ash disabled:opacity-50"
+          className="border border-rule bg-surface-1 px-4 py-2 text-sm text-ink hover:border-rule-strong disabled:opacity-50"
         >
           {saving ? "Submitting…" : "Submit"}
         </button>

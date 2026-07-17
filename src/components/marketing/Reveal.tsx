@@ -19,7 +19,7 @@ export function Reveal({
   return (
     <motion.div
       className={className}
-      initial={reduced ? false : { opacity: 0, y: 16 }}
+      initial={reduced ? false : { opacity: 0, y: 10 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-40px" }}
       transition={{ ...springSoft, delay: reduced ? 0 : delay }}
@@ -33,15 +33,21 @@ export function Reveal({
 export function HairlineRule({
   className,
   delay = 0,
+  accent = false,
 }: {
   className?: string;
   delay?: number;
+  accent?: boolean;
 }) {
   const reduced = usePrefersReducedMotion();
   return (
     <motion.div
       aria-hidden
-      className={cn("h-px origin-left bg-graphite", className)}
+      className={cn(
+        "h-px w-full origin-left",
+        accent ? "h-0.5 bg-accent" : "bg-rule",
+        className,
+      )}
       initial={reduced ? false : { scaleX: 0 }}
       whileInView={{ scaleX: 1 }}
       viewport={{ once: true, margin: "-20px" }}
@@ -52,7 +58,6 @@ export function HairlineRule({
   );
 }
 
-/** Strikethrough that draws in on reveal — for anti-features. */
 export function StrikeReveal({
   children,
   className,
@@ -65,8 +70,8 @@ export function StrikeReveal({
   const reduced = usePrefersReducedMotion();
   return (
     <motion.li
-      className={cn("relative text-graphite", className)}
-      initial={reduced ? false : { opacity: 0, y: 12 }}
+      className={cn("relative text-ink-muted", className)}
+      initial={reduced ? false : { opacity: 0, y: 10 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
       transition={{ ...springSoft, delay: reduced ? 0 : delay }}
@@ -75,7 +80,7 @@ export function StrikeReveal({
         {children}
         <motion.span
           aria-hidden
-          className="absolute left-0 top-1/2 h-px w-full origin-left bg-graphite"
+          className="absolute left-0 top-1/2 h-px w-full origin-left bg-canvas-muted"
           initial={reduced ? false : { scaleX: 0 }}
           whileInView={{ scaleX: 1 }}
           viewport={{ once: true }}

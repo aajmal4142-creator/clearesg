@@ -73,11 +73,11 @@ export function ConsultantCentre({ initialClients, consultancy, templates }: Pro
       <div className="flex flex-wrap items-end justify-between gap-6">
         <div>
           <p className="label-caps">Consultant command centre</p>
-          <h1 className="font-display mt-2 text-3xl text-bone">{consultancy.name}</h1>
-          <p className="mt-2 text-ash">
+          <h1 className="font-display mt-2 text-3xl text-ink">{consultancy.name}</h1>
+          <p className="mt-2 text-ink-muted">
             Clients sorted by deadline risk. Plan{" "}
-            <span className="font-data text-bone">{consultancy.plan}</span> ·{" "}
-            <span className="font-data text-bone">
+            <span className="font-data text-ink">{consultancy.plan}</span> ·{" "}
+            <span className="font-data text-ink">
               {consultancy.clientCount}/{consultancy.clientCap}
             </span>{" "}
             clients.
@@ -87,7 +87,7 @@ export function ConsultantCentre({ initialClients, consultancy, templates }: Pro
           <button
             type="button"
             onClick={() => void nudge()}
-            className="border border-graphite bg-slate px-3 py-2 text-sm text-bone hover:border-ash"
+            className="border border-rule bg-surface-1 px-3 py-2 text-sm text-ink hover:border-rule-strong"
           >
             Nudge selected
           </button>
@@ -96,38 +96,38 @@ export function ConsultantCentre({ initialClients, consultancy, templates }: Pro
             onClick={() => {
               window.location.assign("/api/app/consultant/export");
             }}
-            className="border border-graphite px-3 py-2 text-sm text-ash hover:border-ash hover:text-bone"
+            className="border border-rule px-3 py-2 text-sm text-ink-muted hover:border-rule-strong hover:text-ink"
           >
             Export all
           </button>
           <button
             type="button"
             onClick={() => void refresh()}
-            className="border border-graphite px-3 py-2 text-sm text-ash hover:border-ash hover:text-bone"
+            className="border border-rule px-3 py-2 text-sm text-ink-muted hover:border-rule-strong hover:text-ink"
           >
             Refresh
           </button>
         </div>
       </div>
 
-      {status ? <p className="text-sm text-ash">{status}</p> : null}
+      {status ? <p className="text-sm text-ink-muted">{status}</p> : null}
 
-      <section className="grid gap-6 border border-graphite p-4 md:grid-cols-2">
+      <section className="grid gap-6 border border-rule p-4 md:grid-cols-2">
         <div>
           <p className="label-caps mb-2">White-label</p>
-          <label className="block text-sm text-ash">
+          <label className="block text-sm text-ink-muted">
             Primary colour
             <input
-              className="mt-1 w-full border border-graphite bg-slate px-2 py-2 font-data text-bone"
+              className="mt-1 w-full border border-rule bg-surface-1 px-2 py-2 font-data text-ink"
               value={primaryColor}
               onChange={(e) => setPrimaryColor(e.target.value)}
               placeholder="#00E08A"
             />
           </label>
-          <label className="mt-3 block text-sm text-ash">
+          <label className="mt-3 block text-sm text-ink-muted">
             Custom domain
             <input
-              className="mt-1 w-full border border-graphite bg-slate px-2 py-2 text-bone"
+              className="mt-1 w-full border border-rule bg-surface-1 px-2 py-2 text-ink"
               value={domain}
               onChange={(e) => setDomain(e.target.value)}
               placeholder="esg.yourfirm.com"
@@ -136,24 +136,24 @@ export function ConsultantCentre({ initialClients, consultancy, templates }: Pro
           <button
             type="button"
             onClick={() => void saveBrand()}
-            className="mt-3 border border-graphite px-3 py-2 text-sm text-bone hover:border-ash"
+            className="mt-3 border border-rule px-3 py-2 text-sm text-ink hover:border-rule-strong"
           >
             Save brand
           </button>
         </div>
         <div>
           <p className="label-caps mb-2">Sector templates</p>
-          <ul className="space-y-2 text-sm text-ash">
+          <ul className="space-y-2 text-sm text-ink-muted">
             {templates.map((t) => (
-              <li key={t.id} className="border border-graphite/60 p-2">
-                <span className="text-bone">{t.label}</span>
+              <li key={t.id} className="border border-rule/60 p-2">
+                <span className="text-ink">{t.label}</span>
                 <span className="font-data mt-1 block text-xs">
                   {t.metricKeys.length} metrics
                 </span>
               </li>
             ))}
           </ul>
-          <p className="mt-3 text-xs text-ash">
+          <p className="mt-3 text-xs text-ink-muted">
             Billing: Consultant €199/mo includes 10 clients; +€15/client after (Phase 12
             Stripe).
           </p>
@@ -161,14 +161,14 @@ export function ConsultantCentre({ initialClients, consultancy, templates }: Pro
       </section>
 
       {clients.length === 0 ? (
-        <p className="text-ash">
+        <p className="text-ink-muted">
           No client organisations linked. Set a company&apos;s parentOrg to this
           consultancy in admin/seed.
         </p>
       ) : (
-        <div className="overflow-x-auto border border-graphite">
+        <div className="overflow-x-auto border border-rule">
           <table className="w-full text-left text-sm">
-            <thead className="border-b border-graphite text-ash">
+            <thead className="border-b border-rule text-ink-muted">
               <tr>
                 <th className="px-3 py-2 font-normal" />
                 <th className="px-3 py-2 font-normal">Client</th>
@@ -180,7 +180,7 @@ export function ConsultantCentre({ initialClients, consultancy, templates }: Pro
             </thead>
             <tbody>
               {clients.map((c) => (
-                <tr key={c.id} className="border-b border-graphite/60">
+                <tr key={c.id} className="border-b border-rule/60">
                   <td className="px-3 py-3">
                     <input
                       type="checkbox"
@@ -189,18 +189,18 @@ export function ConsultantCentre({ initialClients, consultancy, templates }: Pro
                     />
                   </td>
                   <td className="px-3 py-3">
-                    <div className="text-bone">{c.name}</div>
-                    <div className="font-data text-xs text-ash">
+                    <div className="text-ink">{c.name}</div>
+                    <div className="font-data text-xs text-ink-muted">
                       {c.sector} · {c.country}
                     </div>
                   </td>
-                  <td className="px-3 py-3 font-data text-bone">
+                  <td className="px-3 py-3 font-data text-ink">
                     {c.daysToFiling === null ? "—" : c.daysToFiling}
                   </td>
-                  <td className="px-3 py-3 font-data text-ash">
+                  <td className="px-3 py-3 font-data text-ink-muted">
                     {c.datapointsCollected}/{c.datapointsRequired}
                   </td>
-                  <td className="px-3 py-3 font-data text-bone">
+                  <td className="px-3 py-3 font-data text-ink">
                     {c.overallScore === null ? "—" : c.overallScore}
                   </td>
                   <td
@@ -211,7 +211,7 @@ export function ConsultantCentre({ initialClients, consultancy, templates }: Pro
                           ? "text-amber"
                           : c.risk === "on_track"
                             ? "text-signal"
-                            : "text-ash"
+                            : "text-ink-muted"
                     }`}
                   >
                     {c.risk}

@@ -18,10 +18,7 @@ type AssembleProps = {
   as?: "div" | "header" | "main" | "section" | "nav";
 };
 
-/**
- * Page assembly: chrome → structure → data.
- * Data arrives last — the instrument boots, then it reads.
- */
+/** Page assembly: chrome → structure → data. The report typesets, then the numbers land. */
 export function Assemble({ layer, children, className, as = "div" }: AssembleProps) {
   const transition = useMotionSafe("soft");
   const reduced = usePrefersReducedMotion();
@@ -49,24 +46,23 @@ const SIZE_CLASS: Record<MetricSize, string> = {
   md: "text-base",
   lg: "text-xl",
   xl: "text-2xl",
-  display: "text-[64px] leading-none md:text-[96px]",
-  gauge: "text-[64px] leading-none md:text-[96px]",
+  display: "text-[56px] leading-none md:text-[80px]",
+  gauge: "text-[80px] leading-none md:text-[112px] font-medium",
 };
+
+type MetricTone = "ink" | "signal" | "amber" | "rust" | "muted" | "bone" | "ash";
 
 type MetricProps = {
   value: number;
   unit?: string;
-  /** Fixed decimal places. Omit to show decimals only when present. */
   decimals?: number;
   size?: MetricSize;
-  /** Count from 0 on mount / value change. Default true. */
   animate?: boolean;
-  /** Delay before count starts (seconds). */
   animateDelay?: number;
   className?: string;
   integerClassName?: string;
   unitClassName?: string;
-  tone?: "bone" | "signal" | "amber" | "rust" | "ash";
+  tone?: MetricTone;
 };
 
 function splitParts(
@@ -110,16 +106,16 @@ function MetricDigits({
   });
 
   return (
-    <span className={cn(toneClass, integerClassName)}>
+    <span className={cn("font-medium", toneClass, integerClassName)}>
       <motion.span>{integer}</motion.span>
-      <motion.span className="text-[0.85em] text-ash">{fraction}</motion.span>
+      <motion.span className="text-[0.85em] text-ink-muted">{fraction}</motion.span>
     </span>
   );
 }
 
 /**
- * Instrument number primitive — integer at full weight, decimal in ash @ 0.85em, unit as label.
- * Values count; they never fade.
+ * Editorial number primitive — integer at --ink weight 500, decimal muted @ 0.85em,
+ * unit as 12px uppercase label. JetBrains Mono, tabular, slashed zero.
  */
 export function Metric({
   value,
@@ -131,7 +127,7 @@ export function Metric({
   className,
   integerClassName,
   unitClassName,
-  tone = "bone",
+  tone = "ink",
 }: MetricProps) {
   const reduced = usePrefersReducedMotion();
   const shouldAnimate = animate && !reduced;
@@ -160,17 +156,13 @@ export function Metric({
         ? "text-amber"
         : tone === "rust"
           ? "text-rust"
-          : tone === "ash"
-            ? "text-ash"
-            : "text-bone";
+          : tone === "muted" || tone === "ash"
+            ? "text-ink-muted"
+            : "text-ink";
 
   return (
     <span
-      className={cn(
-        "font-data inline-flex items-baseline gap-1.5",
-        SIZE_CLASS[size],
-        className,
-      )}
+      className={cn("font-data inline-flex items-baseline", SIZE_CLASS[size], className)}
     >
       <MetricDigits
         springValue={springValue}
@@ -179,7 +171,12 @@ export function Metric({
         integerClassName={integerClassName}
       />
       {unit ? (
-        <span className={cn("label-caps !normal-case tracking-normal", unitClassName)}>
+        <span
+          className={cn(
+            "label-caps ml-[0.4em] !normal-case tracking-normal",
+            unitClassName,
+          )}
+        >
           {unit}
         </span>
       ) : null}

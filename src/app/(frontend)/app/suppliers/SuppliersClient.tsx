@@ -149,8 +149,8 @@ export function SuppliersClient({
       <div className="flex flex-wrap items-end justify-between gap-6">
         <div>
           <p className="label-caps">Supplier chains</p>
-          <h1 className="font-display mt-2 text-3xl text-bone">Scope 3 collection</h1>
-          <p className="mt-2 max-w-xl text-ash">
+          <h1 className="font-display mt-2 text-3xl text-ink">Scope 3 collection</h1>
+          <p className="mt-2 max-w-xl text-ink-muted">
             Tokenised public forms. No supplier account. Response flows into your Scope 3
             as measured supplier data.
           </p>
@@ -158,7 +158,7 @@ export function SuppliersClient({
         <div className="flex gap-8">
           <div>
             {coveragePct === null ? (
-              <span className="font-data text-3xl text-ash">—</span>
+              <span className="font-data text-3xl text-ink-muted">—</span>
             ) : (
               <Metric value={coveragePct} unit="%" size="xl" decimals={0} />
             )}
@@ -166,7 +166,7 @@ export function SuppliersClient({
           </div>
           <div>
             {responseRate === null ? (
-              <span className="font-data text-3xl text-ash">—</span>
+              <span className="font-data text-3xl text-ink-muted">—</span>
             ) : (
               <Metric value={responseRate} unit="%" size="xl" decimals={0} />
             )}
@@ -175,16 +175,16 @@ export function SuppliersClient({
         </div>
       </div>
 
-      {status ? <p className="text-sm text-ash">{status}</p> : null}
+      {status ? <p className="text-sm text-ink-muted">{status}</p> : null}
 
       <form
         onSubmit={(e) => void addSupplier(e)}
-        className="grid gap-3 border border-graphite p-4 md:grid-cols-5"
+        className="grid gap-3 border border-rule p-4 md:grid-cols-5"
       >
         <input
           required
           placeholder="Supplier name"
-          className="border border-graphite bg-slate px-2 py-2 text-bone md:col-span-1"
+          className="border border-rule bg-surface-1 px-2 py-2 text-ink md:col-span-1"
           value={form.name}
           onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
         />
@@ -192,12 +192,12 @@ export function SuppliersClient({
           required
           type="email"
           placeholder="Contact email"
-          className="border border-graphite bg-slate px-2 py-2 text-bone"
+          className="border border-rule bg-surface-1 px-2 py-2 text-ink"
           value={form.contactEmail}
           onChange={(e) => setForm((f) => ({ ...f, contactEmail: e.target.value }))}
         />
         <select
-          className="border border-graphite bg-slate px-2 py-2 text-bone"
+          className="border border-rule bg-surface-1 px-2 py-2 text-ink"
           value={form.category}
           onChange={(e) => setForm((f) => ({ ...f, category: e.target.value }))}
         >
@@ -211,13 +211,13 @@ export function SuppliersClient({
           type="number"
           min={0}
           placeholder="Annual spend"
-          className="border border-graphite bg-slate px-2 py-2 font-data text-bone"
+          className="border border-rule bg-surface-1 px-2 py-2 font-data text-ink"
           value={form.annualSpend}
           onChange={(e) => setForm((f) => ({ ...f, annualSpend: e.target.value }))}
         />
         <button
           type="submit"
-          className="border border-graphite bg-slate px-3 py-2 text-sm text-bone hover:border-ash"
+          className="border border-rule bg-surface-1 px-3 py-2 text-sm text-ink hover:border-rule-strong"
         >
           Add supplier
         </button>
@@ -227,20 +227,20 @@ export function SuppliersClient({
         <button
           type="button"
           onClick={() => void chaseReminders()}
-          className="border border-graphite px-3 py-2 text-sm text-ash hover:border-ash hover:text-bone"
+          className="border border-rule px-3 py-2 text-sm text-ink-muted hover:border-rule-strong hover:text-ink"
         >
           Send due reminders (day 7 / 14)
         </button>
       </div>
 
       {rows.length === 0 ? (
-        <p className="text-ash">
+        <p className="text-ink-muted">
           No suppliers yet. Add one to start collecting Scope 3 data.
         </p>
       ) : (
-        <div className="overflow-x-auto border border-graphite">
+        <div className="overflow-x-auto border border-rule">
           <table className="w-full text-left text-sm">
-            <thead className="border-b border-graphite text-ash">
+            <thead className="border-b border-rule text-ink-muted">
               <tr>
                 <th className="px-3 py-2 font-normal">Name</th>
                 <th className="px-3 py-2 font-normal">Category</th>
@@ -251,22 +251,24 @@ export function SuppliersClient({
             </thead>
             <tbody>
               {rows.map((r) => (
-                <tr key={r.id} className="border-b border-graphite/60">
+                <tr key={r.id} className="border-b border-rule/60">
                   <td className="px-3 py-3">
-                    <div className="text-bone">{r.name}</div>
-                    <div className="text-xs text-ash">{r.contactEmail}</div>
+                    <div className="text-ink">{r.name}</div>
+                    <div className="text-xs text-ink-muted">{r.contactEmail}</div>
                   </td>
-                  <td className="px-3 py-3 text-ash">{r.category}</td>
-                  <td className="px-3 py-3 font-data text-bone">
+                  <td className="px-3 py-3 text-ink-muted">{r.category}</td>
+                  <td className="px-3 py-3 font-data text-ink">
                     {r.annualSpend === null ? "—" : r.annualSpend.toLocaleString()}
                   </td>
-                  <td className="px-3 py-3 font-data text-ash">{r.requestStatus}</td>
+                  <td className="px-3 py-3 font-data text-ink-muted">
+                    {r.requestStatus}
+                  </td>
                   <td className="px-3 py-3">
                     <div className="flex flex-wrap gap-2">
                       {r.requestStatus !== "submitted" ? (
                         <button
                           type="button"
-                          className="text-sm text-bone underline-offset-2 hover:underline"
+                          className="text-sm text-ink underline-offset-2 hover:underline"
                           onClick={() => void sendRequest(r.id)}
                         >
                           {r.requestStatus === "not_sent" ? "Send request" : "Resend"}
@@ -274,7 +276,7 @@ export function SuppliersClient({
                       ) : null}
                       <button
                         type="button"
-                        className="text-sm text-ash hover:text-rust"
+                        className="text-sm text-ink-muted hover:text-rust"
                         onClick={() => void remove(r.id)}
                       >
                         Remove

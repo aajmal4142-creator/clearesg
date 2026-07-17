@@ -24,15 +24,15 @@ function Meter({
     max === null || max === 0 ? 0 : Math.min(100, Math.round((used / max) * 100));
   const near = max !== null && used / max >= 0.8;
   return (
-    <div className="border border-graphite p-3">
+    <div className="border border-rule p-3">
       <div className="mb-2 flex justify-between text-sm">
-        <span className="text-ash">{label}</span>
-        <span className="font-data text-bone">
+        <span className="text-ink-muted">{label}</span>
+        <span className="font-data text-ink">
           {used}
           {max === null ? " / ∞" : ` / ${max}`}
         </span>
       </div>
-      <div className="h-1 bg-slate">
+      <div className="h-1 bg-surface-1">
         <div
           className={`h-1 ${near ? "bg-amber" : "bg-signal"}`}
           style={{ width: max === null ? "8%" : `${pct}%` }}
@@ -93,25 +93,25 @@ export function BillingClient({ initial }: { initial: BillingState }) {
   return (
     <main className="mx-auto max-w-3xl space-y-8 px-6 py-10">
       <header className="space-y-2">
-        <p className="label-caps text-ash">Billing</p>
-        <h1 className="font-display text-3xl text-bone">Plan & usage</h1>
-        <p className="text-sm text-ash">
+        <p className="label-caps text-ink-muted">Billing</p>
+        <h1 className="font-display text-3xl text-ink">Plan & usage</h1>
+        <p className="text-sm text-ink-muted">
           Entitlements are enforced server-side. Free keeps full calculation; paid unlocks
           clean PDF, periods, evidence, and consultant tooling.
         </p>
       </header>
 
-      <section className="border border-graphite p-4">
+      <section className="border border-rule p-4">
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div>
-            <p className="text-sm text-ash">Current plan</p>
-            <p className="font-data text-2xl text-bone">
+            <p className="text-sm text-ink-muted">Current plan</p>
+            <p className="font-data text-2xl text-ink">
               {PLAN_LIMITS[state.plan].label}
               {PLAN_LIMITS[state.plan].priceEur > 0
                 ? ` · €${PLAN_LIMITS[state.plan].priceEur}/mo`
                 : ""}
             </p>
-            <p className="mt-1 font-data text-sm text-ash">
+            <p className="mt-1 font-data text-sm text-ink-muted">
               status {state.subscriptionStatus}
             </p>
           </div>
@@ -120,7 +120,7 @@ export function BillingClient({ initial }: { initial: BillingState }) {
               type="button"
               disabled={busy}
               onClick={() => void refresh()}
-              className="border border-graphite px-3 py-2 text-sm text-ash hover:border-ash hover:text-bone"
+              className="border border-rule px-3 py-2 text-sm text-ink-muted hover:border-rule-strong hover:text-ink"
             >
               Refresh
             </button>
@@ -128,14 +128,14 @@ export function BillingClient({ initial }: { initial: BillingState }) {
               type="button"
               disabled={busy}
               onClick={() => void portal()}
-              className="border border-graphite px-3 py-2 text-sm text-ash hover:border-ash hover:text-bone"
+              className="border border-rule px-3 py-2 text-sm text-ink-muted hover:border-rule-strong hover:text-ink"
             >
               Manage billing
             </button>
           </div>
         </div>
         {state.usage.watermarkedPdf ? (
-          <p className="mt-4 border border-amber/40 bg-slate px-3 py-2 text-sm text-amber">
+          <p className="mt-4 border border-amber/40 bg-surface-1 px-3 py-2 text-sm text-amber">
             PDFs are watermarked on Free. Upgrade to Pro for a clean export.
           </p>
         ) : null}
@@ -169,17 +169,17 @@ export function BillingClient({ initial }: { initial: BillingState }) {
             ],
           ] as const
         ).map(([plan, blurb]) => (
-          <div key={plan} className="border border-graphite p-4">
-            <p className="label-caps text-ash">{PLAN_LIMITS[plan].label}</p>
-            <p className="mt-1 font-data text-xl text-bone">
+          <div key={plan} className="border border-rule p-4">
+            <p className="label-caps text-ink-muted">{PLAN_LIMITS[plan].label}</p>
+            <p className="mt-1 font-data text-xl text-ink">
               €{PLAN_LIMITS[plan].priceEur}/mo
             </p>
-            <p className="mt-2 text-sm text-ash">{blurb}</p>
+            <p className="mt-2 text-sm text-ink-muted">{blurb}</p>
             <button
               type="button"
               disabled={busy || state.plan === plan}
               onClick={() => void checkout(plan)}
-              className="mt-4 border border-graphite bg-slate px-3 py-2 text-sm text-bone hover:border-ash disabled:opacity-40"
+              className="mt-4 border border-rule bg-surface-1 px-3 py-2 text-sm text-ink hover:border-rule-strong disabled:opacity-40"
             >
               {state.plan === plan ? "Current" : `Upgrade to ${PLAN_LIMITS[plan].label}`}
             </button>
