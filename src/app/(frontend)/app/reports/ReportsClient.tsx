@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 
+import { PageMasthead, PageSection } from "@/components/motion";
+
 type ReportRow = {
   id: string;
   version: number;
@@ -58,114 +60,113 @@ export function ReportsClient({ initial }: { initial: ReportRow[] }) {
 
   return (
     <div className="mx-auto max-w-4xl space-y-8 px-6 py-12">
-      <div>
-        <p className="label-caps">Reports</p>
-        <h1 className="font-display mt-2 text-3xl text-ink">Publish</h1>
-        <p className="mt-2 max-w-xl text-ink-muted">
-          Publishing snapshots scores, emissions, materiality, evidence, and factor
-          versions. Published versions are immutable. ClearESG is not an assurance
-          provider.
-        </p>
+      <PageMasthead
+        label="Reports"
+        title="Publish"
+        description="Publishing snapshots scores, emissions, materiality, evidence, and factor versions. Published versions are immutable. ClearESG is not an assurance provider."
+      >
         {status ? <p className="mt-3 text-sm text-ink-muted">{status}</p> : null}
-      </div>
+      </PageMasthead>
 
-      <div className="flex flex-wrap gap-3">
-        <button
-          type="button"
-          onClick={() => void publish("CSRD_SIMPLIFIED")}
-          className="border border-rule bg-surface-1 px-3 py-2 text-sm text-ink hover:border-rule-strong"
-        >
-          Publish CSRD (simplified)
-        </button>
-        <button
-          type="button"
-          onClick={() => void publish("BRSR")}
-          className="border border-rule px-3 py-2 text-sm text-ink-muted hover:border-rule-strong hover:text-ink"
-        >
-          Publish BRSR
-        </button>
-      </div>
-
-      {diff.length > 0 ? (
-        <div className="border border-rule p-4">
-          <p className="label-caps mb-2">Diff vs previous version</p>
-          <ul className="space-y-1 font-data text-sm text-ink-muted">
-            {diff.map((d) => (
-              <li key={d.path}>
-                {d.path}: {d.from} → {d.to}
-              </li>
-            ))}
-          </ul>
+      <PageSection delay={0.08}>
+        <div className="flex flex-wrap gap-3">
+          <button
+            type="button"
+            onClick={() => void publish("CSRD_SIMPLIFIED")}
+            className="border border-rule bg-surface-1 px-3 py-2 text-sm text-ink hover:border-rule-strong"
+          >
+            Publish CSRD (simplified)
+          </button>
+          <button
+            type="button"
+            onClick={() => void publish("BRSR")}
+            className="border border-rule px-3 py-2 text-sm text-ink-muted hover:border-rule-strong hover:text-ink"
+          >
+            Publish BRSR
+          </button>
         </div>
-      ) : null}
 
-      {rows.length === 0 ? (
-        <p className="text-ink-muted">No published reports yet.</p>
-      ) : (
-        <div className="overflow-x-auto border border-rule">
-          <table className="w-full text-left text-sm">
-            <thead className="border-b border-rule text-ink-muted">
-              <tr>
-                <th className="px-3 py-2 font-normal">Version</th>
-                <th className="px-3 py-2 font-normal">Framework</th>
-                <th className="px-3 py-2 font-normal">Score</th>
-                <th className="px-3 py-2 font-normal">Views</th>
-                <th className="px-3 py-2 font-normal">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {rows.map((r) => (
-                <tr key={r.id} className="border-b border-rule/60">
-                  <td className="px-3 py-3 font-data text-ink">v{r.version}</td>
-                  <td className="px-3 py-3 text-ink-muted">{r.framework}</td>
-                  <td className="px-3 py-3 font-data text-ink">
-                    {r.scores?.overall ?? "—"}
-                  </td>
-                  <td className="px-3 py-3 font-data text-ink-muted">{r.viewCount}</td>
-                  <td className="px-3 py-3">
-                    <div className="flex flex-wrap gap-3">
-                      <a
-                        className="text-ink underline-offset-2 hover:underline"
-                        href={`/api/app/reports/${r.id}/pdf`}
-                        target="_blank"
-                        rel="noreferrer"
-                      >
-                        PDF
-                      </a>
-                      <a
-                        className="text-ink-muted underline-offset-2 hover:underline"
-                        href={`/api/app/reports/${r.id}/export?format=json`}
-                        target="_blank"
-                        rel="noreferrer"
-                      >
-                        JSON
-                      </a>
-                      <a
-                        className="text-ink-muted underline-offset-2 hover:underline"
-                        href={`/api/app/reports/${r.id}/export?format=csv`}
-                        target="_blank"
-                        rel="noreferrer"
-                      >
-                        CSV
-                      </a>
-                      {r.shareToken ? (
+        {diff.length > 0 ? (
+          <div className="border border-rule p-4">
+            <p className="label-caps mb-2">Diff vs previous version</p>
+            <ul className="space-y-1 font-data text-sm text-ink-muted">
+              {diff.map((d) => (
+                <li key={d.path}>
+                  {d.path}: {d.from} → {d.to}
+                </li>
+              ))}
+            </ul>
+          </div>
+        ) : null}
+
+        {rows.length === 0 ? (
+          <p className="text-ink-muted">No published reports yet.</p>
+        ) : (
+          <div className="overflow-x-auto border border-rule">
+            <table className="w-full text-left text-sm">
+              <thead className="border-b border-rule text-ink-muted">
+                <tr>
+                  <th className="px-3 py-2 font-normal">Version</th>
+                  <th className="px-3 py-2 font-normal">Framework</th>
+                  <th className="px-3 py-2 font-normal">Score</th>
+                  <th className="px-3 py-2 font-normal">Views</th>
+                  <th className="px-3 py-2 font-normal">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {rows.map((r) => (
+                  <tr key={r.id} className="border-b border-rule/60">
+                    <td className="px-3 py-3 font-data text-ink">v{r.version}</td>
+                    <td className="px-3 py-3 text-ink-muted">{r.framework}</td>
+                    <td className="px-3 py-3 font-data text-ink">
+                      {r.scores?.overall ?? "—"}
+                    </td>
+                    <td className="px-3 py-3 font-data text-ink-muted">{r.viewCount}</td>
+                    <td className="px-3 py-3">
+                      <div className="flex flex-wrap gap-3">
                         <a
-                          className="text-signal underline-offset-2 hover:underline"
-                          href={`/r/${r.shareToken}`}
+                          className="text-ink underline-offset-2 hover:underline"
+                          href={`/api/app/reports/${r.id}/pdf`}
                           target="_blank"
                           rel="noreferrer"
                         >
-                          Living
+                          PDF
                         </a>
-                      ) : null}
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
+                        <a
+                          className="text-ink-muted underline-offset-2 hover:underline"
+                          href={`/api/app/reports/${r.id}/export?format=json`}
+                          target="_blank"
+                          rel="noreferrer"
+                        >
+                          JSON
+                        </a>
+                        <a
+                          className="text-ink-muted underline-offset-2 hover:underline"
+                          href={`/api/app/reports/${r.id}/export?format=csv`}
+                          target="_blank"
+                          rel="noreferrer"
+                        >
+                          CSV
+                        </a>
+                        {r.shareToken ? (
+                          <a
+                            className="text-signal underline-offset-2 hover:underline"
+                            href={`/r/${r.shareToken}`}
+                            target="_blank"
+                            rel="noreferrer"
+                          >
+                            Living
+                          </a>
+                        ) : null}
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </PageSection>
     </div>
   );
 }

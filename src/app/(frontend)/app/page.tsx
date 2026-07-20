@@ -3,8 +3,9 @@ import { redirect } from "next/navigation";
 import { getPayload } from "payload";
 
 import { Gauge } from "@/components/gauge/Gauge";
+import { Assemble, InkReveal, RuleDraw } from "@/components/motion";
 import { AppShell } from "@/components/shell/AppShell";
-import { Assemble, Metric } from "@/components/ui/metric";
+import { Metric } from "@/components/ui/metric";
 import { getCurrentContext } from "@/lib/auth";
 import { spendCoveragePct } from "@/lib/suppliers";
 import config from "@/payload.config";
@@ -100,7 +101,8 @@ export default async function RunwayPage() {
     >
       <main className="mx-auto grid max-w-6xl gap-12 px-6 py-12 lg:grid-cols-[minmax(0,66ch)_280px]">
         <Assemble layer="structure" as="section">
-          <div className="title-rule pt-4">
+          <div className="pt-4">
+            <RuleDraw accent onMount duration={0.45} className="mb-4" />
             <p className="label-caps">Compliance runway</p>
             <h1 className="font-display mt-2 text-[28px] tracking-[-0.01em] text-ink">
               {ctx.activeOrg.name}
@@ -113,10 +115,10 @@ export default async function RunwayPage() {
             </p>
           ) : (
             <Assemble layer="data" className="mt-8">
-              <Metric value={days} size="display" decimals={0} />
+              <Metric value={days} size="display" decimals={0} inView={false} />
               <p className="label-caps mt-2">Days to filing</p>
               <div className="mt-8 flex items-baseline gap-1">
-                <Metric value={collected} size="lg" decimals={0} />
+                <Metric value={collected} size="lg" decimals={0} inView={false} />
                 <span className="font-data text-xl text-ink-muted">/</span>
                 <Metric
                   value={required}
@@ -130,7 +132,13 @@ export default async function RunwayPage() {
               {coveragePct !== null ? (
                 <>
                   <div className="mt-6">
-                    <Metric value={coveragePct} unit="%" size="lg" decimals={0} />
+                    <Metric
+                      value={coveragePct}
+                      unit="%"
+                      size="lg"
+                      decimals={0}
+                      inView={false}
+                    />
                   </div>
                   <p className="label-caps mt-1">Supplier spend covered</p>
                 </>
@@ -144,6 +152,7 @@ export default async function RunwayPage() {
                     decimals={0}
                     tone="rust"
                     className="inline-flex"
+                    inView={false}
                   />{" "}
                   days.
                 </p>
@@ -153,8 +162,9 @@ export default async function RunwayPage() {
             </Assemble>
           )}
 
-          <div className="mt-12">
-            <p className="label-caps section-rule mb-4 pb-2">Next actions</p>
+          <InkReveal className="mt-12" delay={0.12}>
+            <RuleDraw delay={0} duration={0.4} className="mb-4" />
+            <p className="label-caps mb-4">Next actions</p>
             <ul className="space-y-0">
               {nextActions.map((a) => (
                 <li key={a.href} className="border-b border-rule">
@@ -167,7 +177,7 @@ export default async function RunwayPage() {
                 </li>
               ))}
             </ul>
-          </div>
+          </InkReveal>
         </Assemble>
 
         <Assemble
@@ -175,9 +185,10 @@ export default async function RunwayPage() {
           as="section"
           className="flex flex-col border-l border-rule pl-8 max-lg:border-l-0 max-lg:pl-0"
         >
-          <Gauge score={62} previousScore={58} />
-          <div className="mt-10 w-full">
-            <p className="label-caps section-rule mb-3 pb-2">Emissions stack</p>
+          <Gauge score={62} previousScore={58} playOnView={false} />
+          <InkReveal className="mt-10 w-full" delay={0.16}>
+            <RuleDraw delay={0} duration={0.4} className="mb-3" />
+            <p className="label-caps mb-3">Emissions stack</p>
             <div className="flex h-8 w-full overflow-hidden border border-rule bg-surface-2">
               <div className="bg-rust/80" style={{ width: "28%" }} title="Scope 1" />
               <div className="bg-amber/80" style={{ width: "22%" }} title="Scope 2" />
@@ -188,7 +199,7 @@ export default async function RunwayPage() {
               <span>S2</span>
               <span>S3</span>
             </div>
-          </div>
+          </InkReveal>
         </Assemble>
       </main>
     </AppShell>

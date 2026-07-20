@@ -13,7 +13,9 @@ import {
 
 import type { ReportSnapshot } from "./types";
 
-/** PDF always renders LIGHT — printed document tokens (hex OK in React-PDF). */
+/** PDF always renders LIGHT — printed document tokens (hex OK in React-PDF).
+ * Motion is app-only. This document is the static flagship artefact: Gauge at
+ * final position, no count-up, no ink-settle. Assembly metaphor stops at print. */
 const C = {
   canvas: "#FBF9F5",
   surface1: "#FFFFFF",

@@ -1,8 +1,9 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import { Gauge } from "@/components/gauge/Gauge";
+import { InkReveal } from "@/components/motion";
 import { Metric } from "@/components/ui/metric";
 import { FACTORS_FIXTURE } from "@/lib/calc/__fixtures__/factors.fixture";
 import { computeScope1 } from "@/lib/calc/emissions";
@@ -13,6 +14,7 @@ import {
   computeSScore,
 } from "@/lib/calc/scores";
 import type { DatapointValue } from "@/lib/calc/types";
+import { heroStage, usePrefersReducedMotion } from "@/lib/motion";
 
 function demoScore(headcount: number, dieselL: number, renewablePct: number): number {
   const metrics: Record<string, DatapointValue> = {
@@ -80,49 +82,71 @@ function SliderField({
   );
 }
 
-/** Marketing hero — live Gauge driven by real lib/calc. */
+/**
+ * Marketing hero — bravura Gauge sweep on load, then live calc via sliders.
+ * Staging: gauge after masthead ink-settle (heroStage.gauge).
+ */
 export function LiveHeroGauge() {
+  const reduced = usePrefersReducedMotion();
   const [headcount, setHeadcount] = useState(120);
   const [dieselL, setDieselL] = useState(18000);
   const [renewablePct, setRenewablePct] = useState(35);
+  const [settled, setSettled] = useState(false);
+  const live = reduced || settled;
 
   const score = useMemo(
     () => demoScore(headcount, dieselL, renewablePct),
     [headcount, dieselL, renewablePct],
   );
 
+  useEffect(() => {
+    if (reduced) return;
+    // Bravura sweep + settle (~1.4s) then follow sliders live
+    const id = window.setTimeout(() => setSettled(true), (heroStage.gauge + 1.6) * 1000);
+    return () => window.clearTimeout(id);
+  }, [reduced]);
+
   return (
     <div className="flex w-full max-w-md flex-col items-center">
-      <Gauge score={score} previousScore={null} size={320} live />
-      <div className="mt-8 grid w-full gap-5">
-        <SliderField
-          label="Headcount"
-          value={headcount}
-          min={10}
-          max={500}
-          step={5}
-          unit="FTE"
-          onChange={setHeadcount}
-        />
-        <SliderField
-          label="Diesel"
-          value={dieselL}
-          min={0}
-          max={80000}
-          step={500}
-          unit="L"
-          onChange={setDieselL}
-        />
-        <SliderField
-          label="Renewable"
-          value={renewablePct}
-          min={0}
-          max={100}
-          step={1}
-          unit="%"
-          onChange={setRenewablePct}
-        />
-      </div>
+      <Gauge
+        score={score}
+        previousScore={null}
+        size={320}
+        live={live}
+        playOnView={false}
+        playDelay={heroStage.gauge}
+      />
+      <InkReveal delay={heroStage.primaryMetric} onMount className="mt-8 w-full">
+        <div className="grid w-full gap-5">
+          <SliderField
+            label="Headcount"
+            value={headcount}
+            min={10}
+            max={500}
+            step={5}
+            unit="FTE"
+            onChange={setHeadcount}
+          />
+          <SliderField
+            label="Diesel"
+            value={dieselL}
+            min={0}
+            max={80000}
+            step={500}
+            unit="L"
+            onChange={setDieselL}
+          />
+          <SliderField
+            label="Renewable"
+            value={renewablePct}
+            min={0}
+            max={100}
+            step={1}
+            unit="%"
+            onChange={setRenewablePct}
+          />
+        </div>
+      </InkReveal>
     </div>
   );
 }

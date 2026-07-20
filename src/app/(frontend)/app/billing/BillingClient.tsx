@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 
+import { PageMasthead } from "@/components/motion";
 import { PLAN_LIMITS, type PlanId } from "@/lib/billing/plans";
 import type { UsageMeters } from "@/lib/billing/usage";
 
@@ -92,14 +93,11 @@ export function BillingClient({ initial }: { initial: BillingState }) {
 
   return (
     <main className="mx-auto max-w-3xl space-y-8 px-6 py-10">
-      <header className="space-y-2">
-        <p className="label-caps text-ink-muted">Billing</p>
-        <h1 className="font-display text-3xl text-ink">Plan & usage</h1>
-        <p className="text-sm text-ink-muted">
-          Entitlements are enforced server-side. Free keeps full calculation; paid unlocks
-          clean PDF, periods, evidence, and consultant tooling.
-        </p>
-      </header>
+      <PageMasthead
+        label="Billing"
+        title="Plan & usage"
+        description="Entitlements are enforced server-side. Free keeps full calculation; paid unlocks clean PDF, periods, evidence, and consultant tooling."
+      />
 
       <section className="border border-rule p-4">
         <div className="flex flex-wrap items-end justify-between gap-4">

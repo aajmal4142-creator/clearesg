@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 
+import { PageMasthead } from "@/components/motion";
+
 type BenchmarkPayload =
   | {
       available: false;
@@ -44,14 +46,13 @@ export function BenchmarksClient({ initial }: { initial: BenchmarkPayload }) {
 
   return (
     <div className="mx-auto max-w-3xl space-y-8 px-6 py-12">
-      <div>
-        <p className="label-caps">Benchmarking</p>
-        <h1 className="font-display mt-2 text-3xl text-ink">Sector position</h1>
-        <p className="mt-2 text-ink-muted">
-          Cohorts with fewer than 8 organisations are never shown.
-        </p>
+      <PageMasthead
+        label="Benchmarking"
+        title="Sector position"
+        description="Cohorts with fewer than 8 organisations are never shown."
+      >
         {status ? <p className="mt-3 text-sm text-ink-muted">{status}</p> : null}
-      </div>
+      </PageMasthead>
 
       <button
         type="button"

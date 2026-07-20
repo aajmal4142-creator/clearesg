@@ -16,7 +16,7 @@ Single source of truth: `BUILD_PLAN.md`. Follow phases 0→14 in order. Do not s
 - **Type:** Fraunces (display/headings, opsz + SOFT/WONK on display), Inter Tight (UI), JetBrains Mono (**every number** — tabular + slashed-zero).
 - **Layout:** editorial density, 8px grid, rules over boxes. Radius 6px panels / 4px controls / 2px chips.
 - **Gauge:** 240° printed dial — marketing hero, dashboard, PDF page 1 only. Underdamped needle. No glow.
-- **Motion:** `spring` / `springSoft` / `springSnap` + stagger via `lib/motion.ts` / `useMotionSafe()`. Honour `prefers-reduced-motion`.
+- **Motion:** printed-report assembly via `lib/motion.ts` — `spring` / `springSoft` / `springSnap` + `useInkReveal` / `useRuleDraw` / `useCountUp` / `useMotionSafe()`. Compose from `@/components/motion`. Honour `prefers-reduced-motion`.
 - **PDF:** always light theme cover. Flagship artefact.
 - **Copy:** direct, technical, calm. No exclamation marks. No "Oops". Errors state what happened and what to do. Verbs keep their names through the flow.
 

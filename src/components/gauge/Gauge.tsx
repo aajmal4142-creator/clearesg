@@ -1,7 +1,7 @@
 "use client";
 
-import { motion, useMotionValue, useSpring, useTransform } from "motion/react";
-import { useEffect, useMemo } from "react";
+import { motion, useInView, useMotionValue, useSpring, useTransform } from "motion/react";
+import { useEffect, useMemo, useRef } from "react";
 
 import { Metric } from "@/components/ui/metric";
 import {
@@ -18,7 +18,18 @@ type GaugeProps = {
   estimated?: boolean;
   size?: number;
   className?: string;
+  /**
+   * Live mode: needle follows score without bravura reset.
+   * Use after the hero sweep has settled.
+   */
   live?: boolean;
+  /**
+   * Wait for scroll-enter before the bravura sweep (one-shot).
+   * Default true when not live.
+   */
+  playOnView?: boolean;
+  /** Extra delay (s) before the needle starts — hero staging. */
+  playDelay?: number;
 };
 
 function bandColor(score: number): string {
@@ -52,7 +63,7 @@ function needlePath(cx: number, cy: number, length: number): string {
 
 /**
  * Printed dial on good paper — three placements: marketing hero, dashboard, PDF page 1.
- * No glow. Underdamped needle with mass.
+ * No glow. Underdamped needle with mass — oscillation is a SPEC, not a bug.
  */
 export function Gauge({
   score,
@@ -61,8 +72,14 @@ export function Gauge({
   size = 280,
   className,
   live = false,
+  playOnView = true,
+  playDelay = 0,
 }: GaugeProps) {
   const reduced = usePrefersReducedMotion();
+  const rootRef = useRef<HTMLDivElement>(null);
+  const inView = useInView(rootRef, { once: true, margin: "-40px 0px", amount: 0.25 });
+  const canPlay = live || !playOnView || inView || reduced;
+
   const clamped = Math.max(0, Math.min(100, score));
   const startAngle = -210;
   const sweep = 240;
@@ -93,14 +110,25 @@ export function Gauge({
       window.setTimeout(() => arcProgress.set(target), 40);
       return;
     }
+    if (!canPlay) {
+      progress.jump(0);
+      arcProgress.jump(0);
+      return;
+    }
     progress.jump(0);
     arcProgress.jump(0);
-    const id = requestAnimationFrame(() => {
-      progress.set(target);
-      window.setTimeout(() => arcProgress.set(target), 40);
-    });
-    return () => cancelAnimationFrame(id);
-  }, [clamped, progress, arcProgress, reduced, live]);
+    let raf = 0;
+    const timeout = window.setTimeout(() => {
+      raf = requestAnimationFrame(() => {
+        progress.set(target);
+        window.setTimeout(() => arcProgress.set(target), 40);
+      });
+    }, playDelay * 1000);
+    return () => {
+      window.clearTimeout(timeout);
+      if (raf) cancelAnimationFrame(raf);
+    };
+  }, [clamped, progress, arcProgress, reduced, live, canPlay, playDelay]);
 
   const rotation = useTransform(needleSpring, (p) => startAngle + 90 + sweep * p);
   const arcLength = arcSpring;
@@ -116,10 +144,13 @@ export function Gauge({
       : startAngle + 90 + sweep * (Math.max(0, Math.min(100, previousScore)) / 100);
 
   const band = bandColor(clamped);
-  const readoutDelay = reduced || live ? 0 : 1.3;
+  const readoutDelay = reduced || live ? 0 : playDelay + 1.3;
 
   return (
-    <div className={cn("relative inline-flex flex-col items-center", className)}>
+    <div
+      ref={rootRef}
+      className={cn("relative inline-flex flex-col items-center", className)}
+    >
       <div className="relative" style={{ width: size, height: size * 0.72 }}>
         <div
           className="gauge-dish pointer-events-none absolute left-1/2 top-[52%] -translate-x-1/2 -translate-y-1/2 rounded-full"
@@ -154,11 +185,11 @@ export function Gauge({
             return (
               <motion.g
                 key={v}
-                initial={reduced ? false : { opacity: 0 }}
-                animate={{ opacity: 1 }}
+                initial={reduced || !canPlay ? false : { opacity: 0 }}
+                animate={{ opacity: canPlay || reduced ? 1 : 0 }}
                 transition={{
                   ...springSoft,
-                  delay: reduced ? 0 : i * 0.008,
+                  delay: reduced || !canPlay ? 0 : playDelay + i * 0.008,
                 }}
               >
                 <line
@@ -230,6 +261,7 @@ export function Gauge({
             size="gauge"
             animate={!live}
             animateDelay={readoutDelay}
+            inView={false}
           />
           {estimated ? (
             <span className="label-caps mt-2 text-amber">Estimated</span>

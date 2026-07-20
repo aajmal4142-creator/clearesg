@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 
+import { Assemble, PageMasthead } from "@/components/motion";
 import { Metric } from "@/components/ui/metric";
 
 export type SupplierRow = {
@@ -147,15 +148,13 @@ export function SuppliersClient({
   return (
     <div className="mx-auto max-w-5xl space-y-10 px-6 py-12">
       <div className="flex flex-wrap items-end justify-between gap-6">
-        <div>
-          <p className="label-caps">Supplier chains</p>
-          <h1 className="font-display mt-2 text-3xl text-ink">Scope 3 collection</h1>
-          <p className="mt-2 max-w-xl text-ink-muted">
-            Tokenised public forms. No supplier account. Response flows into your Scope 3
-            as measured supplier data.
-          </p>
-        </div>
-        <div className="flex gap-8">
+        <PageMasthead
+          label="Supplier chains"
+          title="Scope 3 collection"
+          description="Tokenised public forms. No supplier account. Response flows into your Scope 3 as measured supplier data."
+          className="flex-1"
+        />
+        <Assemble layer="data" className="flex gap-8">
           <div>
             {coveragePct === null ? (
               <span className="font-data text-3xl text-ink-muted">—</span>
@@ -172,7 +171,7 @@ export function SuppliersClient({
             )}
             <p className="label-caps mt-1">Response rate</p>
           </div>
-        </div>
+        </Assemble>
       </div>
 
       {status ? <p className="text-sm text-ink-muted">{status}</p> : null}

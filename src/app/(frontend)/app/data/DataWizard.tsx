@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 
+import { PageMasthead } from "@/components/motion";
 import { DERIVED_METRICS } from "@/lib/derive/registry";
 
 type Metric = {
@@ -213,15 +214,13 @@ export function DataWizard({
 
   return (
     <div className="mx-auto max-w-3xl space-y-12 px-6 py-12">
-      <div>
-        <p className="label-caps">Data collection</p>
-        <h1 className="font-display mt-2 text-3xl text-ink">Enter once</h1>
-        <p className="mt-2 text-ink-muted">
-          Quality is required on every field. Raw energy inputs derive into ESRS E1-5
-          shapes — they are not mapped directly.
-        </p>
+      <PageMasthead
+        label="Data collection"
+        title="Enter once"
+        description="Quality is required on every field. Raw energy inputs derive into ESRS E1-5 shapes — they are not mapped directly."
+      >
         {status ? <p className="mt-3 text-sm text-ink-muted">{status}</p> : null}
-      </div>
+      </PageMasthead>
 
       {(["E", "S", "G"] as const).map((cat) => (
         <section key={cat}>

@@ -1,43 +1,12 @@
 "use client";
 
-import { motion, useSpring, useTransform, type MotionValue } from "motion/react";
-import { useEffect } from "react";
+import { motion, type MotionValue, useTransform } from "motion/react";
+import type { RefObject } from "react";
 
-import {
-  pageLayer,
-  type PageLayer,
-  useMotionSafe,
-  usePrefersReducedMotion,
-} from "@/lib/motion";
+import { useCountUp } from "@/lib/motion";
 import { cn } from "@/lib/utils";
 
-type AssembleProps = {
-  layer: PageLayer;
-  children: React.ReactNode;
-  className?: string;
-  as?: "div" | "header" | "main" | "section" | "nav";
-};
-
-/** Page assembly: chrome → structure → data. The report typesets, then the numbers land. */
-export function Assemble({ layer, children, className, as = "div" }: AssembleProps) {
-  const transition = useMotionSafe("soft");
-  const reduced = usePrefersReducedMotion();
-  const Comp = motion[as];
-
-  return (
-    <Comp
-      className={className}
-      initial={reduced ? false : { opacity: 0, y: layer === "chrome" ? 0 : 8 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{
-        ...transition,
-        delay: reduced ? 0 : pageLayer[layer],
-      }}
-    >
-      {children}
-    </Comp>
-  );
-}
+export { Assemble } from "@/components/motion";
 
 type MetricSize = "sm" | "md" | "lg" | "xl" | "display" | "gauge";
 
@@ -57,8 +26,15 @@ type MetricProps = {
   unit?: string;
   decimals?: number;
   size?: MetricSize;
+  /** Mechanical count-up on enter. Default true. */
   animate?: boolean;
+  /** Seconds before the counter starts (hero staging). */
   animateDelay?: number;
+  /**
+   * When true (default), count starts on scroll-enter (one-shot).
+   * Set false for hero/mount staging with animateDelay only.
+   */
+  inView?: boolean;
   className?: string;
   integerClassName?: string;
   unitClassName?: string;
@@ -116,6 +92,7 @@ function MetricDigits({
 /**
  * Editorial number primitive — integer at --ink weight 500, decimal muted @ 0.85em,
  * unit as 12px uppercase label. JetBrains Mono, tabular, slashed zero.
+ * Counts up on scroll-enter (printed counter) unless animate={false}.
  */
 export function Metric({
   value,
@@ -124,30 +101,17 @@ export function Metric({
   size = "md",
   animate = true,
   animateDelay = 0,
+  inView = true,
   className,
   integerClassName,
   unitClassName,
   tone = "ink",
 }: MetricProps) {
-  const reduced = usePrefersReducedMotion();
-  const shouldAnimate = animate && !reduced;
-  const springValue = useSpring(shouldAnimate ? 0 : value, {
-    stiffness: 120,
-    damping: 22,
-    mass: 0.8,
+  const { ref, springValue } = useCountUp(value, {
+    delay: animateDelay,
+    enabled: animate,
+    inView,
   });
-
-  useEffect(() => {
-    if (!shouldAnimate) {
-      springValue.jump(value);
-      return;
-    }
-    springValue.jump(0);
-    const id = window.setTimeout(() => {
-      springValue.set(value);
-    }, animateDelay * 1000);
-    return () => window.clearTimeout(id);
-  }, [value, shouldAnimate, animateDelay, springValue]);
 
   const toneClass =
     tone === "signal"
@@ -162,6 +126,7 @@ export function Metric({
 
   return (
     <span
+      ref={ref as RefObject<HTMLSpanElement | null>}
       className={cn("font-data inline-flex items-baseline", SIZE_CLASS[size], className)}
     >
       <MetricDigits

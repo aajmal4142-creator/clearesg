@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 
+import { PageMasthead } from "@/components/motion";
 import type { ClientRiskRow } from "@/lib/consultant";
 import type { SectorTemplate } from "@/lib/consultant/templates";
 
@@ -71,18 +72,12 @@ export function ConsultantCentre({ initialClients, consultancy, templates }: Pro
   return (
     <div className="mx-auto max-w-6xl space-y-10 px-6 py-12">
       <div className="flex flex-wrap items-end justify-between gap-6">
-        <div>
-          <p className="label-caps">Consultant command centre</p>
-          <h1 className="font-display mt-2 text-3xl text-ink">{consultancy.name}</h1>
-          <p className="mt-2 text-ink-muted">
-            Clients sorted by deadline risk. Plan{" "}
-            <span className="font-data text-ink">{consultancy.plan}</span> ·{" "}
-            <span className="font-data text-ink">
-              {consultancy.clientCount}/{consultancy.clientCap}
-            </span>{" "}
-            clients.
-          </p>
-        </div>
+        <PageMasthead
+          label="Consultant command centre"
+          title={consultancy.name}
+          description={`Clients sorted by deadline risk. Plan ${consultancy.plan} · ${consultancy.clientCount}/${consultancy.clientCap} clients.`}
+          className="flex-1"
+        />
         <div className="flex flex-wrap gap-2">
           <button
             type="button"

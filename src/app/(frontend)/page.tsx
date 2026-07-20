@@ -2,9 +2,9 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 import { HairlineRule, Reveal, StrikeReveal } from "@/components/marketing/Reveal";
-import { LiveHeroGauge } from "@/components/marketing/LiveHeroGauge";
+import { MarketingHero } from "@/components/marketing/MarketingHero";
 import { JsonLd, MarketingFooter, MarketingNav } from "@/components/marketing/chrome";
-import { Button } from "@/components/ui/button";
+import { InkChild, InkStagger } from "@/components/motion";
 import { Metric } from "@/components/ui/metric";
 import {
   organizationJsonLd,
@@ -107,33 +107,7 @@ export default function Home() {
       <JsonLd data={[organizationJsonLd, softwareApplicationJsonLd()]} />
       <MarketingNav />
       <main>
-        <section className="mx-auto max-w-3xl px-6 py-20 md:py-28">
-          <p className="label-caps mb-6">ClearESG</p>
-          <h1 className="display-80 text-ink">
-            Enterprise ESG software costs six figures and takes six months.
-            <br />
-            ClearESG gets you audit-ready this quarter.
-          </h1>
-          <p className="measure-prose mt-8 text-ink-muted">
-            Collect once, derive ESRS views, publish a living report. Built like an annual
-            report — warm paper, oxblood chrome, colour reserved for measurements that
-            matter.
-          </p>
-          <div className="mt-10 flex flex-wrap gap-3">
-            <Button asChild>
-              <Link href="/sign-up">Start free</Link>
-            </Button>
-            <Button variant="secondary" asChild>
-              <Link href="/tools/csrd-scope">CSRD scope checker</Link>
-            </Button>
-            <Button variant="ghost" asChild>
-              <Link href="/pricing">Pricing</Link>
-            </Button>
-          </div>
-          <div className="mt-16 flex justify-center">
-            <LiveHeroGauge />
-          </div>
-        </section>
+        <MarketingHero />
 
         <HairlineRule accent className="w-full" />
 
@@ -145,7 +119,7 @@ export default function Home() {
               auditors. ClearESG is designed as that document — not as a dashboard that
               happens to export.
             </p>
-            <ul className="mt-10 space-y-6">
+            <InkStagger as="ul" className="mt-10 space-y-6" delayChildren={0.08}>
               {(
                 [
                   [
@@ -162,14 +136,12 @@ export default function Home() {
                   ],
                 ] as const
               ).map(([label, copy], i) => (
-                <Reveal key={label} delay={0.06 + i * 0.06}>
-                  <li className="section-rule pb-6">
-                    <p className="label-caps">{label}</p>
-                    <p className="mt-2 font-display text-lg text-ink">{copy}</p>
-                  </li>
-                </Reveal>
+                <InkChild key={label} as="li" index={i} className="section-rule pb-6">
+                  <p className="label-caps">{label}</p>
+                  <p className="mt-2 font-display text-lg text-ink">{copy}</p>
+                </InkChild>
               ))}
-            </ul>
+            </InkStagger>
           </section>
         </Reveal>
 
@@ -186,18 +158,12 @@ export default function Home() {
           </Reveal>
           <ul className="mt-10">
             {GAPS.map((g, i) => (
-              <Reveal key={g.gap} delay={i * 0.06}>
+              <Reveal key={g.gap} delay={i * 0.04}>
                 <li className="section-rule py-6">
                   <p className="label-caps">{g.gap}</p>
                   <p className="mt-2 font-display text-lg text-ink">{g.answer}</p>
                   <div className="mt-3">
-                    <Metric
-                      value={g.figure}
-                      unit={g.unit}
-                      size="lg"
-                      tone="signal"
-                      animate={false}
-                    />
+                    <Metric value={g.figure} unit={g.unit} size="lg" tone="signal" />
                   </div>
                 </li>
               </Reveal>
@@ -223,6 +189,13 @@ export default function Home() {
               </StrikeReveal>
             ))}
           </ul>
+          <p className="mt-10 text-sm text-ink-muted">
+            Prefer the product?{" "}
+            <Link href="/sign-up" className="editorial-link">
+              Start free
+            </Link>
+            .
+          </p>
         </section>
       </main>
       <MarketingFooter />

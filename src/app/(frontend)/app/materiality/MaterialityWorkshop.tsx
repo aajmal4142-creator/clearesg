@@ -3,6 +3,7 @@
 import { motion } from "motion/react";
 import { useMemo, useRef, useState } from "react";
 
+import { PageMasthead } from "@/components/motion";
 import { spring, useMotionSafe } from "@/lib/motion";
 import {
   ESRS_TOPICS,
@@ -128,16 +129,16 @@ export function MaterialityWorkshop({
   return (
     <div className="mx-auto grid max-w-6xl gap-10 px-6 py-12 lg:grid-cols-[1fr_1.1fr]">
       <section>
-        <p className="label-caps">Double materiality</p>
-        <h1 className="font-display mt-2 text-3xl text-ink">Workshop</h1>
-        <p className="mt-2 text-ink-muted">
-          Score impact (severity × scope × irremediability) and financial (magnitude ×
-          likelihood). Threshold {MATERIALITY_THRESHOLD} on either axis.
-        </p>
-        {status ? <p className="mt-3 text-sm text-ink-muted">{status}</p> : null}
-        {locked ? (
-          <p className="mt-3 text-sm text-signal">Final — locked for this period.</p>
-        ) : null}
+        <PageMasthead
+          label="Double materiality"
+          title="Workshop"
+          description={`Score impact (severity × scope × irremediability) and financial (magnitude × likelihood). Threshold ${MATERIALITY_THRESHOLD} on either axis.`}
+        >
+          {status ? <p className="mt-3 text-sm text-ink-muted">{status}</p> : null}
+          {locked ? (
+            <p className="mt-3 text-sm text-signal">Final — locked for this period.</p>
+          ) : null}
+        </PageMasthead>
 
         <div className="mt-8 flex flex-wrap gap-2">
           {topicsCatalog.map((t, i) => {

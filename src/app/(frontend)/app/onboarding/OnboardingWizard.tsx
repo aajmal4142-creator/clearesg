@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from "motion/react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
+import { Assemble } from "@/components/motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Metric } from "@/components/ui/metric";
@@ -114,9 +115,18 @@ export function OnboardingWizard() {
 
   if (done) {
     return (
-      <div className="mx-auto flex max-w-2xl flex-col items-center px-6 py-16">
+      <Assemble
+        layer="data"
+        className="mx-auto flex max-w-2xl flex-col items-center px-6 py-16"
+      >
         <p className="label-caps mb-4">Baseline</p>
-        <Metric value={estimate.score} size="display" decimals={0} tone="amber" />
+        <Metric
+          value={estimate.score}
+          size="display"
+          decimals={0}
+          tone="amber"
+          inView={false}
+        />
         <p className="label-caps mt-2 text-amber">Estimated score</p>
         <div className="mt-6">
           <Metric
@@ -125,6 +135,7 @@ export function OnboardingWizard() {
             size="xl"
             decimals={0}
             tone="amber"
+            inView={false}
           />
         </div>
         <p className="label-caps mt-1 text-amber">Estimated footprint</p>
@@ -142,7 +153,7 @@ export function OnboardingWizard() {
         >
           Open runway
         </Button>
-      </div>
+      </Assemble>
     );
   }
 

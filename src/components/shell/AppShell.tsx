@@ -2,9 +2,9 @@
 
 import Link from "next/link";
 
+import { Assemble, RuleDraw } from "@/components/motion";
 import { ThemeToggle } from "@/components/shell/ThemeToggle";
 import { OrgSwitcher } from "@/components/shell/OrgSwitcher";
-import { Assemble } from "@/components/ui/metric";
 
 type ShellOrg = { id: string; name: string };
 
@@ -20,6 +20,7 @@ export function AppShell({
   return (
     <div className="flex min-h-full flex-col bg-canvas text-ink">
       <Assemble layer="chrome" as="header">
+        <RuleDraw accent onMount duration={0.4} className="w-full" />
         <div className="flex items-center justify-between border-b border-rule px-6 py-3">
           <div className="flex items-center gap-8">
             <Link href="/app" className="label-caps text-ink">

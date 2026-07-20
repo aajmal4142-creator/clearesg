@@ -220,17 +220,48 @@ Motion (the one bravura moment): underdamped needle spring `{ stiffness: 180, da
 visible overshoot; arc trails by 40ms; ticks stagger opacity; readout counts and lands 100ms after needle rest.
 `prefers-reduced-motion` → final position, full arc, no count.
 
-### Motion
+### Motion — printed-report assembly
 
-`lib/motion.ts` exports exactly three springs plus stagger. Zero per-component transition objects.
+One metaphor: **a regulatory report being printed and assembled live.** Motion reads as
+craft and authority, never startup flourish. If an animation does not reinforce “serious
+document being produced,” cut it.
 
-- Page assembly: chrome → structure → data, 40ms apart.
-- Hover on rows/panels: `--accent-quiet` tint + left 2px `--accent` bar (scaleY, springSnap). No lift/scale/shadow.
+`lib/motion.ts` is the motion layer: three public springs (`spring` / `springSoft` /
+`springSnap`), authoritative ink easing (`inkEase`), page-layer delays, hero staging, and
+hooks — `useInkReveal`, `useRuleDraw`, `useCountUp`, `useMotionSafe`,
+`usePrefersReducedMotion`. Components compose from `@/components/motion` primitives
+(`Assemble`, `InkReveal`, `RuleDraw`, `InkStagger`, `PageMasthead`) — not one-off
+transitions. Zero per-component spring objects outside Gauge.
+
+**Five behaviours (scroll-driven, one-shot — never re-trigger on scroll-back):**
+
+1. **Rules draw themselves.** Structural rules animate via `scaleX` / `scaleY` from origin,
+   400–600ms, on scroll-enter (or mount for chrome). Rules arrive **before** the content
+   they frame.
+2. **Metrics count up.** Every `<Metric>` mechanically tick-counts to its value on enter
+   (JetBrains Mono, tabular — no layout shift). Printed counter rolling into place.
+3. **Ink-settle reveals.** Text/section blocks enter with short opacity + 8–12px rise,
+   staggered per child. Feels like ink hitting paper, not slide-in. Easing is authoritative
+   (`inkEase`), not bouncy — except the Gauge needle.
+4. **Gauge arrival.** On enter, the dial needle sweeps past target and settles with its
+   underdamped oscillation (SPEC, not a bug). Arc trails ~40ms; readout counts ~100ms after
+   needle rest. Hero moment — stage deliberately via `playDelay` / `heroStage`.
+5. **Hero print order.** On load: chrome rules draw → masthead ink-settles → hero Gauge
+   sweeps → primary metric / controls land. Reads as a report printing.
+
+**Choreography**
+
+- Assembly order is always **chrome → structure → data** (`pageLayer`: 0 / 40ms / 80ms).
+- Stagger children; never simultaneous.
+- Hover on rows/panels: `--accent-quiet` tint + left 2px `--accent` bar (`scaleY`,
+  `springSnap`). No lift / scale / shadow.
 - Numbers never fade — they count.
-- Section rules draw in (scaleX, origin left, 400ms) on scroll reveal.
+- `prefers-reduced-motion`: all of the above collapse to instant final state. No exceptions.
+- Forbidden: parallax-for-its-own-sake, infinite loops, decorative particles, theme-flashing,
+  glassmorphism, blobs, cursor followers, card tilt, scroll-jacking, gradient meshes,
+  floating 3D, soft green.
 
-Forbidden: glassmorphism, blobs, parallax, cursor followers, card tilt, scroll-jacking, gradient meshes,
-floating 3D, soft green.
+**PDF:** always static light cover. Motion is app-only; the PDF is the finished print.
 
 ### PDF (React-PDF)
 
@@ -410,7 +441,8 @@ Work top to bottom. Commit after each. Update the ledger.
   **Every colour in the entire app references a var. Zero hex values in components.** This is what makes
   white-labelling work later.
 - Fonts via `next/font`: Instrument Serif, Geist, Geist Mono. Preload, `display: swap`.
-- `lib/motion.ts` — house spring config + a `useMotionSafe()` hook wrapping `useReducedMotion`.
+- `lib/motion.ts` — three springs, ink/rule transitions, `useInkReveal` / `useRuleDraw` /
+  `useCountUp` / `useMotionSafe`; compose via `@/components/motion`.
 - ESLint strict, Prettier, Husky + lint-staged, Vitest, Playwright.
 - `.env.example` with every var named and commented.
 - **Commit:** `chore: scaffold next16 + payload3 + shadcn + design tokens`
@@ -700,6 +732,7 @@ Update after every phase. This is how you resume if context is lost.
 | 14 — Hardening      | [x]    | Health `/api/health`; Upstash/memory rate limits; Sentry init when DSN set; structured logs; focus-visible + reduced-motion; Playwright + axe smoke.                                                     |
 | Design depth pass   | [x]    | Five-surface elevation + noise; Metric primitive; bravura Gauge (hero/runway/PDF); springs+stagger; live marketing calc hero; chrome→structure→data.                                                     |
 | Editorial redesign  | [x]    | §3 Editorial: Fraunces/Inter Tight/JetBrains Mono; dual theme cookie; oxblood accent; restyled Gauge; light PDF cover; paper grain.                                                                      |
+| Editorial motion    | [x]    | Printed-report assembly: rule-draw, ink-settle, Metric count-up, Gauge staging; `useInkReveal`/`useRuleDraw`/`useCountUp`; hero chrome→masthead→gauge; PDF stays static.                                 |
 
 ---
 
