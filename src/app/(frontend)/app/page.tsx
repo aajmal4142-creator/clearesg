@@ -99,7 +99,7 @@ export default async function RunwayPage() {
       }))}
       activeOrgId={ctx.activeOrg.id}
     >
-      <main className="mx-auto grid max-w-6xl gap-12 px-6 py-12 lg:grid-cols-[minmax(0,66ch)_280px]">
+      <main className="mx-auto grid max-w-6xl gap-10 px-6 py-10 lg:grid-cols-[minmax(0,66ch)_280px] lg:gap-12 lg:py-12">
         <Assemble layer="structure" as="section">
           <div className="pt-4">
             <RuleDraw accent onMount duration={0.45} className="mb-4" />
@@ -185,7 +185,7 @@ export default async function RunwayPage() {
           as="section"
           className="flex flex-col border-l border-rule pl-8 max-lg:border-l-0 max-lg:pl-0"
         >
-          <Gauge score={62} previousScore={58} playOnView={false} />
+          <Gauge score={62} previousScore={58} playOnView={false} size={300} />
           <InkReveal className="mt-10 w-full" delay={0.16}>
             <RuleDraw delay={0} duration={0.4} className="mb-3" />
             <p className="label-caps mb-3">Emissions stack</p>

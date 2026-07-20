@@ -66,7 +66,7 @@ export const COMPETITORS: CompetitorPage[] = [
       "Deep finance/close integrations at enterprise scale",
     ],
     whereWeWin: [
-      "60-second baseline → runway → supplier requests in one instrument UI",
+      "60-second baseline → runway → supplier requests in one product flow",
       "Derivation layer that refuses fake raw→ESRS mappings",
       "Consultant command centre + white-label at SME price points",
     ],
@@ -98,7 +98,7 @@ export const COMPETITORS: CompetitorPage[] = [
       "Broad SMB brand recognition in some EU markets",
     ],
     whereWeWin: [
-      "Instrument aesthetic with monospaced measurement discipline",
+      "Editorial report layout with monospaced measurement discipline",
       "Framework-agnostic datapoints + derive registry",
       "Benchmarking that never shows cohorts under n=8",
     ],

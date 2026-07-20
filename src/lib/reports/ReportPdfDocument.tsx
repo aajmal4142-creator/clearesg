@@ -131,13 +131,13 @@ function PdfGauge({ score, size = 180 }: { score: number; size?: number }) {
           stroke={C.rule}
           strokeWidth={1}
         />
-        <Path d={trackPath} stroke={C.rule} strokeWidth={2} fill="none" />
-        <Path d={fillPath} stroke={band} strokeWidth={4} fill="none" />
+        <Path d={trackPath} stroke="#E4DFD4" strokeWidth={1.25} fill="none" />
+        <Path d={fillPath} stroke={band} strokeWidth={3.5} fill="none" />
         {ticks.map((v) => {
           const a = startAngle + sweep * (v / 100);
-          const outer = polar(a, r - 2);
-          const inner = polar(a, r - 14);
-          const label = polar(a, r - 26);
+          const outer = polar(a, r - 3);
+          const inner = polar(a, r - 12);
+          const label = polar(a, r - 24);
           return (
             <G key={v}>
               <Line
@@ -145,22 +145,36 @@ function PdfGauge({ score, size = 180 }: { score: number; size?: number }) {
                 y1={inner.y}
                 x2={outer.x}
                 y2={outer.y}
-                stroke={C.muted}
-                strokeWidth={1}
+                stroke={C.ink}
+                strokeWidth={1.25}
               />
               <Text
                 x={label.x - 6}
                 y={label.y + 3}
-                style={{ fontSize: 7, fontFamily: "Courier", color: C.muted }}
+                style={{ fontSize: 7, fontFamily: "Courier", color: C.ink }}
               >
                 {String(v)}
               </Text>
             </G>
           );
         })}
-        <Line x1={cx} y1={cy} x2={tip.x} y2={tip.y} stroke={C.ink} strokeWidth={1.5} />
-        <Circle cx={cx} cy={cy} r={7} fill={C.surface1} stroke={C.rule} strokeWidth={1} />
-        <Circle cx={cx} cy={cy} r={3} fill={C.ink} />
+        <Line
+          x1={cx}
+          y1={cy}
+          x2={tip.x}
+          y2={tip.y}
+          stroke={C.accent}
+          strokeWidth={1.75}
+        />
+        <Circle
+          cx={cx}
+          cy={cy}
+          r={7}
+          fill={C.surface1}
+          stroke="#E4DFD4"
+          strokeWidth={1}
+        />
+        <Circle cx={cx} cy={cy} r={3} fill={C.accent} />
       </Svg>
       <Text style={styles.scoreBig}>{Math.round(clamped)}</Text>
       <Text style={styles.label}>Overall</Text>

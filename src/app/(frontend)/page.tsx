@@ -14,7 +14,7 @@ import {
 } from "@/lib/marketing/site";
 
 export const metadata: Metadata = {
-  title: `${SITE_NAME} — precision instrument for mandatory disclosure`,
+  title: `${SITE_NAME} — audit-ready ESG disclosure this quarter`,
   description: SITE_TAGLINE,
   alternates: { canonical: "/" },
 };
@@ -112,14 +112,13 @@ export default function Home() {
         <HairlineRule accent className="w-full" />
 
         <Reveal delay={0.06}>
-          <section className="mx-auto max-w-3xl px-6 py-16">
-            <h2 className="display-40 section-rule pb-4 text-ink">Built for filing</h2>
-            <p className="measure-prose mt-6 text-ink-muted">
+          <section className="mx-auto max-w-3xl px-6 py-10 md:py-12">
+            <h2 className="display-40 section-rule pb-3 text-ink">Built for filing</h2>
+            <p className="measure-prose mt-5 text-ink-muted">
               The artefact that matters is the report shared with banks, buyers, and
-              auditors. ClearESG is designed as that document — not as a dashboard that
-              happens to export.
+              auditors — not a dashboard that happens to export.
             </p>
-            <InkStagger as="ul" className="mt-10 space-y-6" delayChildren={0.08}>
+            <InkStagger as="ul" className="mt-8 space-y-5" delayChildren={0.08}>
               {(
                 [
                   [
@@ -136,7 +135,7 @@ export default function Home() {
                   ],
                 ] as const
               ).map(([label, copy], i) => (
-                <InkChild key={label} as="li" index={i} className="section-rule pb-6">
+                <InkChild key={label} as="li" index={i} className="section-rule pb-5">
                   <p className="label-caps">{label}</p>
                   <p className="mt-2 font-display text-lg text-ink">{copy}</p>
                 </InkChild>
@@ -147,19 +146,19 @@ export default function Home() {
 
         <HairlineRule />
 
-        <section className="mx-auto max-w-3xl px-6 py-16">
+        <section className="mx-auto max-w-3xl px-6 py-10 md:py-12">
           <Reveal>
-            <h2 className="display-40 section-rule pb-4 text-ink">
+            <h2 className="display-40 section-rule pb-3 text-ink">
               Twelve gaps. Twelve answers.
             </h2>
-            <p className="measure-prose mt-6 text-ink-muted">
+            <p className="measure-prose mt-5 text-ink-muted">
               What the market leaves blank — and what ClearESG ships as product.
             </p>
           </Reveal>
-          <ul className="mt-10">
+          <ul className="mt-8">
             {GAPS.map((g, i) => (
               <Reveal key={g.gap} delay={i * 0.04}>
-                <li className="section-rule py-6">
+                <li className="section-rule py-5">
                   <p className="label-caps">{g.gap}</p>
                   <p className="mt-2 font-display text-lg text-ink">{g.answer}</p>
                   <div className="mt-3">
@@ -173,23 +172,23 @@ export default function Home() {
 
         <HairlineRule />
 
-        <section className="mx-auto max-w-3xl px-6 py-16">
+        <section className="mx-auto max-w-3xl px-6 py-10 md:py-12">
           <Reveal>
-            <h2 className="display-40 section-rule pb-4 text-ink">
+            <h2 className="display-40 section-rule pb-3 text-ink">
               Deliberately not building
             </h2>
-            <p className="measure-prose mt-6 text-ink-muted">
+            <p className="measure-prose mt-5 text-ink-muted">
               Confidence is more attractive than a feature list.
             </p>
           </Reveal>
-          <ul className="mt-8 space-y-3 text-sm">
+          <ul className="mt-6 space-y-2 text-sm">
             {ANTI.map((item, i) => (
               <StrikeReveal key={item} delay={i * 0.06}>
                 {item}
               </StrikeReveal>
             ))}
           </ul>
-          <p className="mt-10 text-sm text-ink-muted">
+          <p className="mt-8 text-sm text-ink-muted">
             Prefer the product?{" "}
             <Link href="/sign-up" className="editorial-link">
               Start free

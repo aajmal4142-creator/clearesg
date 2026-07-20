@@ -4,6 +4,16 @@
 /* ClearESG Editorial tokens — BUILD_PLAN §3. Hex lives only here. */
 
 :root {
+  /* Cream-primary fallback before [data-theme] resolves — the report */
+  --canvas: #fbf9f5;
+  --surface-1: #ffffff;
+  --surface-2: #f5f2ec;
+  --ink: #1a1714;
+  --ink-muted: #6b635a;
+  --rule: #e0dad0;
+  --rule-strong: #c4bbae;
+  --dial-ring: #e4dfd4;
+
   /* Brand — chrome, both themes */
   --accent: #7a2e2e;
   --accent-hover: #8f3838;
@@ -22,9 +32,13 @@
   --shadow-float: 0 12px 32px -8px rgba(26, 23, 20, 0.14);
   --grain-opacity: 0.02;
   --grain-blend: multiply;
+
+  --background: var(--canvas);
+  --foreground: var(--ink);
+  --border: var(--rule);
 }
 
-/* LIGHT — the report (default) */
+/* LIGHT — the report (PRIMARY default) */
 [data-theme="light"] {
   --canvas: #fbf9f5;
   --surface-1: #ffffff;
@@ -33,6 +47,7 @@
   --ink-muted: #6b635a;
   --rule: #e0dad0;
   --rule-strong: #c4bbae;
+  --dial-ring: #e4dfd4;
 
   --signal: #0e7c4a;
   --amber: #b87309;
@@ -70,7 +85,7 @@
   --sidebar-ring: var(--accent);
 }
 
-/* DARK — the terminal (warm near-black, not blue-black) */
+/* DARK — the terminal (SECONDARY, warm near-black #14120F — never blue-black) */
 [data-theme="dark"] {
   --canvas: #14120f;
   --surface-1: #1c1916;
@@ -79,6 +94,8 @@
   --ink-muted: #9a9188;
   --rule: #322d27;
   --rule-strong: #4a443c;
+  /* Warm paper ring on black — dial inverts, not chrome */
+  --dial-ring: #3a342c;
 
   /* Slightly lifted for ≥4.5:1 on warm dark canvas */
   --signal: #2a9a5c;
@@ -125,6 +142,7 @@
   --color-ink-muted: var(--ink-muted);
   --color-rule: var(--rule);
   --color-rule-strong: var(--rule-strong);
+  --color-dial-ring: var(--dial-ring);
   --color-accent: var(--accent);
   --color-accent-hover: var(--accent-hover);
   --color-accent-quiet: var(--accent-quiet);
@@ -263,7 +281,7 @@
 
   @media (min-width: 1440px) {
     .display-80 {
-      font-size: 7rem;
+      font-size: 4rem;
       font-variation-settings:
         "SOFT" 30,
         "WONK" 1,
@@ -382,7 +400,8 @@
   }
 
   .gauge-dish {
+    /* Printed dial face — recessed well, not chrome bezel */
     background: var(--surface-2);
-    border: 1px solid var(--rule);
+    border: 1px solid var(--dial-ring);
   }
 }

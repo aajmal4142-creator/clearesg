@@ -174,7 +174,9 @@ Both themes are first-class. Neither is “the dark version of” the other. CSS
 ```
 
 Theme toggle in the app shell. Persist to a cookie, read server-side, set `data-theme` on `<html>` before paint —
-no flash. Respect `prefers-color-scheme` on first visit only. White-label consultant colour overrides `--accent`
+no flash. **Cream (`light`) is the forced primary default** — never infer dark from
+`prefers-color-scheme` (that re-introduced the unfinished black canvas). Dark is secondary
+and opt-in via the toggle only. White-label consultant colour overrides `--accent`
 only, never the data colours.
 
 ### Surface & material
@@ -190,11 +192,15 @@ only, never the data colours.
 
 ### Layout
 
-Editorial density: generous type, tight gutters, 8px grid.
+Editorial density: generous type, tight gutters, 8px grid. Whitespace is report margin —
+tighten section rhythm so gaps never read as “content failed to load.”
 
 - **App:** 2-column where content allows — primary 66ch, secondary rail 280px (metadata, evidence, factors),
-  separated by a 1px `--rule`, not a card.
-- **Marketing:** single 58ch measure, centred, long-form.
+  separated by a 1px `--rule`, not a card. Runway: Gauge leads the data rail above the fold.
+- **Marketing home (Option A):** two-column hero above the fold — left masthead (oxblood mono
+  eyebrow → Fraunces headline → Inter Tight subhead → CTAs), right printed-dial Gauge.
+  Structural oxblood rule draws (~600ms) above the hero on load. Long-form sections below
+  use a single 58ch measure, centred.
 - **Tables:** no card wrapper, full-bleed, hairline rules. Header 12px uppercase `--ink-muted` with 2px
   `--rule-strong` beneath. Numerics right-aligned, JetBrains Mono, tabular. Zebra via `--surface-2`.
 
@@ -206,19 +212,23 @@ unit as 12px uppercase `--ink-muted` with 0.4em left margin. JetBrains Mono, tab
 
 ### Signature element: **The Gauge**
 
-Three placements only: marketing hero, dashboard, PDF page 1. SVG. Printed dial on good paper — no glow.
+Three placements only: marketing hero (leads the fold), dashboard, PDF page 1. SVG.
+Printed dial on good paper — no glow, no chrome speedometer bezel.
 
-- Dish: `--surface-2` circle, 1px `--rule`.
-- 240° arc opening downward. Track 2px `--rule`. Fill 4px band colour (signal/amber/rust by score).
-- Ticks inside: minor every 5, major every 20 with 12px JetBrains Mono labels.
-- Needle: tapered 7px→1.5px, `--ink`, hairline `--canvas` spine.
-- Hub: outer 14px `--surface-1` + 1px `--rule`, inner 6px `--ink`.
+- Dish: `--surface-2` circle, 1px `--dial-ring` (`#E4DFD4` light / warm ring on dark).
+- 240° arc opening downward. Thin `--dial-ring` track. Fill ~3.5px band colour
+  (signal/amber/rust by score — signal green when on track).
+- Engraved ticks inside: minor every 5, major every 20 with JetBrains Mono labels in `--ink`.
+- Needle: tapered 7px→1.5px, **oxblood `--accent`**, hairline `--canvas` spine; hub inner
+  disc also `--accent`.
 - Ghost needle: previous period, `--rule-strong`, 1px, opacity 0.6, static.
 - Centre readout: `<Metric>`, 112px JetBrains Mono weight 500, below the hub.
+- Dark theme: invert to warm-paper-on-black (dial ring / dish warmer; needle stays oxblood).
 
 Motion (the one bravura moment): underdamped needle spring `{ stiffness: 180, damping: 12, mass: 1.2 }` with
 visible overshoot; arc trails by 40ms; ticks stagger opacity; readout counts and lands 100ms after needle rest.
 `prefers-reduced-motion` → final position, full arc, no count.
+**Oscillation is a SPEC — do not damp it.**
 
 ### Motion — printed-report assembly
 
@@ -246,8 +256,9 @@ transitions. Zero per-component spring objects outside Gauge.
 4. **Gauge arrival.** On enter, the dial needle sweeps past target and settles with its
    underdamped oscillation (SPEC, not a bug). Arc trails ~40ms; readout counts ~100ms after
    needle rest. Hero moment — stage deliberately via `playDelay` / `heroStage`.
-5. **Hero print order.** On load: chrome rules draw → masthead ink-settles → hero Gauge
-   sweeps → primary metric / controls land. Reads as a report printing.
+5. **Hero print order.** On load: oxblood rule draws (~600ms) → masthead ink-settles →
+   hero Gauge sweeps (right column, above the fold) → primary controls land.
+   Gauge leads the composition — never buried below the fold.
 
 **Choreography**
 
@@ -271,6 +282,8 @@ Always renders **LIGHT**, regardless of app theme. Cover: `--canvas`, 2px `--acc
 ### Copy voice
 
 Direct, technical, calm, never cute. Never apologises. Never says "Oops!" Never uses an exclamation mark.
+Never narrates the aesthetic — the page shows cream, oxblood, and the dial; copy does not
+describe “warm paper” or “precision instrument.”
 Errors state what happened and what to do: _"Electricity data missing for Q3. Upload a bill or enter kWh
 manually."_ Empty states are instructions, not illustrations: _"No suppliers yet. Add one to start collecting
 Scope 3 data."_ Actions are verbs and keep their name through the whole flow — the button that says **Publish**
@@ -733,6 +746,7 @@ Update after every phase. This is how you resume if context is lost.
 | Design depth pass   | [x]    | Five-surface elevation + noise; Metric primitive; bravura Gauge (hero/runway/PDF); springs+stagger; live marketing calc hero; chrome→structure→data.                                                     |
 | Editorial redesign  | [x]    | §3 Editorial: Fraunces/Inter Tight/JetBrains Mono; dual theme cookie; oxblood accent; restyled Gauge; light PDF cover; paper grain.                                                                      |
 | Editorial motion    | [x]    | Printed-report assembly: rule-draw, ink-settle, Metric count-up, Gauge staging; `useInkReveal`/`useRuleDraw`/`useCountUp`; hero chrome→masthead→gauge; PDF stays static.                                 |
+| Cream-primary fix   | [x]    | Default theme forced cream (no OS-dark inference); dark = warm #14120F opt-in; gauge-lead hero; printed-dial oxblood needle; strip instrument copy.                                                      |
 
 ---
 

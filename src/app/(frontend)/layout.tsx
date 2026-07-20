@@ -78,6 +78,7 @@ export default async function RootLayout({
     <html
       lang="en"
       data-theme={theme}
+      style={{ colorScheme: theme === "dark" ? "dark" : "light" }}
       className={`${interTight.variable} ${jetbrainsMono.variable} ${fraunces.variable} h-full`}
       suppressHydrationWarning
     >

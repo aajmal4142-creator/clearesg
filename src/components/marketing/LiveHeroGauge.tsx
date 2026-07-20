@@ -83,8 +83,7 @@ function SliderField({
 }
 
 /**
- * Marketing hero — bravura Gauge sweep on load, then live calc via sliders.
- * Staging: gauge after masthead ink-settle (heroStage.gauge).
+ * Marketing hero gauge — printed dial above the fold, then live sliders.
  */
 export function LiveHeroGauge() {
   const reduced = usePrefersReducedMotion();
@@ -101,23 +100,22 @@ export function LiveHeroGauge() {
 
   useEffect(() => {
     if (reduced) return;
-    // Bravura sweep + settle (~1.4s) then follow sliders live
     const id = window.setTimeout(() => setSettled(true), (heroStage.gauge + 1.6) * 1000);
     return () => window.clearTimeout(id);
   }, [reduced]);
 
   return (
-    <div className="flex w-full max-w-md flex-col items-center">
+    <div className="flex w-full max-w-[400px] flex-col items-center">
       <Gauge
         score={score}
         previousScore={null}
-        size={320}
+        size={360}
         live={live}
         playOnView={false}
         playDelay={heroStage.gauge}
       />
-      <InkReveal delay={heroStage.primaryMetric} onMount className="mt-8 w-full">
-        <div className="grid w-full gap-5">
+      <InkReveal delay={heroStage.primaryMetric} onMount className="mt-6 w-full">
+        <div className="grid w-full gap-4 border-t border-rule pt-5">
           <SliderField
             label="Headcount"
             value={headcount}

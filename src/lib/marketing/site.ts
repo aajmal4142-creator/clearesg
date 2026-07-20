@@ -1,6 +1,5 @@
 export const SITE_NAME = "ClearESG";
-export const SITE_TAGLINE =
-  "Precision instrument for mandatory ESG disclosure. Audit-ready this quarter.";
+export const SITE_TAGLINE = "Mandatory ESG disclosure, audit-ready this quarter.";
 
 export function siteUrl(path = ""): string {
   const base = (process.env.NEXT_PUBLIC_APP_URL ?? "https://clearesg.com").replace(

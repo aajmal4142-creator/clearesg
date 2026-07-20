@@ -48,7 +48,7 @@ function polar(
   return { x: cx + radius * Math.cos(rad), y: cy + radius * Math.sin(rad) };
 }
 
-/** Tapered needle: 7px at hub → 1.5px at tip */
+/** Tapered needle: 7px at hub → 1.5px at tip — oxblood ink */
 function needlePath(cx: number, cy: number, length: number): string {
   const hubHalf = 3.5;
   const tipHalf = 0.75;
@@ -63,7 +63,8 @@ function needlePath(cx: number, cy: number, length: number): string {
 
 /**
  * Printed dial on good paper — three placements: marketing hero, dashboard, PDF page 1.
- * No glow. Underdamped needle with mass — oscillation is a SPEC, not a bug.
+ * Ink on cream (dark: warm-paper-on-black). Engraved ticks. Oxblood needle.
+ * Underdamped oscillation is a SPEC, not a bug.
  */
 export function Gauge({
   score,
@@ -165,12 +166,13 @@ export function Gauge({
           role="img"
           aria-label={`ESG score ${Math.round(clamped)}${estimated ? ", estimated" : ""}`}
         >
-          <path d={arcPath} fill="none" stroke="var(--rule)" strokeWidth={2} />
+          {/* Thin engraved dial ring — not a glowing bezel */}
+          <path d={arcPath} fill="none" stroke="var(--dial-ring)" strokeWidth={1.25} />
           <motion.path
             d={arcPath}
             fill="none"
             stroke={band}
-            strokeWidth={4}
+            strokeWidth={3.5}
             strokeLinecap="butt"
             pathLength={1}
             style={{ pathLength: arcLength }}
@@ -179,9 +181,10 @@ export function Gauge({
           {ticks.map((v, i) => {
             const a = startAngle + sweep * (v / 100);
             const major = v % 20 === 0;
-            const outer = polar(cx, cy, a, r - 2);
-            const inner = polar(cx, cy, a, r - (major ? 14 : 8));
-            const label = polar(cx, cy, a, r - 26);
+            /* Engraved ticks: short major gradations, hairline minors */
+            const outer = polar(cx, cy, a, r - 3);
+            const inner = polar(cx, cy, a, r - (major ? 12 : 6));
+            const label = polar(cx, cy, a, r - 24);
             return (
               <motion.g
                 key={v}
@@ -197,8 +200,8 @@ export function Gauge({
                   y1={inner.y}
                   x2={outer.x}
                   y2={outer.y}
-                  stroke={major ? "var(--ink-muted)" : "var(--rule-strong)"}
-                  strokeWidth={1}
+                  stroke={major ? "var(--ink)" : "var(--rule-strong)"}
+                  strokeWidth={major ? 1.25 : 0.75}
                 />
                 {major ? (
                   <text
@@ -206,8 +209,8 @@ export function Gauge({
                     y={label.y}
                     textAnchor="middle"
                     dominantBaseline="middle"
-                    fill="var(--ink-muted)"
-                    fontSize={12}
+                    fill="var(--ink)"
+                    fontSize={11}
                     fontFamily="var(--font-jetbrains-mono)"
                   >
                     {v}
@@ -232,7 +235,7 @@ export function Gauge({
           ) : null}
 
           <motion.g style={{ rotate: rotation, transformOrigin: `${cx}px ${cy}px` }}>
-            <path d={needlePath(cx, cy, needleLen)} fill="var(--ink)" />
+            <path d={needlePath(cx, cy, needleLen)} fill="var(--accent)" />
             <line
               x1={cx}
               y1={cy}
@@ -248,10 +251,10 @@ export function Gauge({
             cy={cy}
             r={7}
             fill="var(--surface-1)"
-            stroke="var(--rule)"
+            stroke="var(--dial-ring)"
             strokeWidth={1}
           />
-          <circle cx={cx} cy={cy} r={3} fill="var(--ink)" />
+          <circle cx={cx} cy={cy} r={3} fill="var(--accent)" />
         </svg>
 
         <div className="pointer-events-none absolute inset-x-0 bottom-[6%] flex flex-col items-center">
