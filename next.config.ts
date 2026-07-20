@@ -12,6 +12,12 @@ const nextConfig: NextConfig = {
       {
         pathname: "/api/media/file/**",
       },
+      {
+        pathname: "/marketing/**",
+      },
+      {
+        pathname: "/brand/**",
+      },
     ],
   },
   webpack: (webpackConfig) => {

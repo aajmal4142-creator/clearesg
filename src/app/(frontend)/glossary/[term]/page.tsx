@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
-import { JsonLd, MarketingFooter, MarketingNav } from "@/components/marketing/chrome";
+import { MarketingLayout } from "@/components/marketing/MarketingLayout";
 import { GLOSSARY, glossaryBySlug } from "@/lib/marketing/glossary";
 import { absoluteUrl, SITE_NAME } from "@/lib/marketing/site";
 
@@ -29,21 +29,19 @@ export default async function GlossaryTermPage({ params }: Props) {
   if (!t) notFound();
 
   return (
-    <div className="flex min-h-full flex-col bg-canvas text-ink">
-      <JsonLd
-        data={{
-          "@context": "https://schema.org",
-          "@type": "DefinedTerm",
-          name: t.term,
-          description: t.answer,
-          url: absoluteUrl(`/glossary/${t.slug}`),
-          dateModified: t.updatedAt,
-        }}
-      />
-      <MarketingNav />
+    <MarketingLayout
+      jsonLd={{
+        "@context": "https://schema.org",
+        "@type": "DefinedTerm",
+        name: t.term,
+        description: t.answer,
+        url: absoluteUrl(`/glossary/${t.slug}`),
+        dateModified: t.updatedAt,
+      }}
+    >
       <main className="mx-auto max-w-3xl flex-1 px-6 py-16">
-        <p className="label-caps text-ink-muted">Glossary</p>
-        <h1 className="mt-2 font-display text-[48px] text-ink">{t.term}</h1>
+        <p className="acid-label">Glossary</p>
+        <h1 className="mt-2 acid-display-sm text-ink">{t.term}</h1>
         <p className="mt-6 text-ink">{t.answer}</p>
         <p className="mt-2 font-data text-xs text-ink-muted">Updated {t.updatedAt}</p>
         {t.body.map((para) => (
@@ -51,28 +49,27 @@ export default async function GlossaryTermPage({ params }: Props) {
             {para}
           </p>
         ))}
-        <h2 className="mt-10 text-sm text-ink">Related</h2>
-        <ul className="mt-2 flex flex-wrap gap-3 text-sm text-ink-muted">
+        <h2 className="mt-10 text-sm font-medium text-ink">Related</h2>
+        <ul className="mt-3 flex flex-wrap gap-3 text-sm text-ink-muted">
           {t.related.map((r) => (
             <li key={r}>
-              <Link href={`/glossary/${r}`} className="hover:text-ink">
+              <Link href={`/glossary/${r}`} className="acid-link">
                 {r}
               </Link>
             </li>
           ))}
           <li>
-            <Link href="/tools/csrd-scope" className="hover:text-ink">
+            <Link href="/tools/csrd-scope" className="acid-link">
               CSRD scope checker
             </Link>
           </li>
           <li>
-            <Link href="/pricing" className="hover:text-ink">
+            <Link href="/pricing" className="acid-link">
               Pricing
             </Link>
           </li>
         </ul>
       </main>
-      <MarketingFooter />
-    </div>
+    </MarketingLayout>
   );
 }

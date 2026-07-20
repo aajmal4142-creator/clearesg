@@ -7,8 +7,8 @@ export function isTheme(value: string | undefined | null): value is Theme {
 }
 
 /**
- * Inline script — runs before paint.
- * Cream (light) is the PRIMARY default. Dark is opt-in via cookie only —
- * never inferred from prefers-color-scheme (that inverted the Editorial report).
+ * Theme is applied server-side in root layout via cookies() → data-theme.
+ * ThemeToggle updates the cookie + attribute on the client.
+ * No inline boot script — React 19 rejects <script> in the component tree.
+ * Cream (light) remains the PRIMARY default; dark is cookie opt-in only.
  */
-export const THEME_BOOT_SCRIPT = `(function(){try{var m=document.cookie.match(/(?:^|; )${THEME_COOKIE}=([^;]*)/);var t=m?decodeURIComponent(m[1]):null;if(t!=="light"&&t!=="dark"){t="light";}document.documentElement.setAttribute("data-theme",t);}catch(e){document.documentElement.setAttribute("data-theme","light");}})();`;
