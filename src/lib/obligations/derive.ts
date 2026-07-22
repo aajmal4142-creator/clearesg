@@ -164,3 +164,11 @@ export function parseRevenueBand(value: string | null | undefined): RevenueBand 
   }
   return null;
 }
+
+/** Manual overrides are sticky unless force=true. */
+export function shouldSkipEngineWrite(
+  existing: { source?: string | null } | null | undefined,
+  force: boolean,
+): boolean {
+  return !force && existing?.source === "manual";
+}

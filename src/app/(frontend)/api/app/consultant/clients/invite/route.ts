@@ -4,6 +4,7 @@ import { NextResponse } from "next/server";
 import { getCurrentContext } from "@/lib/auth";
 import { assertCan, BillingDeniedError, billingDeniedResponse } from "@/lib/billing";
 import { writeAuditLog } from "@/lib/audit/write";
+import { deriveObligations } from "@/lib/obligations";
 import { sendTransactionalEmail } from "@/lib/email/send";
 import config from "@/payload.config";
 
@@ -111,18 +112,62 @@ export async function POST(req: Request) {
     overrideAccess: true,
   });
 
-  const framework =
-    body.framework ??
-    (body.country === "IN" || !body.country ? "BRSR" : "CSRD_SIMPLIFIED");
+  const country = (body.country ?? parent.country ?? "IN").toUpperCase();
+  const framework = body.framework ?? (country === "IN" ? "BRSR" : "CSRD_SIMPLIFIED");
+
+  // Invite often lacks headcount/revenue — run the engine with what we have.
+  // Any provisional +180d date is ALWAYS needs_confirmation, never "derived".
+  const derived = deriveObligations({
+    country,
+    employeeCount: null,
+    revenueBand: null,
+  });
+  const primary = derived.obligations[0];
+
+  let filingDeadline: string | null = primary?.filingDeadline ?? null;
+  let confidence: "derived" | "needs_confirmation" = "needs_confirmation";
+  let wave = primary?.wave ?? (framework === "BRSR" ? "brsr_supply" : "3");
+  let standardVersion =
+    primary?.standardVersion ?? (framework === "BRSR" ? "BRSR" : "CSRD_SIMPLIFIED");
+  const firstReportingFY = primary?.firstReportingFY ?? `FY${new Date().getFullYear()}`;
+  const jurisdiction = primary?.jurisdiction ?? country;
+  let derivationReason =
+    primary?.reason ??
+    "Created from a consultant invite. Confirm the applicable framework and deadline with the client.";
+
+  if (filingDeadline == null && framework === "CSRD_SIMPLIFIED") {
+    // Provisional runway date for invite UX only — never confidence: derived.
+    filingDeadline = new Date(Date.now() + 180 * 24 * 60 * 60 * 1000)
+      .toISOString()
+      .slice(0, 10);
+    confidence = "needs_confirmation";
+    wave = "3";
+    standardVersion = "CSRD_SIMPLIFIED";
+    derivationReason =
+      "Provisional deadline from consultant invite (+180 days). Not derived from a completed baseline — confirm with the client before treating as authoritative.";
+  } else if (primary) {
+    confidence = "needs_confirmation";
+    derivationReason = `${primary.reason}\n\nCreated from a consultant invite — confirm with the client before treating as authoritative.`;
+  }
+
   await payload.create({
     collection: "compliance-obligations",
     data: {
       organisation: child.id,
-      wave: framework === "BRSR" ? "brsr_supply" : "3",
-      jurisdiction: body.country ?? "IN",
-      standardVersion: framework,
-      firstReportingFY: `FY${new Date().getFullYear()}`,
-      filingDeadline: new Date(Date.now() + 180 * 24 * 60 * 60 * 1000).toISOString(),
+      wave,
+      jurisdiction,
+      standardVersion,
+      firstReportingFY,
+      filingDeadline,
+      derivationReason,
+      confidence,
+      source: "engine",
+      derivedInputs: {
+        country,
+        headcount: null,
+        revenueBand: null,
+        asOf: new Date().toISOString().slice(0, 10),
+      },
     },
     overrideAccess: true,
   });

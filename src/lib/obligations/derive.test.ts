@@ -12,6 +12,7 @@ import {
   headcountAtLarge,
   headcountJustUnderLarge,
   parseRevenueBand,
+  shouldSkipEngineWrite,
 } from "./index";
 
 const AS_OF = "2026-07-22";
@@ -172,5 +173,14 @@ describe("baseline drift helpers", () => {
   it("parseRevenueBand accepts only known bands", () => {
     expect(parseRevenueBand("50_250m")).toBe("50_250m");
     expect(parseRevenueBand("nope")).toBeNull();
+  });
+});
+
+describe("shouldSkipEngineWrite", () => {
+  it("keeps manual overrides sticky unless force is set", () => {
+    expect(shouldSkipEngineWrite({ source: "manual" }, false)).toBe(true);
+    expect(shouldSkipEngineWrite({ source: "manual" }, true)).toBe(false);
+    expect(shouldSkipEngineWrite({ source: "engine" }, false)).toBe(false);
+    expect(shouldSkipEngineWrite(null, false)).toBe(false);
   });
 });
