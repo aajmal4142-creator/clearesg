@@ -171,18 +171,40 @@ export function MaterialityWorkshop({
               Financial ↑
             </span>
 
-            {computed.map((p) => {
-              const left = `${(p.impactScore / 5) * 100}%`;
-              const bottom = `${(p.financialScore / 5) * 100}%`;
+            {computed.map((p, idx) => {
+              const baseLeft = (p.impactScore / 5) * 100;
+              const baseBottom = (p.financialScore / 5) * 100;
+              // ~1–2% jitter so equal scores do not stack exactly.
+              const jitterX = ((idx % 5) - 2) * 0.4;
+              const jitterY = (((idx * 3) % 5) - 2) * 0.4;
+              const left = `${Math.min(98, Math.max(2, baseLeft + jitterX))}%`;
+              const bottom = `${Math.min(98, Math.max(2, baseBottom + jitterY))}%`;
+              const topicIdx = scores.findIndex((s) => s.esrsTopic === p.esrsTopic);
+              const markerClass = `absolute -translate-x-1/2 translate-y-1/2 font-data text-xs ${
+                p.material ? "text-signal" : "text-ink-muted"
+              }`;
+
+              if (locked) {
+                return (
+                  <span
+                    key={p.esrsTopic}
+                    className={`${markerClass} pointer-events-none`}
+                    style={{ left, bottom }}
+                  >
+                    {p.esrsTopic}
+                  </span>
+                );
+              }
+
               return (
                 <motion.button
                   key={p.esrsTopic}
                   type="button"
-                  drag={!locked}
+                  drag
                   dragConstraints={matrixRef}
                   dragMomentum={false}
                   onDragEnd={(e) => {
-                    if (locked || !matrixRef.current) return;
+                    if (!matrixRef.current) return;
                     const rect = matrixRef.current.getBoundingClientRect();
                     const pe = e as unknown as PointerEvent;
                     const clientX = "clientX" in pe ? pe.clientX : 0;
@@ -195,13 +217,11 @@ export function MaterialityWorkshop({
                       5,
                       Math.max(0, ((rect.bottom - clientY) / rect.height) * 5),
                     );
-                    const idx = scores.findIndex((s) => s.esrsTopic === p.esrsTopic);
-                    if (idx < 0) return;
                     const xi = Math.round(x);
                     const yi = Math.round(y);
                     setScores((prev) =>
                       prev.map((s, i) =>
-                        i === idx
+                        i === topicIdx
                           ? {
                               ...s,
                               impactSeverity: xi,
@@ -213,25 +233,27 @@ export function MaterialityWorkshop({
                           : s,
                       ),
                     );
-                    setActive(idx);
+                    setActive(topicIdx);
                   }}
                   transition={transition.type === "spring" ? spring : transition}
-                  className={`absolute -translate-x-1/2 translate-y-1/2 cursor-grab font-data text-xs active:cursor-grabbing ${
-                    p.material ? "text-signal" : "text-ink-muted"
-                  }`}
+                  className={`${markerClass} cursor-grab active:cursor-grabbing`}
                   style={{ left, bottom }}
-                  onClick={() =>
-                    setActive(scores.findIndex((s) => s.esrsTopic === p.esrsTopic))
-                  }
+                  onClick={() => setActive(topicIdx)}
                 >
                   {p.esrsTopic}
                 </motion.button>
               );
             })}
           </div>
-          <p className="mt-3 text-sm text-ink-muted">
-            Drag a topic to reposition. Material topics render in signal green.
-          </p>
+          {!locked ? (
+            <p className="mt-3 text-sm text-ink-muted">
+              Drag a topic to reposition. Material topics render in signal green.
+            </p>
+          ) : (
+            <p className="mt-3 text-sm text-ink-muted">
+              Material topics render in signal green.
+            </p>
+          )}
         </div>
       }
     >
@@ -240,13 +262,15 @@ export function MaterialityWorkshop({
       <div className="mt-4 flex flex-wrap gap-2">
         {topicsCatalog.map((t, i) => {
           const c = computed[i];
+          const selected = i === active;
           return (
             <button
               key={t.id}
               type="button"
+              aria-pressed={selected}
               onClick={() => setActive(i)}
               className={`border px-2 py-1 font-data text-xs ${
-                i === active
+                selected
                   ? "border-rule-strong text-ink"
                   : c?.material
                     ? "border-signal/60 text-signal"
@@ -260,7 +284,9 @@ export function MaterialityWorkshop({
       </div>
 
       {topic && row ? (
-        <div className="mt-8 space-y-4 border-t border-rule pt-4">
+        <div
+          className={`mt-8 space-y-4 border-t border-rule pt-4 ${locked ? "opacity-60" : ""}`}
+        >
           <h2 className="text-lg text-ink">
             {topic.id} — {topic.label}
           </h2>
@@ -274,7 +300,7 @@ export function MaterialityWorkshop({
               ["financialLikelihood", "Financial likelihood"],
             ] as const
           ).map(([key, label]) => (
-            <label key={key} className="block">
+            <label key={key} className={`block ${locked ? "opacity-70" : ""}`}>
               <span className="label-caps">{label}</span>
               <input
                 type="range"
@@ -282,18 +308,18 @@ export function MaterialityWorkshop({
                 max={5}
                 step={1}
                 disabled={locked}
-                className="mt-2 w-full accent-[var(--signal)]"
+                className="mt-2 w-full accent-[var(--signal)] disabled:cursor-not-allowed"
                 value={Number(row[key])}
                 onChange={(e) => setField(key, Number(e.target.value))}
               />
               <span className="font-data text-sm text-ink">{row[key]}</span>
             </label>
           ))}
-          <label className="block">
+          <label className={`block ${locked ? "opacity-70" : ""}`}>
             <span className="label-caps">Rationale</span>
             <textarea
               disabled={locked}
-              className="mt-2 w-full border border-rule bg-surface-1 px-2 py-2 text-sm text-ink"
+              className="mt-2 w-full border border-rule bg-surface-1 px-2 py-2 text-sm text-ink disabled:cursor-not-allowed"
               rows={3}
               value={row.rationale}
               onChange={(e) => setField("rationale", e.target.value)}

@@ -1,97 +1,136 @@
-"use client";
-
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { getPayload } from "payload";
+import { redirect } from "next/navigation";
 
-import {
-  EmptyState,
-  PageFrame,
-  PageSkeleton,
-  StatusLine,
-} from "@/components/shell/PageFrame";
+import { PageFrame } from "@/components/shell/PageFrame";
 import { Button } from "@/components/ui/button";
+import { getCurrentContext } from "@/lib/auth";
+import config from "@/payload.config";
+
+import { GuideChecklist } from "./GuideChecklist";
 
 const STEPS = [
-  { id: "sector", label: "Confirm sector and country", href: "/dashboard/onboarding" },
-  { id: "baseline", label: "Finish 60-second baseline", href: "/dashboard/onboarding" },
+  {
+    id: "sector",
+    label: "Confirm sector and country",
+    href: "/dashboard/onboarding",
+  },
+  {
+    id: "baseline",
+    label: "Finish organisation baseline",
+    href: "/dashboard/onboarding",
+  },
   {
     id: "top3",
-    label: "Replace top three estimated figures",
+    label: "Enter your top three figures",
     href: "/dashboard/data",
   },
   { id: "supplier", label: "Request one supplier", href: "/dashboard/suppliers" },
-  { id: "publish", label: "Publish living report", href: "/dashboard/reports" },
+  { id: "publish", label: "Publish a living report", href: "/dashboard/reports" },
 ] as const;
 
-type GuideResult =
-  { kind: "ok"; done: Record<string, boolean> } | { kind: "error"; message: string };
+async function deriveDone(organisationId: string): Promise<Record<string, boolean>> {
+  const payload = await getPayload({ config });
+  const org = await payload.findByID({
+    collection: "organisations",
+    id: organisationId,
+    depth: 0,
+    overrideAccess: true,
+  });
 
-async function fetchGuide(): Promise<GuideResult> {
-  const res = await fetch("/api/app/guide");
-  const data = (await res.json().catch(() => ({}))) as {
-    done?: Record<string, boolean>;
-    error?: string;
-  };
-  if (!res.ok) {
-    return {
-      kind: "error",
-      message:
-        data.error ??
-        "Could not load checklist. Finish onboarding or switch organisation.",
-    };
+  const saved =
+    org.guideProgress &&
+    typeof org.guideProgress === "object" &&
+    !Array.isArray(org.guideProgress)
+      ? (org.guideProgress as Record<string, boolean>)
+      : {};
+
+  const sectorDone = Boolean(org.sector && org.country) || Boolean(saved.sector);
+  const baselineDone = Boolean(org.onboardedAt) || Boolean(saved.baseline);
+
+  let top3Done = Boolean(saved.top3);
+  try {
+    const periods = await payload.find({
+      collection: "reporting-periods",
+      where: {
+        and: [
+          { organisation: { equals: organisationId } },
+          { status: { equals: "open" } },
+        ],
+      },
+      limit: 1,
+      overrideAccess: true,
+    });
+    const periodId = periods.docs[0]?.id;
+    if (periodId && !top3Done) {
+      const present = await payload.find({
+        collection: "datapoints",
+        where: {
+          and: [
+            { organisation: { equals: organisationId } },
+            { period: { equals: periodId } },
+          ],
+        },
+        limit: 50,
+        overrideAccess: true,
+      });
+      const filled = present.docs.filter(
+        (d) => d.quality !== "missing" && d.value != null,
+      ).length;
+      top3Done = filled >= 3;
+    }
+  } catch {
+    /* keep saved */
   }
-  return { kind: "ok", done: data.done ?? {} };
+
+  let supplierDone = Boolean(saved.supplier);
+  try {
+    const suppliers = await payload.find({
+      collection: "suppliers",
+      where: { organisation: { equals: organisationId } },
+      limit: 1,
+      overrideAccess: true,
+    });
+    supplierDone = suppliers.totalDocs > 0 || supplierDone;
+  } catch {
+    /* keep saved */
+  }
+
+  let publishDone = Boolean(saved.publish);
+  try {
+    const reports = await payload.find({
+      collection: "reports",
+      where: { organisation: { equals: organisationId } },
+      limit: 1,
+      overrideAccess: true,
+    });
+    publishDone = reports.totalDocs > 0 || publishDone;
+  } catch {
+    /* keep saved */
+  }
+
+  return {
+    sector: sectorDone,
+    baseline: baselineDone,
+    top3: top3Done,
+    supplier: supplierDone,
+    publish: publishDone,
+  };
 }
 
-export default function GuidePage() {
-  const [done, setDone] = useState<Record<string, boolean>>({});
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [reloadKey, setReloadKey] = useState(0);
+export default async function GuidePage() {
+  const ctx = await getCurrentContext();
+  if (!ctx.activeOrg) redirect("/dashboard/onboarding");
 
-  useEffect(() => {
-    let cancelled = false;
-
-    void fetchGuide().then((result) => {
-      if (cancelled) return;
-      if (result.kind === "error") {
-        setError(result.message);
-      } else {
-        setDone(result.done);
-        setError(null);
-      }
-      setLoading(false);
-    });
-
-    return () => {
-      cancelled = true;
-    };
-  }, [reloadKey]);
-
-  async function toggle(id: string) {
-    const next = { ...done, [id]: !done[id] };
-    setDone(next);
-    const res = await fetch("/api/app/guide", {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ done: next }),
-    });
-    if (!res.ok) {
-      const data = (await res.json().catch(() => ({}))) as { error?: string };
-      setError(data.error ?? "Could not save checklist");
-      setLoading(true);
-      setReloadKey((k) => k + 1);
-    }
-  }
-
-  const next = STEPS.find((s) => !done[s.id]);
+  const done = await deriveDone(ctx.activeOrg.id);
   const completed = STEPS.filter((s) => done[s.id]).length;
+  const next = STEPS.find((s) => !done[s.id]);
 
   return (
     <PageFrame
-      eyebrow="Guided mode"
+      eyebrow="Getting started"
       title="First report — do this with me"
-      help="Linear checklist from empty to published. Progress is saved on your organisation — shared across the team."
+      help="Checklist from empty to published. Steps complete automatically when the work is done; you can also tick them manually."
       rail={
         <div className="text-sm text-ink-muted">
           <p className="label-caps text-ink">Progress</p>
@@ -107,53 +146,24 @@ export default function GuidePage() {
         </div>
       }
     >
-      {loading ? <PageSkeleton rows={5} /> : null}
-      {error ? <StatusLine tone="error">{error}</StatusLine> : null}
-      {!loading && !error ? (
-        <>
-          {next ? (
-            <p className="text-sm text-ink">
-              Next:{" "}
-              <Link
-                href={next.href}
-                className="text-accent underline-offset-2 hover:underline"
-              >
-                {next.label}
-              </Link>
-            </p>
-          ) : (
-            <p className="text-sm text-signal">Checklist complete.</p>
-          )}
-          <ul className="mt-8 space-y-0 border-t border-rule">
-            {STEPS.map((s) => (
-              <li
-                key={s.id}
-                className="flex items-center gap-3 border-b border-rule py-3"
-              >
-                <input
-                  type="checkbox"
-                  checked={Boolean(done[s.id])}
-                  onChange={() => void toggle(s.id)}
-                  aria-label={s.label}
-                />
-                <Link href={s.href} className="text-sm text-ink hover:text-accent">
-                  {s.label}
-                </Link>
-              </li>
-            ))}
-          </ul>
-          {next ? (
-            <Button asChild className="mt-6" size="sm">
-              <Link href={next.href}>Continue</Link>
-            </Button>
-          ) : null}
-        </>
-      ) : null}
-      {!loading && error ? (
-        <EmptyState
-          title="Guide unavailable"
-          body="Sign in with an organisation membership to use the shared checklist."
-        />
+      {next ? (
+        <p className="text-sm text-ink">
+          Next:{" "}
+          <Link
+            href={next.href}
+            className="text-accent underline-offset-2 hover:underline"
+          >
+            {next.label}
+          </Link>
+        </p>
+      ) : (
+        <p className="text-sm text-signal">Checklist complete.</p>
+      )}
+      <GuideChecklist steps={[...STEPS]} initialDone={done} />
+      {next ? (
+        <Button asChild className="mt-6" size="sm">
+          <Link href={next.href}>Continue — {next.label}</Link>
+        </Button>
       ) : null}
     </PageFrame>
   );

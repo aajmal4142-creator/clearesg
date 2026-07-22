@@ -9,6 +9,7 @@ import {
   StatusLine,
 } from "@/components/shell/PageFrame";
 import { Button } from "@/components/ui/button";
+import { auditActionLabel, shortRelativeTime } from "@/lib/ui/displayLabels";
 
 type LogRow = {
   id: string;
@@ -23,6 +24,14 @@ type LoadResult =
   | { kind: "ok"; logs: LogRow[] }
   | { kind: "forbidden" }
   | { kind: "error"; message: string };
+
+const ENTITY_TYPE_OPTIONS = [
+  { value: "", label: "All entities" },
+  { value: "datapoints", label: "Datapoints" },
+  { value: "reports", label: "Reports" },
+  { value: "internal-data-requests", label: "Internal requests" },
+  { value: "organisations", label: "Organisations" },
+] as const;
 
 async function fetchAuditLogs(entityType: string): Promise<LoadResult> {
   const q = entityType ? `?entityType=${encodeURIComponent(entityType)}` : "";
@@ -103,15 +112,20 @@ export default function AuditPage() {
         <>
           <label className="block text-sm">
             <span className="label-caps">Filter entity type</span>
-            <input
-              className="mt-1 w-full border border-rule bg-surface-1 px-3 py-2 font-data text-sm"
+            <select
+              className="mt-1 w-full appearance-none border border-rule bg-surface-1 px-3 py-2 text-sm text-ink"
               value={entityType}
               onChange={(e) => {
                 setLoading(true);
                 setEntityType(e.target.value);
               }}
-              placeholder="datapoints"
-            />
+            >
+              {ENTITY_TYPE_OPTIONS.map((opt) => (
+                <option key={opt.value || "all"} value={opt.value}>
+                  {opt.label}
+                </option>
+              ))}
+            </select>
           </label>
           {error ? <StatusLine tone="error">{error}</StatusLine> : null}
           {loading ? (
@@ -123,18 +137,23 @@ export default function AuditPage() {
             <ul className="mt-8 space-y-0 border-t border-rule">
               {logs.map((l) => (
                 <li key={l.id} className="border-b border-rule py-3 text-sm">
-                  <p className="font-data text-xs text-ink-muted">
-                    {new Date(l.createdAt).toISOString()}
+                  <p
+                    className="font-data text-xs text-ink-muted"
+                    title={new Date(l.createdAt).toISOString()}
+                  >
+                    {shortRelativeTime(l.createdAt)}
                   </p>
                   <p className="text-ink">
-                    {l.action} · {l.entityType}/{l.entityId}
+                    {auditActionLabel(l.action)} · {l.entityType}/{l.entityId}
                   </p>
                   <p className="text-xs text-ink-muted">{l.actor?.email ?? "system"}</p>
                 </li>
               ))}
               {logs.length === 0 && !error ? (
                 <li className="py-6 text-sm text-ink-muted">
-                  No audit events yet. Approvals, publishes, and assignments write here.
+                  {entityType
+                    ? "No matching events"
+                    : "No audit events yet. Approvals, publishes, and assignments write here."}
                 </li>
               ) : null}
             </ul>

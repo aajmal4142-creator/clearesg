@@ -4,6 +4,7 @@ import { useState } from "react";
 
 import { EmptyState, PageFrame, StatusLine } from "@/components/shell/PageFrame";
 import type { MembershipRole } from "@/lib/access/membership";
+import { sectorLabel } from "@/lib/ui/displayLabels";
 
 type BenchmarkPayload =
   | {
@@ -24,6 +25,15 @@ type BenchmarkPayload =
       improve: Array<{ label: string; href: string }>;
     };
 
+function emptyBenchmarkBody(
+  data: Extract<BenchmarkPayload, { available: false }>,
+): string {
+  if (data.reason === "Forbidden") {
+    return "This cohort is not available for your organisation yet.";
+  }
+  return `Not enough organisations in your sector yet for a private comparison. We need at least ${data.minCohortSize} peers before percentiles appear.`;
+}
+
 export function BenchmarksClient({
   initial,
   role = null,
@@ -35,21 +45,22 @@ export function BenchmarksClient({
   const [status, setStatus] = useState<string | null>(null);
   const [statusTone, setStatusTone] = useState<"neutral" | "error" | "ok">("neutral");
   const canRecompute = role === "owner" || role === "admin";
+  const showRecompute = canRecompute || role === null;
 
   async function recompute() {
     setStatusTone("neutral");
-    setStatus("Recomputing…");
+    setStatus("Updating sector comparison…");
     const res = await fetch("/api/app/benchmarks/recompute", { method: "POST" });
     const body = (await res.json().catch(() => ({}))) as {
       error?: string;
       written?: number;
     };
     if (!res.ok) {
-      const raw = body.error ?? "Recompute failed";
+      const raw = body.error ?? "Could not update cohorts";
       setStatusTone("error");
       setStatus(
         raw === "Forbidden"
-          ? "Recompute requires an admin or owner. Ask a teammate with that role."
+          ? "Updating cohorts requires an admin or owner. Ask a teammate with that role."
           : raw,
       );
       return;
@@ -58,34 +69,34 @@ export function BenchmarksClient({
     const next = (await get.json()) as BenchmarkPayload;
     setData(next);
     setStatusTone("ok");
-    setStatus(`Wrote ${body.written ?? 0} cohort(s)`);
+    setStatus(
+      body.written && body.written > 0
+        ? `Updated ${body.written} cohort(s)`
+        : "No new cohorts yet — more organisations need published electricity data",
+    );
   }
 
   return (
     <PageFrame
       eyebrow="Benchmarking"
       title="Sector position"
-      help="Cohorts with fewer than 8 organisations are never shown."
+      help="Comparisons stay private until at least eight organisations share a sector cohort."
       actions={
-        canRecompute ? (
+        showRecompute ? (
           <button
             type="button"
             onClick={() => void recompute()}
-            className="border border-rule px-3 py-2 text-sm text-ink-muted hover:border-rule-strong hover:text-ink"
+            className={`border border-rule px-3 py-2 text-sm ${
+              !data.available
+                ? "text-ink-muted/70 hover:border-rule hover:text-ink-muted"
+                : "text-ink-muted hover:border-rule-strong hover:text-ink"
+            }`}
           >
-            Recompute cohorts
+            {!data.available ? "Check for new peers" : "Refresh cohorts"}
           </button>
         ) : role !== null ? (
-          <p className="text-sm text-ink-muted">Recompute is admin-only</p>
-        ) : (
-          <button
-            type="button"
-            onClick={() => void recompute()}
-            className="border border-rule px-3 py-2 text-sm text-ink-muted hover:border-rule-strong hover:text-ink"
-          >
-            Recompute cohorts
-          </button>
-        )
+          <p className="text-sm text-ink-muted">Cohort refresh is admin-only</p>
+        ) : null
       }
       rail={
         <div className="space-y-3 text-sm text-ink-muted">
@@ -99,19 +110,13 @@ export function BenchmarksClient({
       {status ? <StatusLine tone={statusTone}>{status}</StatusLine> : null}
 
       {!data.available ? (
-        <EmptyState
-          title="No cohort available"
-          body={
-            data.reason === "Forbidden"
-              ? "This cohort is not available for your organisation yet."
-              : data.reason
-          }
-        />
+        <EmptyState title="No cohort available" body={emptyBenchmarkBody(data)} />
       ) : (
         <>
           <div className="mt-4 border-t border-rule pt-4">
             <p className="label-caps">
-              {data.metricKey} · sector {data.sector} · n={data.cohortSize}
+              {data.metricKey} · {sectorLabel(data.sector)} · {data.cohortSize}{" "}
+              organisations
             </p>
             <div className="mt-6 flex items-end gap-2">
               {(

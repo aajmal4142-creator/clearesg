@@ -4,6 +4,7 @@ import { getPayload } from "payload";
 import { BenchmarksClient } from "@/app/(frontend)/dashboard/benchmarks/BenchmarksClient";
 import { getCurrentContext } from "@/lib/auth";
 import { MIN_COHORT_SIZE } from "@/lib/benchmarks";
+import { sectorLabel } from "@/lib/ui/displayLabels";
 import config from "@/payload.config";
 
 export default async function BenchmarksPage() {
@@ -48,8 +49,8 @@ export default async function BenchmarksPage() {
         available: false as const,
         reason:
           ctx.role === "owner" || ctx.role === "admin"
-            ? `No cohort with n ≥ ${MIN_COHORT_SIZE} for sector ${sectorPrefix}. Recompute when enough organisations have published electricity data.`
-            : `No cohort with n ≥ ${MIN_COHORT_SIZE} for sector ${sectorPrefix} yet. An admin can recompute cohorts when enough organisations have data.`,
+            ? `Not enough peers in ${sectorLabel(sectorPrefix)} yet (need ${MIN_COHORT_SIZE}+ with electricity data). Check again once more organisations have published.`
+            : `Not enough peers in ${sectorLabel(sectorPrefix)} yet (need ${MIN_COHORT_SIZE}+). An admin can refresh cohorts when more organisations have data.`,
         minCohortSize: MIN_COHORT_SIZE,
       };
 

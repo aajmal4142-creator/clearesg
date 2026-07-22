@@ -50,9 +50,10 @@ export function AppNav({
                   <Link
                     href={item.href}
                     title={collapsed ? item.label : undefined}
+                    aria-label={item.label}
                     onClick={onNavigate}
                     className={cn(
-                      "group relative flex items-center gap-2.5 rounded-[4px] px-2 py-1.5 text-sm transition-colors",
+                      "group relative flex items-center gap-2.5 rounded-[4px] px-2 py-1.5 text-sm transition-colors focus-visible:outline-accent",
                       collapsed && "justify-center px-0",
                       active
                         ? "bg-accent-quiet text-ink"

@@ -3,7 +3,10 @@
 import { useState } from "react";
 
 import { EmptyState, PageFrame, StatusLine } from "@/components/shell/PageFrame";
+import { AppField, AppSelectNative } from "@/components/ui/AppField";
+import { Button } from "@/components/ui/button";
 import { Metric } from "@/components/ui/metric";
+import { requestStatusLabel } from "@/lib/ui/displayLabels";
 
 export type SupplierRow = {
   id: string;
@@ -242,23 +245,23 @@ export function SuppliersClient({
           onSubmit={(e) => void addSupplier(e)}
           className="mt-4 grid gap-3 border-t border-rule pt-4 md:grid-cols-2"
         >
-          <input
+          <AppField
             required
-            placeholder="Supplier name"
-            className="border border-rule bg-surface-1 px-2 py-2 text-ink"
+            label="Supplier name"
+            placeholder="Acme Supplies Ltd"
             value={form.name}
             onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
           />
-          <input
+          <AppField
             required
             type="email"
-            placeholder="Contact email"
-            className="border border-rule bg-surface-1 px-2 py-2 text-ink"
+            label="Contact email"
+            placeholder="contact@supplier.com"
             value={form.contactEmail}
             onChange={(e) => setForm((f) => ({ ...f, contactEmail: e.target.value }))}
           />
-          <select
-            className="border border-rule bg-surface-1 px-2 py-2 text-ink"
+          <AppSelectNative
+            label="Category"
             value={form.category}
             onChange={(e) => setForm((f) => ({ ...f, category: e.target.value }))}
           >
@@ -267,21 +270,19 @@ export function SuppliersClient({
                 {c.label}
               </option>
             ))}
-          </select>
-          <input
+          </AppSelectNative>
+          <AppField
             type="number"
             min={0}
-            placeholder="Annual spend"
-            className="border border-rule bg-surface-1 px-2 py-2 font-data text-ink"
+            label="Annual spend"
+            placeholder="0"
+            className="font-data"
             value={form.annualSpend}
             onChange={(e) => setForm((f) => ({ ...f, annualSpend: e.target.value }))}
           />
-          <button
-            type="submit"
-            className="border border-rule bg-surface-1 px-3 py-2 text-sm text-ink hover:border-rule-strong md:col-span-2"
-          >
+          <Button type="submit" className="md:col-span-2" size="sm">
             Add supplier
-          </button>
+          </Button>
         </form>
       ) : null}
 
@@ -300,7 +301,7 @@ export function SuppliersClient({
       {rows.length === 0 ? (
         <EmptyState
           title="No suppliers yet"
-          body="Add a supplier with a contact email, then send a tokenised request. Their response lands in Scope 3 without creating an account."
+          body="Add a supplier with a contact email, then send them a one-link request. Their reply lands in Scope 3 — they do not need an account."
         />
       ) : (
         <div className="mt-6 overflow-x-auto border-t border-rule">
@@ -325,8 +326,8 @@ export function SuppliersClient({
                   <td className="px-3 py-3 font-data text-ink">
                     {r.annualSpend === null ? "—" : r.annualSpend.toLocaleString()}
                   </td>
-                  <td className="px-3 py-3 font-data text-ink-muted">
-                    {r.requestStatus}
+                  <td className="px-3 py-3 text-ink-muted">
+                    {requestStatusLabel(r.requestStatus)}
                   </td>
                   <td className="px-3 py-3">
                     {canWrite ? (

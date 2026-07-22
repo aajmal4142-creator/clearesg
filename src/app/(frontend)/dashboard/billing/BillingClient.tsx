@@ -6,6 +6,7 @@ import { PageFrame, StatusLine } from "@/components/shell/PageFrame";
 import type { MembershipRole } from "@/lib/access/membership";
 import { PLAN_LIMITS, type PlanId } from "@/lib/billing/plans";
 import type { UsageMeters } from "@/lib/billing/usage";
+import { subscriptionStatusLabel } from "@/lib/ui/displayLabels";
 
 type BillingState = {
   plan: PlanId;
@@ -127,7 +128,7 @@ export function BillingClient({
     <PageFrame
       eyebrow="Billing"
       title="Plan & usage"
-      help="Entitlements are enforced server-side. Free keeps full calculation; paid unlocks clean PDF, periods, evidence, and consultant tooling."
+      help="Free includes full calculation. Paid plans unlock clean PDF export, extra periods, evidence storage, and consultant tools."
       actions={
         readOnlyNonOwner ? (
           <p className="text-sm text-ink-muted">Read-only — ask an owner to upgrade</p>
@@ -142,7 +143,9 @@ export function BillingClient({
               ? ` · €${PLAN_LIMITS[state.plan].priceEur}/mo`
               : ""}
           </p>
-          <p className="font-data text-xs">status {state.subscriptionStatus}</p>
+          <p className="font-data text-xs">
+            {subscriptionStatusLabel(state.subscriptionStatus)}
+          </p>
           {state.usage.watermarkedPdf ? (
             <p className="text-amber">
               PDFs are watermarked on Free. Upgrade to Pro for a clean export.
@@ -192,11 +195,14 @@ export function BillingClient({
           used={state.usage.suppliers.used}
           max={state.usage.suppliers.max}
         />
-        <Meter
-          label="Clients"
-          used={state.usage.clients.used}
-          max={state.usage.clients.max}
-        />
+        {state.plan !== "free" &&
+        (state.usage.clients.max === null || state.usage.clients.max > 0) ? (
+          <Meter
+            label="Clients"
+            used={state.usage.clients.used}
+            max={state.usage.clients.max}
+          />
+        ) : null}
       </section>
 
       <section className="mt-8 grid gap-6 border-t border-rule pt-4 md:grid-cols-2">

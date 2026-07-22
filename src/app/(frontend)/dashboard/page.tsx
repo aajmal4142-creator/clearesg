@@ -232,13 +232,13 @@ export default async function RunwayPage() {
   return (
     <PageFrame
       eyebrow="Compliance runway"
-      title={ctx.activeOrg.name}
+      title="Compliance runway"
       help="Countdown to filing — live scores from your datapoints, not placeholders."
       context={
         period
           ? {
               period: `${String(period.startDate).slice(0, 10)} → ${String(period.endDate).slice(0, 10)}`,
-              status: calm.label,
+              status: `${period.status === "open" ? "Open" : period.status} · ${calm.label}`,
             }
           : { status: calm.label }
       }
@@ -275,7 +275,7 @@ export default async function RunwayPage() {
                 </div>
                 <div className="mt-2 flex justify-between text-xs font-semibold uppercase tracking-[0.08em] text-ink-muted">
                   <span>
-                    S1{" "}
+                    Scope 1{" "}
                     <Metric
                       value={scope1}
                       size="sm"
@@ -285,7 +285,7 @@ export default async function RunwayPage() {
                     />
                   </span>
                   <span>
-                    S2{" "}
+                    Scope 2{" "}
                     <Metric
                       value={scope2}
                       size="sm"
@@ -295,7 +295,7 @@ export default async function RunwayPage() {
                     />
                   </span>
                   <span>
-                    S3{" "}
+                    Scope 3{" "}
                     <Metric
                       value={scope3}
                       size="sm"
@@ -411,8 +411,13 @@ export default async function RunwayPage() {
               />{" "}
               days.
             </p>
-          ) : (
+          ) : calm.level === "on_track" ? (
             <p className="mt-4 text-signal">On track at current collection rate.</p>
+          ) : (
+            <p className="mt-4 text-ink-muted">
+              Collection pace is fine — finish the missing metrics below to clear{" "}
+              {calm.label.toLowerCase()}.
+            </p>
           )}
           <p className="mt-4 text-sm text-ink-muted">
             Assigned to you: {assignedToMe.length}
@@ -420,7 +425,12 @@ export default async function RunwayPage() {
               <span className="text-rust"> ({overdue.length} overdue)</span>
             ) : null}
             {" · "}
-            Pending approval: {pendingApproval}
+            <Link
+              href="/dashboard/data"
+              className="text-accent underline-offset-2 hover:underline"
+            >
+              Pending approval: {pendingApproval}
+            </Link>
           </p>
         </Assemble>
       )}

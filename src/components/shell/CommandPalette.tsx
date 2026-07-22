@@ -9,11 +9,17 @@ import { buildNavGroups } from "@/components/shell/navConfig";
 export function CommandPalette({
   orgType,
   onboarded,
+  open: openProp,
+  onOpenChange,
 }: {
   orgType: "company" | "consultancy" | null;
   onboarded: boolean;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }) {
-  const [open, setOpen] = useState(false);
+  const [internalOpen, setInternalOpen] = useState(false);
+  const open = openProp ?? internalOpen;
+  const setOpen = onOpenChange ?? setInternalOpen;
   const router = useRouter();
   const groups = useMemo(
     () => buildNavGroups({ orgType, onboarded }),
@@ -24,13 +30,13 @@ export function CommandPalette({
     const onKey = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
         e.preventDefault();
-        setOpen((v) => !v);
+        setOpen(!open);
       }
       if (e.key === "Escape") setOpen(false);
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, []);
+  }, [open, setOpen]);
 
   if (!open) return null;
 
@@ -72,7 +78,7 @@ export function CommandPalette({
                         setOpen(false);
                         router.push(item.href);
                       }}
-                      className="flex cursor-pointer items-center gap-2 rounded-[4px] px-2 py-2 text-sm text-ink aria-selected:bg-accent-quiet"
+                      className="flex cursor-pointer items-center gap-2 rounded-[4px] px-2 py-2 text-sm text-ink aria-selected:bg-accent aria-selected:text-canvas"
                     >
                       <Icon className="size-4 text-ink-muted" aria-hidden />
                       {item.label}

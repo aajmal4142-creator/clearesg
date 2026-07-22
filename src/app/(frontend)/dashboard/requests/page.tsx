@@ -8,7 +8,10 @@ import {
   PageSkeleton,
   StatusLine,
 } from "@/components/shell/PageFrame";
+import { AppField, AppSelectNative, appFieldClass } from "@/components/ui/AppField";
 import { Button } from "@/components/ui/button";
+import { requestStatusLabel } from "@/lib/ui/displayLabels";
+import { cn } from "@/lib/utils";
 
 type RequestRow = {
   id: string;
@@ -134,9 +137,9 @@ export default function RequestsPage() {
 
   return (
     <PageFrame
-      eyebrow="Intra-org"
+      eyebrow="Requests"
       title="Internal data requests"
-      help="Assign structured metric packs to teammates. Same request-status pattern as suppliers — Membership users, not public tokens."
+      help="Assign a metric checklist to a teammate with a due date. They sign in to respond."
       rail={
         <div className="text-sm text-ink-muted">
           <p className="label-caps text-ink">Open</p>
@@ -150,49 +153,43 @@ export default function RequestsPage() {
       {!loading && !loadError ? (
         <>
           <div className="space-y-3 border-b border-rule pb-8">
-            <input
-              className="w-full border border-rule bg-surface-1 px-3 py-2 text-sm"
+            <AppField
+              label="Title"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              placeholder="Title"
-              aria-label="Request title"
+              placeholder="Q1 energy pack"
             />
-            <label className="block text-sm">
-              <span className="label-caps">Assignee</span>
-              <select
-                className="mt-1 w-full border border-rule bg-surface-1 px-3 py-2 text-sm"
-                value={assigneeId}
-                onChange={(e) => setAssigneeId(e.target.value)}
-              >
-                <option value="">Select teammate</option>
-                {teammates.map((t) => (
-                  <option key={t.id} value={t.id}>
-                    {t.name || t.email || t.id}
-                  </option>
-                ))}
-              </select>
-            </label>
+            <AppSelectNative
+              label="Assignee"
+              value={assigneeId}
+              onChange={(e) => setAssigneeId(e.target.value)}
+            >
+              <option value="">Select teammate</option>
+              {teammates.map((t) => (
+                <option key={t.id} value={t.id}>
+                  {t.name || t.email || t.id}
+                </option>
+              ))}
+            </AppSelectNative>
             {teammates.length === 0 ? (
               <p className="text-xs text-ink-muted">
                 No teammates found. Invite members before assigning requests.
               </p>
             ) : null}
-            <input
-              className="w-full border border-rule bg-surface-1 px-3 py-2 font-data text-sm"
+            <AppField
+              label="Metrics"
+              className="font-data"
               value={metricKeys}
               onChange={(e) => setMetricKeys(e.target.value)}
-              placeholder="metric keys, comma-separated"
-              aria-label="Metric keys"
+              placeholder="e.g. electricity_kwh, diesel_litres"
             />
-            <label className="block text-sm">
-              <span className="label-caps">Due date</span>
-              <input
-                type="date"
-                className="mt-1 w-full border border-rule bg-surface-1 px-3 py-2 font-data text-sm"
-                value={dueDate}
-                onChange={(e) => setDueDate(e.target.value)}
-              />
-            </label>
+            <AppField
+              type="date"
+              label="Due date"
+              className="font-data"
+              value={dueDate}
+              onChange={(e) => setDueDate(e.target.value)}
+            />
             <Button type="button" size="sm" onClick={() => void create()}>
               Send request
             </Button>
@@ -212,22 +209,25 @@ export default function RequestsPage() {
                     <div>
                       <p className="text-ink">{r.title}</p>
                       <p className="font-data text-xs text-ink-muted">
-                        {r.requestStatus}
+                        {requestStatusLabel(r.requestStatus)}
                         {r.dueDate ? ` · due ${String(r.dueDate).slice(0, 10)}` : ""}
                         {" · "}
                         {r.metricKeys.join(", ")}
                       </p>
                     </div>
                     <select
-                      className="border border-rule bg-surface-1 px-2 py-1 text-xs"
+                      className={cn(
+                        appFieldClass,
+                        "w-auto appearance-none px-2 py-1 text-xs",
+                      )}
                       value={r.requestStatus}
                       onChange={(e) => void patchStatus(r.id, e.target.value)}
                       aria-label={`Status for ${r.title}`}
                     >
-                      <option value="not_sent">not_sent</option>
-                      <option value="sent">sent</option>
-                      <option value="opened">opened</option>
-                      <option value="submitted">submitted</option>
+                      <option value="not_sent">{requestStatusLabel("not_sent")}</option>
+                      <option value="sent">{requestStatusLabel("sent")}</option>
+                      <option value="opened">{requestStatusLabel("opened")}</option>
+                      <option value="submitted">{requestStatusLabel("submitted")}</option>
                     </select>
                   </div>
                 </li>

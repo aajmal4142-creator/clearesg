@@ -4,6 +4,7 @@ import { useState } from "react";
 
 import { EmptyState, PageFrame, StatusLine } from "@/components/shell/PageFrame";
 import { BUYER_FAQ } from "@/lib/reports/buyerFaq";
+import { frameworkLabel } from "@/lib/ui/displayLabels";
 
 type ReportRow = {
   id: string;
@@ -248,13 +249,25 @@ export function ReportsClient({
               {rows.map((r) => (
                 <tr key={r.id} className="border-b border-rule/60">
                   <td className="px-3 py-3 font-data text-ink">v{r.version}</td>
-                  <td className="px-3 py-3 text-ink-muted">{r.framework}</td>
+                  <td className="px-3 py-3 text-ink-muted">
+                    {frameworkLabel(r.framework)}
+                  </td>
                   <td className="px-3 py-3 font-data text-ink">
                     {r.scores?.overall ?? "—"}
                   </td>
                   <td className="px-3 py-3 font-data text-ink-muted">{r.viewCount}</td>
                   <td className="px-3 py-3">
-                    <div className="flex flex-wrap gap-3">
+                    <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+                      {r.shareToken ? (
+                        <a
+                          className="text-signal underline-offset-2 hover:underline"
+                          href={`/r/${r.shareToken}`}
+                          target="_blank"
+                          rel="noreferrer"
+                        >
+                          Open live report
+                        </a>
+                      ) : null}
                       <a
                         className="text-ink underline-offset-2 hover:underline"
                         href={`/api/app/reports/${r.id}/pdf`}
@@ -263,32 +276,25 @@ export function ReportsClient({
                       >
                         PDF
                       </a>
-                      <a
-                        className="text-ink-muted underline-offset-2 hover:underline"
-                        href={`/api/app/reports/${r.id}/export?format=json`}
-                        target="_blank"
-                        rel="noreferrer"
-                      >
-                        JSON
-                      </a>
-                      <a
-                        className="text-ink-muted underline-offset-2 hover:underline"
-                        href={`/api/app/reports/${r.id}/export?format=csv`}
-                        target="_blank"
-                        rel="noreferrer"
-                      >
-                        CSV
-                      </a>
-                      {r.shareToken ? (
+                      <span className="text-xs text-ink-muted">
                         <a
-                          className="text-signal underline-offset-2 hover:underline"
-                          href={`/r/${r.shareToken}`}
+                          className="underline-offset-2 hover:underline"
+                          href={`/api/app/reports/${r.id}/export?format=json`}
                           target="_blank"
                           rel="noreferrer"
                         >
-                          Living
+                          JSON
                         </a>
-                      ) : null}
+                        <span aria-hidden="true"> · </span>
+                        <a
+                          className="underline-offset-2 hover:underline"
+                          href={`/api/app/reports/${r.id}/export?format=csv`}
+                          target="_blank"
+                          rel="noreferrer"
+                        >
+                          CSV
+                        </a>
+                      </span>
                     </div>
                   </td>
                 </tr>

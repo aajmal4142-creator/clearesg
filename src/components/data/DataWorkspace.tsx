@@ -18,7 +18,21 @@ import { suggestMetricFromFilename } from "@/lib/data/suggestMetric";
 import type { FactorRecord, Quality } from "@/lib/calc";
 import { DERIVED_METRICS } from "@/lib/derive/registry";
 import { cn } from "@/lib/utils";
+import { evidenceLabel, qualityLabel } from "@/lib/ui/displayLabels";
 import { toast } from "sonner";
+
+const IMPORT_COLUMN_LABELS: Record<string, string> = {
+  metricKey: "Metric ID",
+  label: "Label",
+  value: "Value",
+  unit: "Unit",
+  period: "Period",
+  quality: "Quality",
+  evidenceRef: "Evidence ref",
+  note: "Note",
+  frameworkCell: "Framework cell",
+  assignee: "Assignee",
+};
 
 export type DataRowState = {
   metricKey: string;
@@ -133,8 +147,10 @@ export function DataWorkspace({
         setStatusTone("neutral");
         setStatus("Saved. Approval reset to pending — re-validation required.");
       } else {
+        const label =
+          DATA_METRICS.find((m) => m.key === row.metricKey)?.label ?? row.metricKey;
         setStatusTone("ok");
-        setStatus(`Saved ${row.metricKey}`);
+        setStatus(`Saved ${label}`);
       }
     },
     [canWrite, periodLocked],
@@ -355,8 +371,11 @@ export function DataWorkspace({
           <p className="label-caps text-ink">Derived</p>
           <ul className="space-y-1 text-xs">
             {DERIVED_METRICS.slice(0, 6).map((d) => (
-              <li key={d.key} className="font-data">
-                {d.key}
+              <li key={d.key}>
+                <span className="text-ink">{d.label.replace(/ \(derived\)$/i, "")}</span>
+                {d.unit ? (
+                  <span className="font-data text-ink-muted"> · {d.unit}</span>
+                ) : null}
               </li>
             ))}
           </ul>
@@ -386,7 +405,7 @@ export function DataWorkspace({
                       );
                     }}
                   />
-                  {c}
+                  {IMPORT_COLUMN_LABELS[c] ?? c}
                 </label>
               ))}
             </div>
@@ -512,11 +531,10 @@ export function DataWorkspace({
                         void onEvidenceDrop(row.metricKey, e.dataTransfer.files);
                     }}
                   >
-                    <td className="py-2 pr-2">
+                    <td className="sticky left-0 z-[1] bg-canvas py-2 pr-2">
                       <p className="text-ink">{def.label}</p>
-                      <p className="font-data text-[10px] text-ink-muted">
-                        {row.metricKey}
-                        {def.unit ? ` · ${def.unit}` : null}
+                      <p className="text-[10px] text-ink-muted">
+                        {def.unit ? def.unit : null}
                         {locked && periodLocked ? " · locked" : null}
                       </p>
                     </td>
@@ -599,8 +617,11 @@ export function DataWorkspace({
                             key={q}
                             type="button"
                             disabled={locked}
+                            title={qualityLabel(q)}
+                            aria-label={qualityLabel(q)}
+                            aria-pressed={row.quality === q}
                             className={cn(
-                              "rounded-[2px] px-1.5 py-0.5 text-[10px] uppercase tracking-wide",
+                              "min-h-9 min-w-9 rounded-[2px] px-2 py-1.5 text-[11px]",
                               row.quality === q
                                 ? "bg-accent text-primary-foreground"
                                 : "bg-surface-1 text-ink-muted hover:text-ink",
@@ -615,7 +636,7 @@ export function DataWorkspace({
                               void saveRow(next);
                             }}
                           >
-                            {q.slice(0, 3)}
+                            {qualityLabel(q)}
                           </button>
                         ))}
                       </div>
@@ -624,7 +645,7 @@ export function DataWorkspace({
                       <label className="inline-flex cursor-pointer items-center gap-1 text-xs">
                         <span
                           className={cn(
-                            "rounded-[2px] border px-1.5 py-0.5 font-data text-[10px] uppercase",
+                            "rounded-[2px] border px-1.5 py-0.5 text-[10px]",
                             row.evidenceCount > 0
                               ? "border-signal text-signal"
                               : "border-amber text-amber",
@@ -632,10 +653,10 @@ export function DataWorkspace({
                           title={
                             row.evidenceCount > 0
                               ? "Evidence attached — drop another file to add"
-                              : "Bare — drop a bill onto this row"
+                              : "No evidence yet — drop a bill onto this row"
                           }
                         >
-                          {row.evidenceCount > 0 ? "evidenced" : "bare"}
+                          {evidenceLabel(row.evidenceCount > 0 ? "evidenced" : "bare")}
                         </span>
                         {!locked ? (
                           <input
@@ -651,7 +672,8 @@ export function DataWorkspace({
                     <td className="py-2 pr-2">
                       <select
                         disabled={locked || teammates.length === 0}
-                        className="max-w-[9rem] border border-rule bg-surface-1 px-1 py-1 text-xs"
+                        aria-label={`Owner for ${def.label}`}
+                        className="max-w-[9rem] appearance-none rounded-[4px] border border-rule bg-surface-1 px-2 py-1.5 text-xs text-ink disabled:opacity-50"
                         value={row.assignedTo ?? ""}
                         onChange={(e) => {
                           const assignedTo = e.target.value || null;
@@ -660,7 +682,11 @@ export function DataWorkspace({
                           void saveRow(next);
                         }}
                       >
-                        <option value="">Unassigned</option>
+                        <option value="">
+                          {teammates.length === 0
+                            ? "Invite teammates to assign"
+                            : "Unassigned"}
+                        </option>
                         {teammates.map((t) => (
                           <option key={t.id} value={t.id}>
                             {t.name || t.email || t.id}

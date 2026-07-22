@@ -5,6 +5,7 @@ import { useState } from "react";
 import { EmptyState, PageFrame, StatusLine } from "@/components/shell/PageFrame";
 import { Button } from "@/components/ui/button";
 import { Metric } from "@/components/ui/metric";
+import { qualityLabel } from "@/lib/ui/displayLabels";
 
 type FieldRow = {
   fieldId: string;
@@ -72,7 +73,7 @@ export default function QuestionnairesPage() {
     <PageFrame
       eyebrow="Inbound questionnaire"
       title="Buyer questionnaire response"
-      help="Maps your canonical datapoints to a buyer questionnaire (EcoVadis-lite). Deterministic — no AI. Not a filing."
+      help="Fills a buyer questionnaire (EcoVadis-lite) from the metrics you already entered. Same numbers every time — no AI. This is a response pack, not a filing."
       actions={
         <Button type="button" size="sm" disabled={busy} onClick={() => void generate()}>
           {busy ? "Generating…" : "Generate evidenced export"}
@@ -114,7 +115,7 @@ export default function QuestionnairesPage() {
       {!payload && !error ? (
         <EmptyState
           title="No export yet"
-          body="Generate an evidenced JSON mapping from your open-period datapoints. Unmapped fields stay explicit — never silently zero."
+          body="Generate a downloadable response from your current period data. Fields we cannot map stay blank — we never invent zeros."
         />
       ) : null}
 
@@ -149,7 +150,7 @@ export default function QuestionnairesPage() {
                     {r.value == null ? "—" : r.value}
                     {r.unit ? ` ${r.unit}` : ""}
                   </td>
-                  <td className="py-2 pr-2 text-xs">{r.quality}</td>
+                  <td className="py-2 pr-2 text-xs">{qualityLabel(r.quality)}</td>
                   <td className="py-2 text-xs">{r.status}</td>
                 </tr>
               ))}
