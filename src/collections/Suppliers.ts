@@ -34,6 +34,14 @@ export const Suppliers: CollectionConfig = {
     },
     { name: "annualSpend", type: "number", min: 0 },
     {
+      name: "requestPeriod",
+      type: "relationship",
+      relationTo: "reporting-periods",
+      admin: {
+        description: "Reporting period this request token is bound to",
+      },
+    },
+    {
       name: "requestToken",
       type: "text",
       unique: true,

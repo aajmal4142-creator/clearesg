@@ -2,6 +2,7 @@ import type { Payload } from "payload";
 
 import { writeAuditLog } from "@/lib/audit/write";
 import type { Quality } from "@/lib/calc";
+import { NO_SUPPLIER_KEY } from "@/lib/suppliers/supplierKey";
 
 export type DatapointWriteInput = {
   organisationId: string;
@@ -36,6 +37,7 @@ export async function writeDatapoint(
         { organisation: { equals: input.organisationId } },
         { period: { equals: input.periodId } },
         { metricKey: { equals: input.metricKey } },
+        { supplierKey: { equals: NO_SUPPLIER_KEY } },
       ],
     },
     limit: 1,
@@ -53,6 +55,8 @@ export async function writeDatapoint(
     unit: input.unit ?? undefined,
     quality: input.quality,
     source: input.source,
+    supplierKey: NO_SUPPLIER_KEY,
+    provenance: "manual",
     enteredBy: input.actorId,
     enteredAt: new Date().toISOString(),
   };

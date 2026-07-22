@@ -399,6 +399,22 @@ export interface Datapoint {
   value?: number | null;
   unit?: string | null;
   quality: 'measured' | 'calculated' | 'estimated' | 'missing';
+  /**
+   * Where this Scope 3 figure came from. Independent of quality (measured vs estimated).
+   */
+  provenance?: ('supplier_primary' | 'spend_estimate' | 'manual') | null;
+  /**
+   * Supplier that produced this contribution, when applicable
+   */
+  supplier?: (string | null) | Supplier;
+  /**
+   * Sentinel unique-index key. Empty string = no supplier. Never null.
+   */
+  supplierKey: string;
+  /**
+   * Pinned EmissionFactor id used when this value was derived
+   */
+  factorId?: string | null;
   evidence?: (string | Evidence)[] | null;
   source: 'manual' | 'import' | 'supplier' | 'estimate' | 'api' | 'internal_survey';
   approvalState: 'pending' | 'approved' | 'rejected';
@@ -412,6 +428,40 @@ export interface Datapoint {
   enteredBy?: (string | null) | User;
   enteredAt?: string | null;
   note?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "suppliers".
+ */
+export interface Supplier {
+  id: string;
+  organisation: string | Organisation;
+  name: string;
+  contactEmail: string;
+  category: 'purchased_goods' | 'capital_goods' | 'transport' | 'waste' | 'business_travel' | 'other';
+  annualSpend?: number | null;
+  /**
+   * Reporting period this request token is bound to
+   */
+  requestPeriod?: (string | null) | ReportingPeriod;
+  requestToken?: string | null;
+  requestStatus?: ('not_sent' | 'sent' | 'opened' | 'submitted' | 'declined') | null;
+  sentAt?: string | null;
+  requestExpiresAt?: string | null;
+  respondedAt?: string | null;
+  lastReminderAt?: string | null;
+  submittedData?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  reminderCount?: number | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -447,36 +497,6 @@ export interface Evidence {
    * OCR is not productized; new uploads should set skipped until a worker ships.
    */
   ocrStatus?: ('pending' | 'done' | 'failed' | 'skipped') | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "suppliers".
- */
-export interface Supplier {
-  id: string;
-  organisation: string | Organisation;
-  name: string;
-  contactEmail: string;
-  category: 'purchased_goods' | 'capital_goods' | 'transport' | 'waste' | 'business_travel' | 'other';
-  annualSpend?: number | null;
-  requestToken?: string | null;
-  requestStatus?: ('not_sent' | 'sent' | 'opened' | 'submitted' | 'declined') | null;
-  sentAt?: string | null;
-  requestExpiresAt?: string | null;
-  respondedAt?: string | null;
-  lastReminderAt?: string | null;
-  submittedData?:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
-  reminderCount?: number | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1020,6 +1040,10 @@ export interface DatapointsSelect<T extends boolean = true> {
   value?: T;
   unit?: T;
   quality?: T;
+  provenance?: T;
+  supplier?: T;
+  supplierKey?: T;
+  factorId?: T;
   evidence?: T;
   source?: T;
   approvalState?: T;
@@ -1063,6 +1087,7 @@ export interface SuppliersSelect<T extends boolean = true> {
   contactEmail?: T;
   category?: T;
   annualSpend?: T;
+  requestPeriod?: T;
   requestToken?: T;
   requestStatus?: T;
   sentAt?: T;

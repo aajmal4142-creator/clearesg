@@ -36,7 +36,7 @@ export const SUPPLIER_FORM_FIELDS = [
   },
   {
     key: "estimated_tco2e",
-    label: "Estimated Scope 1+2 emissions (if known)",
+    label: "Your greenhouse gas emissions (if you already track them)",
     unit: "tCO2e",
     required: false,
   },
@@ -44,9 +44,12 @@ export const SUPPLIER_FORM_FIELDS = [
 
 export type SupplierFormFieldKey = (typeof SUPPLIER_FORM_FIELDS)[number]["key"];
 
-export type SupplierFormValues = Partial<Record<SupplierFormFieldKey, number | null>>;
+export type SupplierFormValues = Partial<
+  Record<SupplierFormFieldKey, number | null> & { is_metered?: boolean | null }
+>;
 
 export const SUPPLIER_REPORTED_METRIC = "supplier_reported_tco2e";
+export const SUPPLIER_SPEND_ESTIMATE_METRIC = "supplier_spend_estimate_tco2e";
 
 export const REQUEST_TTL_DAYS = 30;
 export const REMINDER_DAYS = [7, 14] as const;
