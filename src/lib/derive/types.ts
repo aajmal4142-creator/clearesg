@@ -24,9 +24,22 @@ export type DerivedValue = {
 };
 
 export type FrameworkMapping = {
-  framework: "CSRD_SET1" | "CSRD_SIMPLIFIED" | "BRSR" | "VSME" | "GRI";
+  framework:
+    | "CSRD_SET1"
+    | "CSRD_SIMPLIFIED"
+    | "BRSR"
+    | "VSME"
+    | "GRI"
+    | "ISSB_S1"
+    | "ISSB_S2"
+    | "EU_TAXONOMY";
+  /** Disclosure code (product alias: disclosureCode). */
   datapointRef: string;
+  /** Human disclosure name. */
+  label: string;
   required: boolean;
+  /** When true, contributes only — never alone satisfies. */
+  contributionOnly: boolean;
   validFrom: string | null;
   validUntil: string | null;
   sourceDoc: string;

@@ -15,9 +15,20 @@ export type MetricCategory = "E" | "S" | "G";
 export type MetricInputType = "number" | "boolean" | "select";
 
 export interface FrameworkMapping {
-  framework: "CSRD_SET1" | "CSRD_SIMPLIFIED" | "BRSR" | "VSME" | "GRI";
+  framework:
+    | "CSRD_SET1"
+    | "CSRD_SIMPLIFIED"
+    | "BRSR"
+    | "VSME"
+    | "GRI"
+    | "ISSB_S1"
+    | "ISSB_S2"
+    | "EU_TAXONOMY";
+  /** Disclosure code (product alias: disclosureCode). */
   datapointRef: string;
+  label?: string;
   required: boolean;
+  contributionOnly?: boolean;
   validFrom?: string;
   validUntil?: string;
 }

@@ -2,6 +2,8 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 
+import { FrameworkChips } from "@/components/data/FrameworkChips";
+import { FrameworkCoveragePanel } from "@/components/data/FrameworkCoveragePanel";
 import { ApprovalChip } from "@/components/governance/ApprovalChip";
 import { PageFrame, StatusLine } from "@/components/shell/PageFrame";
 import { Button } from "@/components/ui/button";
@@ -17,6 +19,11 @@ import {
 import { suggestMetricFromFilename } from "@/lib/data/suggestMetric";
 import type { FactorRecord, Quality } from "@/lib/calc";
 import { DERIVED_METRICS } from "@/lib/derive/registry";
+import {
+  coverageFromData,
+  type DatapointProvenance,
+  type FrameworkId,
+} from "@/lib/frameworks";
 import { cn } from "@/lib/utils";
 import { evidenceLabel, qualityLabel } from "@/lib/ui/displayLabels";
 import { toast } from "sonner";
@@ -42,6 +49,7 @@ export type DataRowState = {
   approvalState: string;
   evidenceCount: number;
   assignedTo: string | null;
+  provenance?: DatapointProvenance | null;
 };
 
 type Teammate = { id: string; email: string; name: string };
@@ -55,6 +63,7 @@ export function DataWorkspace({
   region,
   year,
   canWrite,
+  applicableFrameworks: applicable = [],
 }: {
   initialRows: DataRowState[];
   periodLocked: boolean;
@@ -62,6 +71,7 @@ export function DataWorkspace({
   region: string;
   year: number;
   canWrite: boolean;
+  applicableFrameworks?: FrameworkId[];
 }) {
   const [mode, setMode] = useState<Mode>("enter");
   const [rows, setRows] = useState<DataRowState[]>(() => {
@@ -77,10 +87,25 @@ export function DataWorkspace({
           approvalState: "pending",
           evidenceCount: 0,
           assignedTo: null,
+          provenance: null,
         }
       );
     });
   });
+
+  const coverage = useMemo(
+    () =>
+      coverageFromData({
+        applicable,
+        datapoints: rows.map((r) => ({
+          metricKey: r.metricKey,
+          quality: r.quality,
+          provenance: r.provenance ?? null,
+        })),
+      }),
+    [applicable, rows],
+  );
+
   const [status, setStatus] = useState<string | null>(null);
   const [statusTone, setStatusTone] = useState<"neutral" | "error" | "ok">("neutral");
   const [teammates, setTeammates] = useState<Teammate[]>([]);
@@ -384,6 +409,8 @@ export function DataWorkspace({
     >
       {status ? <StatusLine tone={statusTone}>{status}</StatusLine> : null}
 
+      <FrameworkCoveragePanel summaries={coverage.byFramework} />
+
       {mode === "spreadsheet" ? (
         <div className="space-y-6">
           <p className="text-sm text-ink-muted">
@@ -537,6 +564,7 @@ export function DataWorkspace({
                         {def.unit ? def.unit : null}
                         {locked && periodLocked ? " · locked" : null}
                       </p>
+                      <FrameworkChips metricKey={row.metricKey} applicable={applicable} />
                     </td>
                     <td className="py-2 pr-2">
                       {def.inputType === "boolean" ? (

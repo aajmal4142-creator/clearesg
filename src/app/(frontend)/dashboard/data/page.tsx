@@ -5,6 +5,12 @@ import { DataWorkspace, type DataRowState } from "@/components/data/DataWorkspac
 import { getCurrentContext } from "@/lib/auth";
 import type { FactorRecord, Quality } from "@/lib/calc";
 import { DATA_METRICS } from "@/lib/data";
+import {
+  applicableFrameworks,
+  type DatapointProvenance,
+  type FrameworkId,
+} from "@/lib/frameworks";
+import type { ObligationStandard } from "@/lib/obligations/types";
 import config from "@/payload.config";
 
 export default async function DataPage() {
@@ -42,6 +48,7 @@ export default async function DataPage() {
     });
     for (const dp of dps.docs) {
       const def = DATA_METRICS.find((m) => m.key === dp.metricKey);
+      const provenance = dp.provenance as DatapointProvenance | null | undefined;
       initialRows.push({
         metricKey: dp.metricKey,
         value: typeof dp.value === "number" ? dp.value : null,
@@ -51,9 +58,28 @@ export default async function DataPage() {
         evidenceCount: Array.isArray(dp.evidence) ? dp.evidence.length : 0,
         assignedTo:
           typeof dp.assignedTo === "string" ? dp.assignedTo : (dp.assignedTo?.id ?? null),
+        provenance: provenance ?? null,
       });
     }
   }
+
+  const obligations = await payload.find({
+    collection: "compliance-obligations",
+    where: { organisation: { equals: ctx.activeOrg.id } },
+    limit: 20,
+    overrideAccess: true,
+  });
+  const standardVersions = [
+    ...new Set(obligations.docs.map((o) => o.standardVersion as ObligationStandard)),
+  ];
+  const voluntary =
+    obligations.docs.length === 0 ||
+    obligations.docs.every((o) => o.filingDeadline == null);
+  const frameworksApplicable: FrameworkId[] = applicableFrameworks({
+    standardVersions:
+      standardVersions.length > 0 ? standardVersions : (["VSME"] as ObligationStandard[]),
+    voluntary,
+  });
 
   const factorsResult = await payload.find({
     collection: "emission-factors",
@@ -84,6 +110,7 @@ export default async function DataPage() {
       region={ctx.activeOrg.country || "GB"}
       year={year}
       canWrite={ctx.role !== "viewer" && ctx.role !== null}
+      applicableFrameworks={frameworksApplicable}
     />
   );
 }
