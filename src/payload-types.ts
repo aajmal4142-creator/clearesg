@@ -658,10 +658,35 @@ export interface ComplianceObligation {
    */
   firstReportingFY: string;
   /**
-   * The countdown the Compliance Runway displays
+   * Countdown the Compliance Runway displays. Leave empty for voluntary / not in mandatory scope — never invent a date.
    */
-  filingDeadline: string;
+  filingDeadline?: string | null;
   notes?: string | null;
+  /**
+   * Plain-language why this obligation was derived or overridden
+   */
+  derivationReason?: string | null;
+  /**
+   * needs_confirmation surfaces a gentle Runway prompt; derived is still confirmable, never legal advice
+   */
+  confidence?: ('derived' | 'needs_confirmation') | null;
+  /**
+   * Manual overrides are sticky on baseline change — do not silently overwrite
+   */
+  source?: ('engine' | 'manual') | null;
+  /**
+   * When an Owner/Admin confirmed or overrode the obligation
+   */
+  confirmedAt?: string | null;
+  /**
+   * Baseline snapshot used at last engine derivation
+   */
+  derivedInputs?: {
+    country?: string | null;
+    headcount?: number | null;
+    revenueBand?: ('lt_2m' | '2_10m' | '10_50m' | '50_250m' | 'gt_250m') | null;
+    asOf?: string | null;
+  };
   updatedAt: string;
   createdAt: string;
 }
@@ -1187,6 +1212,18 @@ export interface ComplianceObligationsSelect<T extends boolean = true> {
   firstReportingFY?: T;
   filingDeadline?: T;
   notes?: T;
+  derivationReason?: T;
+  confidence?: T;
+  source?: T;
+  confirmedAt?: T;
+  derivedInputs?:
+    | T
+    | {
+        country?: T;
+        headcount?: T;
+        revenueBand?: T;
+        asOf?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
 }
