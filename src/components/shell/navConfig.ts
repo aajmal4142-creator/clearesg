@@ -61,6 +61,7 @@ export function buildNavGroups(opts: {
 
   const assure: NavItem[] = [
     { href: "/dashboard/guide", label: "Guide", icon: BookOpen },
+    { href: "/dashboard/assurance", label: "Assurance", icon: ClipboardList },
     { href: "/dashboard/audit", label: "Audit", icon: ShieldCheck },
     { href: "/dashboard/benchmarks", label: "Benchmarks", icon: BarChart3 },
   ];

@@ -81,6 +81,16 @@ export const Reports: CollectionConfig = {
     },
     { name: "pdfUrl", type: "text" },
     { name: "shareToken", type: "text", unique: true, index: true },
+    {
+      name: "assuranceToken",
+      type: "text",
+      unique: true,
+      index: true,
+      admin: {
+        description:
+          "Token for read-only /a/[token] Assurance Room (no Membership role).",
+      },
+    },
     { name: "shareExpiresAt", type: "date" },
     { name: "viewCount", type: "number", defaultValue: 0, min: 0 },
     { name: "publishedAt", type: "date" },

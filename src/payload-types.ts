@@ -306,9 +306,20 @@ export interface MetricDefinition {
   calcRole: string;
   frameworkMappings?:
     | {
-        framework: 'CSRD_SET1' | 'CSRD_SIMPLIFIED' | 'BRSR' | 'VSME' | 'GRI';
+        framework: 'CSRD_SET1' | 'CSRD_SIMPLIFIED' | 'BRSR' | 'VSME' | 'GRI' | 'ISSB_S1' | 'ISSB_S2' | 'EU_TAXONOMY';
+        /**
+         * Disclosure code (product alias: disclosureCode). Not a datapoint document id.
+         */
         datapointRef: string;
+        /**
+         * Human disclosure name (counsel placeholder OK).
+         */
+        label?: string | null;
         required?: boolean | null;
+        /**
+         * When true, data contributes to this disclosure — never alone satisfies it.
+         */
+        contributionOnly?: boolean | null;
         validFrom?: string | null;
         validUntil?: string | null;
         sourceDoc?: string | null;
@@ -333,9 +344,20 @@ export interface DerivedMetricDefinition {
   unit: string;
   frameworkMappings?:
     | {
-        framework: 'CSRD_SET1' | 'CSRD_SIMPLIFIED' | 'BRSR' | 'VSME' | 'GRI';
+        framework: 'CSRD_SET1' | 'CSRD_SIMPLIFIED' | 'BRSR' | 'VSME' | 'GRI' | 'ISSB_S1' | 'ISSB_S2' | 'EU_TAXONOMY';
+        /**
+         * Disclosure code (product alias: disclosureCode). Not a datapoint document id.
+         */
         datapointRef: string;
+        /**
+         * Human disclosure name (counsel placeholder OK).
+         */
+        label?: string | null;
         required?: boolean | null;
+        /**
+         * When true, data contributes to this disclosure — never alone satisfies it.
+         */
+        contributionOnly?: boolean | null;
         validFrom?: string | null;
         validUntil?: string | null;
         sourceDoc: string;
@@ -479,6 +501,14 @@ export interface Evidence {
   sha256: string;
   uploadedBy?: (string | null) | User;
   uploadedAt: string;
+  /**
+   * Start of the period this evidence covers (for assurance freshness).
+   */
+  coverageStart?: string | null;
+  /**
+   * End of the period this evidence covers (for assurance freshness).
+   */
+  coverageEnd?: string | null;
   linkedDatapoints?: (string | Datapoint)[] | null;
   /**
    * Why this document proves the figure — shown to auditors and reviewers.
@@ -545,6 +575,10 @@ export interface MaterialityAssessment {
         impactScore: number;
         financialScore: number;
         rationale?: string | null;
+        /**
+         * Auditor trail — sector starting position accepted vs actively changed.
+         */
+        origin?: ('suggested' | 'adjusted') | null;
         decidedBy?: (string | null) | User;
         decidedAt?: string | null;
         id?: string | null;
@@ -602,6 +636,10 @@ export interface Report {
     | null;
   pdfUrl?: string | null;
   shareToken?: string | null;
+  /**
+   * Token for read-only /a/[token] Assurance Room (no Membership role).
+   */
+  assuranceToken?: string | null;
   shareExpiresAt?: string | null;
   viewCount?: number | null;
   publishedAt?: string | null;
@@ -971,7 +1009,9 @@ export interface MetricDefinitionsSelect<T extends boolean = true> {
     | {
         framework?: T;
         datapointRef?: T;
+        label?: T;
         required?: T;
+        contributionOnly?: T;
         validFrom?: T;
         validUntil?: T;
         sourceDoc?: T;
@@ -997,7 +1037,9 @@ export interface DerivedMetricDefinitionsSelect<T extends boolean = true> {
     | {
         framework?: T;
         datapointRef?: T;
+        label?: T;
         required?: T;
+        contributionOnly?: T;
         validFrom?: T;
         validUntil?: T;
         sourceDoc?: T;
@@ -1073,6 +1115,8 @@ export interface EvidenceSelect<T extends boolean = true> {
   sha256?: T;
   uploadedBy?: T;
   uploadedAt?: T;
+  coverageStart?: T;
+  coverageEnd?: T;
   linkedDatapoints?: T;
   whyNote?: T;
   extractedData?: T;
@@ -1148,6 +1192,7 @@ export interface MaterialityAssessmentsSelect<T extends boolean = true> {
         impactScore?: T;
         financialScore?: T;
         rationale?: T;
+        origin?: T;
         decidedBy?: T;
         decidedAt?: T;
         id?: T;
@@ -1188,6 +1233,7 @@ export interface ReportsSelect<T extends boolean = true> {
   snapshot?: T;
   pdfUrl?: T;
   shareToken?: T;
+  assuranceToken?: T;
   shareExpiresAt?: T;
   viewCount?: T;
   publishedAt?: T;

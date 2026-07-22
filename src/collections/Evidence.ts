@@ -34,6 +34,21 @@ export const Evidence: CollectionConfig = {
     },
     { name: "uploadedAt", type: "date", required: true },
     {
+      name: "coverageStart",
+      type: "date",
+      admin: {
+        description:
+          "Start of the period this evidence covers (for assurance freshness).",
+      },
+    },
+    {
+      name: "coverageEnd",
+      type: "date",
+      admin: {
+        description: "End of the period this evidence covers (for assurance freshness).",
+      },
+    },
+    {
       name: "linkedDatapoints",
       type: "relationship",
       relationTo: "datapoints",

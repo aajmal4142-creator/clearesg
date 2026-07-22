@@ -42,6 +42,8 @@ const IMPORT_COLUMN_LABELS: Record<string, string> = {
 };
 
 export type DataRowState = {
+  /** Payload datapoint id when a row exists in the open period. */
+  id?: string | null;
   metricKey: string;
   value: number | null;
   quality: Quality;
@@ -156,12 +158,18 @@ export function DataWorkspace({
       const data = (await res.json().catch(() => ({}))) as {
         error?: string;
         approvalReset?: boolean;
+        id?: string;
       };
       setSavingKey(null);
       if (!res.ok) {
         setStatusTone("error");
         setStatus(data.error ?? "Save failed");
         return;
+      }
+      if (data.id) {
+        setRows((prev) =>
+          prev.map((r) => (r.metricKey === row.metricKey ? { ...r, id: data.id } : r)),
+        );
       }
       if (data.approvalReset) {
         setRows((prev) =>
@@ -203,9 +211,16 @@ export function DataWorkspace({
         return;
       }
     }
+    const row = rows.find((r) => r.metricKey === metricKey);
+    if (!row?.id) {
+      setStatusTone("error");
+      setStatus("Save the figure before attaching evidence so the link can be verified.");
+      return;
+    }
     const form = new FormData();
     form.set("file", file);
     form.set("metricKey", metricKey);
+    form.set("datapointId", row.id);
     const why = window.prompt(
       "Why does this document prove the figure? (optional note for auditors)",
       "",
@@ -218,8 +233,7 @@ export function DataWorkspace({
       return;
     }
     updateRow(metricKey, {
-      evidenceCount:
-        (rows.find((r) => r.metricKey === metricKey)?.evidenceCount ?? 0) + 1,
+      evidenceCount: (row.evidenceCount ?? 0) + 1,
     });
     setStatusTone("ok");
     setStatus(`Evidence attached to ${metricKey}`);

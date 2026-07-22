@@ -136,9 +136,14 @@ export async function POST(req: Request) {
     });
 
     const shareToken = randomBytes(18).toString("base64url");
+    const assuranceToken = randomBytes(18).toString("base64url");
     const shareDays = body.shareDays ?? 90;
     const shareExpiresAt = new Date();
     shareExpiresAt.setUTCDate(shareExpiresAt.getUTCDate() + shareDays);
+
+    const factorIds = [
+      ...new Set(snapshot.factorsUsed.map((f) => f.factorId).filter(Boolean)),
+    ];
 
     const report = await payload.create({
       collection: "reports",
@@ -155,8 +160,10 @@ export async function POST(req: Request) {
           scope3: snapshot.emissions.scope3,
         },
         dataQualityPct: snapshot.emissions.dataQualityPct,
+        factorVersionsUsed: factorIds,
         snapshot,
         shareToken,
+        assuranceToken,
         shareExpiresAt: shareExpiresAt.toISOString(),
         viewCount: 0,
         publishedAt: new Date().toISOString(),
@@ -186,6 +193,7 @@ export async function POST(req: Request) {
       id: report.id,
       version: nextVersion,
       shareUrl: `${origin}/r/${shareToken}`,
+      assuranceUrl: `${origin}/a/${assuranceToken}`,
       diff,
     });
   });

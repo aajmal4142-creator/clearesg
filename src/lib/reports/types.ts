@@ -64,6 +64,48 @@ export function diffSnapshots(
       to: String(b.emissions.dataQualityPct),
     });
   }
+
+  // Factors — by factorId
+  const aFactors = new Map(a.factorsUsed.map((f) => [f.factorId, f]));
+  const bFactors = new Map(b.factorsUsed.map((f) => [f.factorId, f]));
+  for (const id of new Set([...aFactors.keys(), ...bFactors.keys()])) {
+    const fa = aFactors.get(id);
+    const fb = bFactors.get(id);
+    if (!fa && fb) {
+      diffs.push({ path: `factors.${id}`, from: "", to: `${fb.key}@${fb.year}` });
+    } else if (fa && !fb) {
+      diffs.push({ path: `factors.${id}`, from: `${fa.key}@${fa.year}`, to: "" });
+    } else if (fa && fb && (fa.value !== fb.value || fa.year !== fb.year)) {
+      diffs.push({
+        path: `factors.${id}`,
+        from: `${fa.value}/${fa.year}`,
+        to: `${fb.value}/${fb.year}`,
+      });
+    }
+  }
+
+  // Evidence index — by sha256
+  const aEv = new Map(a.evidenceIndex.map((e) => [e.sha256, e]));
+  const bEv = new Map(b.evidenceIndex.map((e) => [e.sha256, e]));
+  for (const sha of new Set([...aEv.keys(), ...bEv.keys()])) {
+    const ea = aEv.get(sha);
+    const eb = bEv.get(sha);
+    if (!ea && eb) {
+      diffs.push({ path: `evidence.${sha.slice(0, 12)}`, from: "", to: eb.filename });
+    } else if (ea && !eb) {
+      diffs.push({ path: `evidence.${sha.slice(0, 12)}`, from: ea.filename, to: "" });
+    }
+  }
+
+  // Materiality narrative
+  if ((a.materiality.narrative ?? "") !== (b.materiality.narrative ?? "")) {
+    diffs.push({
+      path: "materiality.narrative",
+      from: a.materiality.narrative ?? "",
+      to: b.materiality.narrative ?? "",
+    });
+  }
+
   return diffs;
 }
 

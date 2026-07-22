@@ -36,6 +36,25 @@ describe("report snapshot helpers", () => {
     expect(d.some((x) => x.path === "scores.overall")).toBe(true);
   });
 
+  it("diffs factor pins and evidence", () => {
+    const d = diffSnapshots(
+      base({
+        factorsUsed: [
+          { factorId: "f1", key: "grid", value: 0.2, source: "DEFRA", year: 2024 },
+        ],
+        evidenceIndex: [{ filename: "a.pdf", sha256: "aaa" }],
+      }),
+      base({
+        factorsUsed: [
+          { factorId: "f1", key: "grid", value: 0.3, source: "DEFRA", year: 2025 },
+        ],
+        evidenceIndex: [{ filename: "b.pdf", sha256: "bbb" }],
+      }),
+    );
+    expect(d.some((x) => x.path.startsWith("factors."))).toBe(true);
+    expect(d.some((x) => x.path.startsWith("evidence."))).toBe(true);
+  });
+
   it("exports csv header", () => {
     expect(snapshotToCsv(base()).startsWith("section,key,value")).toBe(true);
   });
