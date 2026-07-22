@@ -1,17 +1,19 @@
 "use client";
 
-import { motion } from "motion/react";
-import { useMemo, useRef, useState } from "react";
+import { useMemo, useState } from "react";
 
 import { PageFrame, StatusLine } from "@/components/shell/PageFrame";
-import { spring, useMotionSafe } from "@/lib/motion";
 import {
   ESRS_TOPICS,
   financialScoreOf,
   impactScoreOf,
   isMaterial,
   MATERIALITY_THRESHOLD,
+  SECTOR_DEFAULTS_DISCLAIMER,
+  sectorDefaults,
+  topicOriginAgainstDefault,
   type EsrsTopic,
+  type TopicOrigin,
 } from "@/lib/materiality";
 
 type TopicScore = {
@@ -22,22 +24,17 @@ type TopicScore = {
   financialMagnitude: number;
   financialLikelihood: number;
   rationale: string;
+  origin: TopicOrigin;
 };
 
-function emptyScores(): TopicScore[] {
-  return ESRS_TOPICS.map((t) => ({
-    esrsTopic: t.id,
-    impactSeverity: 0,
-    impactScope: 0,
-    impactIrremediability: 0,
-    financialMagnitude: 0,
-    financialLikelihood: 0,
-    rationale: "",
-  }));
+function fromDefaults(sector: string): TopicScore[] {
+  return sectorDefaults(sector).map((s) => ({ ...s, origin: "suggested" as const }));
 }
 
-function fromAssessment(topics: unknown): TopicScore[] {
-  if (!Array.isArray(topics) || topics.length === 0) return emptyScores();
+function fromAssessment(topics: unknown, sector: string): TopicScore[] {
+  const baselines = sectorDefaults(sector);
+  const baselineById = new Map(baselines.map((b) => [b.esrsTopic, b]));
+  if (!Array.isArray(topics) || topics.length === 0) return fromDefaults(sector);
   const byId = new Map(
     topics.map((t) => {
       const row = t as Record<string, unknown>;
@@ -46,15 +43,26 @@ function fromAssessment(topics: unknown): TopicScore[] {
   );
   return ESRS_TOPICS.map((t) => {
     const row = byId.get(t.id);
-    return {
+    const baseline = baselineById.get(t.id)!;
+    if (!row) return { ...baseline, origin: "suggested" as const };
+    const current = {
       esrsTopic: t.id,
-      impactSeverity: Number(row?.impactSeverity ?? 0),
-      impactScope: Number(row?.impactScope ?? 0),
-      impactIrremediability: Number(row?.impactIrremediability ?? 0),
-      financialMagnitude: Number(row?.financialMagnitude ?? 0),
-      financialLikelihood: Number(row?.financialLikelihood ?? 0),
-      rationale: String(row?.rationale ?? ""),
+      impactSeverity: Number(row.impactSeverity ?? baseline.impactSeverity),
+      impactScope: Number(row.impactScope ?? baseline.impactScope),
+      impactIrremediability: Number(
+        row.impactIrremediability ?? baseline.impactIrremediability,
+      ),
+      financialMagnitude: Number(row.financialMagnitude ?? baseline.financialMagnitude),
+      financialLikelihood: Number(
+        row.financialLikelihood ?? baseline.financialLikelihood,
+      ),
+      rationale: String(row.rationale ?? baseline.rationale),
     };
+    const origin =
+      row.origin === "suggested" || row.origin === "adjusted"
+        ? (row.origin as TopicOrigin)
+        : topicOriginAgainstDefault(current, baseline);
+    return { ...current, origin };
   });
 }
 
@@ -62,6 +70,7 @@ export function MaterialityWorkshop({
   initialAssessment,
   topicsCatalog,
   canWrite = true,
+  sector,
 }: {
   initialAssessment: {
     topics?: unknown;
@@ -70,15 +79,21 @@ export function MaterialityWorkshop({
   } | null;
   topicsCatalog: EsrsTopic[];
   canWrite?: boolean;
+  sector: string;
 }) {
-  const transition = useMotionSafe();
-  const matrixRef = useRef<HTMLDivElement>(null);
-  const locked = initialAssessment?.status === "final" || !canWrite;
-  const [scores, setScores] = useState(() => fromAssessment(initialAssessment?.topics));
+  const baselines = useMemo(() => sectorDefaults(sector), [sector]);
+  const [scores, setScores] = useState(() =>
+    fromAssessment(initialAssessment?.topics, sector),
+  );
   const [active, setActive] = useState(0);
   const [status, setStatus] = useState<string | null>(null);
   const [statusTone, setStatusTone] = useState<"neutral" | "error" | "ok">("neutral");
   const [narrative, setNarrative] = useState(initialAssessment?.narrative ?? "");
+  const [assessmentStatus, setAssessmentStatus] = useState(
+    initialAssessment?.status ?? "draft",
+  );
+
+  const locked = assessmentStatus === "final" || !canWrite;
 
   const computed = useMemo(
     () =>
@@ -116,7 +131,7 @@ export function MaterialityWorkshop({
     });
     const data = (await res.json().catch(() => ({}))) as {
       error?: string;
-      assessment?: { narrative?: string };
+      assessment?: { narrative?: string; status?: string };
     };
     if (!res.ok) {
       const raw = data.error ?? "Save failed";
@@ -129,33 +144,52 @@ export function MaterialityWorkshop({
       return;
     }
     if (data.assessment?.narrative) setNarrative(data.assessment.narrative);
+    if (finalise) setAssessmentStatus("final");
     setStatusTone("ok");
     setStatus(finalise ? "Assessment finalised" : "Draft saved");
   }
 
   function setField(key: keyof TopicScore, value: number | string) {
-    setScores((prev) => prev.map((s, i) => (i === active ? { ...s, [key]: value } : s)));
+    setScores((prev) =>
+      prev.map((s, i) => {
+        if (i !== active) return s;
+        const next = { ...s, [key]: value };
+        const baseline = baselines.find((b) => b.esrsTopic === s.esrsTopic);
+        const origin = baseline
+          ? topicOriginAgainstDefault(
+              {
+                esrsTopic: next.esrsTopic,
+                impactSeverity: next.impactSeverity,
+                impactScope: next.impactScope,
+                impactIrremediability: next.impactIrremediability,
+                financialMagnitude: next.financialMagnitude,
+                financialLikelihood: next.financialLikelihood,
+                rationale: next.rationale,
+              },
+              baseline,
+            )
+          : "adjusted";
+        return { ...next, origin };
+      }),
+    );
   }
 
   return (
     <PageFrame
       eyebrow="Double materiality"
       title="Workshop"
-      help={`Score impact (severity × scope × irremediability) and financial (magnitude × likelihood). Threshold ${MATERIALITY_THRESHOLD} on either axis. Scores live here — not in a spreadsheet.`}
+      help={`Score each topic in turn. The matrix on the right is the output of those scores — not an input. Threshold ${MATERIALITY_THRESHOLD} on either axis.`}
       actions={
         !canWrite ? (
           <p className="text-sm text-ink-muted">View only</p>
-        ) : initialAssessment?.status === "final" ? (
+        ) : assessmentStatus === "final" ? (
           <p className="text-sm text-signal">Final — locked for this period</p>
         ) : undefined
       }
       rail={
         <div>
-          <p className="label-caps mb-4">Matrix</p>
-          <div
-            ref={matrixRef}
-            className="relative aspect-square w-full border border-rule bg-surface-1"
-          >
+          <p className="label-caps mb-4">Matrix (output)</p>
+          <div className="relative aspect-square w-full border border-rule bg-surface-1">
             <div
               className="absolute left-0 right-0 border-t border-dashed border-rule"
               style={{ bottom: `${(MATERIALITY_THRESHOLD / 5) * 100}%` }}
@@ -174,90 +208,35 @@ export function MaterialityWorkshop({
             {computed.map((p, idx) => {
               const baseLeft = (p.impactScore / 5) * 100;
               const baseBottom = (p.financialScore / 5) * 100;
-              // ~1–2% jitter so equal scores do not stack exactly.
               const jitterX = ((idx % 5) - 2) * 0.4;
               const jitterY = (((idx * 3) % 5) - 2) * 0.4;
               const left = `${Math.min(98, Math.max(2, baseLeft + jitterX))}%`;
               const bottom = `${Math.min(98, Math.max(2, baseBottom + jitterY))}%`;
               const topicIdx = scores.findIndex((s) => s.esrsTopic === p.esrsTopic);
-              const markerClass = `absolute -translate-x-1/2 translate-y-1/2 font-data text-xs ${
-                p.material ? "text-signal" : "text-ink-muted"
-              }`;
-
-              if (locked) {
-                return (
-                  <span
-                    key={p.esrsTopic}
-                    className={`${markerClass} pointer-events-none`}
-                    style={{ left, bottom }}
-                  >
-                    {p.esrsTopic}
-                  </span>
-                );
-              }
-
               return (
-                <motion.button
+                <button
                   key={p.esrsTopic}
                   type="button"
-                  drag
-                  dragConstraints={matrixRef}
-                  dragMomentum={false}
-                  onDragEnd={(e) => {
-                    if (!matrixRef.current) return;
-                    const rect = matrixRef.current.getBoundingClientRect();
-                    const pe = e as unknown as PointerEvent;
-                    const clientX = "clientX" in pe ? pe.clientX : 0;
-                    const clientY = "clientY" in pe ? pe.clientY : 0;
-                    const x = Math.min(
-                      5,
-                      Math.max(0, ((clientX - rect.left) / rect.width) * 5),
-                    );
-                    const y = Math.min(
-                      5,
-                      Math.max(0, ((rect.bottom - clientY) / rect.height) * 5),
-                    );
-                    const xi = Math.round(x);
-                    const yi = Math.round(y);
-                    setScores((prev) =>
-                      prev.map((s, i) =>
-                        i === topicIdx
-                          ? {
-                              ...s,
-                              impactSeverity: xi,
-                              impactScope: xi,
-                              impactIrremediability: xi,
-                              financialMagnitude: yi,
-                              financialLikelihood: yi,
-                            }
-                          : s,
-                      ),
-                    );
-                    setActive(topicIdx);
-                  }}
-                  transition={transition.type === "spring" ? spring : transition}
-                  className={`${markerClass} cursor-grab active:cursor-grabbing`}
+                  className={`absolute -translate-x-1/2 translate-y-1/2 font-data text-xs ${
+                    p.material ? "text-signal" : "text-ink-muted"
+                  }`}
                   style={{ left, bottom }}
                   onClick={() => setActive(topicIdx)}
                 >
                   {p.esrsTopic}
-                </motion.button>
+                </button>
               );
             })}
           </div>
-          {!locked ? (
-            <p className="mt-3 text-sm text-ink-muted">
-              Drag a topic to reposition. Material topics render in signal green.
-            </p>
-          ) : (
-            <p className="mt-3 text-sm text-ink-muted">
-              Material topics render in signal green.
-            </p>
-          )}
+          <p className="mt-3 text-sm text-ink-muted">
+            Material topics render in signal green. Click a label to open that topic.
+          </p>
         </div>
       }
     >
       {status ? <StatusLine tone={statusTone}>{status}</StatusLine> : null}
+
+      <p className="mt-2 text-sm text-ink-muted">{SECTOR_DEFAULTS_DISCLAIMER}</p>
 
       <div className="mt-4 flex flex-wrap gap-2">
         {topicsCatalog.map((t, i) => {
@@ -287,9 +266,14 @@ export function MaterialityWorkshop({
         <div
           className={`mt-8 space-y-4 border-t border-rule pt-4 ${locked ? "opacity-60" : ""}`}
         >
-          <h2 className="text-lg text-ink">
-            {topic.id} — {topic.label}
-          </h2>
+          <div className="flex flex-wrap items-baseline justify-between gap-2">
+            <h2 className="text-lg text-ink">
+              {topic.id} — {topic.label}
+            </h2>
+            <p className="label-caps text-ink-muted">
+              Origin · {row.origin === "suggested" ? "suggested" : "adjusted"}
+            </p>
+          </div>
           <p className="text-sm text-ink-muted">{topic.description}</p>
           {(
             [
@@ -333,7 +317,7 @@ export function MaterialityWorkshop({
         </div>
       ) : null}
 
-      {!locked && canWrite && initialAssessment?.status !== "final" ? (
+      {!locked && canWrite && assessmentStatus !== "final" ? (
         <div className="mt-6 flex gap-3">
           <button
             type="button"

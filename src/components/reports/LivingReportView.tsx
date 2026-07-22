@@ -82,6 +82,24 @@ export function LivingReportView({ snapshot }: { snapshot: ReportSnapshot }) {
         <p className="text-sm text-ink-muted">
           {snapshot.materiality.narrative ?? "No materiality narrative on this version."}
         </p>
+        {snapshot.materiality.points.filter((p) => p.material).length > 0 ? (
+          <ul className="mt-3 flex flex-wrap gap-2">
+            {snapshot.materiality.points
+              .filter((p) => p.material)
+              .map((p) => (
+                <li
+                  key={p.esrsTopic}
+                  className="rounded-[2px] border border-rule px-2 py-0.5 font-data text-xs text-ink"
+                >
+                  {p.esrsTopic}
+                </li>
+              ))}
+          </ul>
+        ) : (
+          <p className="mt-3 text-xs text-ink-muted">
+            No finalised material topics on this snapshot.
+          </p>
+        )}
       </InkReveal>
 
       <InkReveal className="mt-10" delay={0.18}>

@@ -47,4 +47,26 @@ Derived registry (`lib/derive/registry.ts`) keeps approved CSRD seed rows with m
 
 ## Materiality (Track B)
 
-See below once Track B lands: sector defaults, topic `origin`, final-only snapshot.
+### Sector defaults
+
+Reviewable heuristics in [`src/lib/materiality/sectorDefaults.ts`](../src/lib/materiality/sectorDefaults.ts), keyed by NACE letter (first letter of `organisations.sector`). Starting positions are **not** determinations — workshop shows `SECTOR_DEFAULTS_DISCLAIMER`.
+
+### Topic `origin`
+
+| Value       | Meaning                                                   |
+| ----------- | --------------------------------------------------------- |
+| `suggested` | Scores/rationale still match the sector starting position |
+| `adjusted`  | Any score or rationale changed from the suggestion        |
+
+Stored on each topic row; surfaced in the workshop as “Origin · suggested|adjusted”.
+
+### Finalise
+
+- Contributor / viewer cannot finalise (403).
+- Finalise writes `writeAuditLog` action `materiality.finalised`.
+- Client flips to locked immediately on success.
+- Soft lock: draft updates rejected with 409 when status is already final.
+
+### Snapshot / PDF / Living Report
+
+[`buildSnapshot`](../src/lib/reports/buildSnapshot.ts) loads materiality **only** where `status: "final"`. Drafts never enter published reports. Living Report lists material topic codes from the snapshot points.

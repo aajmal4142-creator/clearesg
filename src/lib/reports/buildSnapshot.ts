@@ -105,6 +105,7 @@ export async function buildReportSnapshot(opts: {
       and: [
         { organisation: { equals: opts.organisationId } },
         { period: { equals: opts.periodId } },
+        { status: { equals: "final" } },
       ],
     },
     limit: 1,

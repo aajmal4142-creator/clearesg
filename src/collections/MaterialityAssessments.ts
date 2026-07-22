@@ -52,6 +52,19 @@ export const MaterialityAssessments: CollectionConfig = {
         },
         { name: "rationale", type: "textarea" },
         {
+          name: "origin",
+          type: "select",
+          defaultValue: "suggested",
+          options: [
+            { label: "Suggested (sector default accepted)", value: "suggested" },
+            { label: "Adjusted (deliberated)", value: "adjusted" },
+          ],
+          admin: {
+            description:
+              "Auditor trail — sector starting position accepted vs actively changed.",
+          },
+        },
+        {
           name: "decidedBy",
           type: "relationship",
           relationTo: "users",

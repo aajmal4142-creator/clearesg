@@ -9,3 +9,11 @@ export {
   type ImpactInputs,
   type MatrixPoint,
 } from "./score";
+export {
+  naceLetter,
+  SECTOR_DEFAULTS_DISCLAIMER,
+  sectorDefaults,
+  topicOriginAgainstDefault,
+  type TopicOrigin,
+  type TopicStartingScores,
+} from "./sectorDefaults";

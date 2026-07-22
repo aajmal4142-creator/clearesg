@@ -1,6 +1,7 @@
 import { getPayload } from "payload";
 import { NextResponse } from "next/server";
 
+import { writeAuditLog } from "@/lib/audit/write";
 import { getCurrentContext } from "@/lib/auth";
 import { BillingDeniedError, billingDeniedResponse } from "@/lib/billing";
 import {
@@ -9,6 +10,9 @@ import {
   financialScoreOf,
   impactScoreOf,
   materialityNarrative,
+  sectorDefaults,
+  topicOriginAgainstDefault,
+  type TopicOrigin,
 } from "@/lib/materiality";
 import { ensureOpenPeriod } from "@/lib/org/period";
 import config from "@/payload.config";
@@ -23,6 +27,7 @@ type TopicBody = {
   impactScore?: number;
   financialScore?: number;
   rationale?: string;
+  origin?: TopicOrigin;
 };
 
 export async function GET() {
@@ -57,6 +62,7 @@ export async function GET() {
     topicsCatalog: ESRS_TOPICS,
     periodId,
     assessment: found.docs[0] ?? null,
+    sectorDefaults: sectorDefaults(ctx.activeOrg.sector ?? ""),
   });
 }
 
@@ -88,6 +94,9 @@ export async function PUT(req: Request) {
     throw err;
   }
 
+  const baselines = sectorDefaults(ctx.activeOrg.sector ?? "");
+  const baselineByTopic = new Map(baselines.map((b) => [b.esrsTopic, b]));
+
   const topics = (body.topics ?? []).map((t) => {
     const impact =
       t.impactScore ??
@@ -102,6 +111,23 @@ export async function PUT(req: Request) {
         magnitude: t.financialMagnitude ?? 0,
         likelihood: t.financialLikelihood ?? 0,
       });
+    const baseline = baselineByTopic.get(t.esrsTopic);
+    const origin: TopicOrigin =
+      t.origin ??
+      (baseline
+        ? topicOriginAgainstDefault(
+            {
+              esrsTopic: t.esrsTopic,
+              impactSeverity: t.impactSeverity ?? 0,
+              impactScope: t.impactScope ?? 0,
+              impactIrremediability: t.impactIrremediability ?? 0,
+              financialMagnitude: t.financialMagnitude ?? 0,
+              financialLikelihood: t.financialLikelihood ?? 0,
+              rationale: t.rationale ?? "",
+            },
+            baseline,
+          )
+        : "adjusted");
     return {
       esrsTopic: t.esrsTopic,
       impactSeverity: t.impactSeverity,
@@ -112,6 +138,7 @@ export async function PUT(req: Request) {
       impactScore: impact,
       financialScore: financial,
       rationale: t.rationale,
+      origin,
       decidedBy: ctx.user.id,
       decidedAt: new Date().toISOString(),
     };
@@ -165,6 +192,22 @@ export async function PUT(req: Request) {
       collection: "materiality-assessments",
       data,
       overrideAccess: true,
+    });
+  }
+
+  if (body.finalise) {
+    await writeAuditLog(payload, {
+      organisationId: ctx.activeOrg.id,
+      actorId: ctx.user.id,
+      action: "materiality.finalised",
+      entityType: "materiality-assessments",
+      entityId: doc.id,
+      after: {
+        periodId,
+        status: "final",
+        topicCount: topics.length,
+        materialCount: snapshot.points.filter((p) => p.material).length,
+      },
     });
   }
 

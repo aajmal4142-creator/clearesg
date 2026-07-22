@@ -38,6 +38,7 @@ export default async function MaterialityPage() {
   return (
     <MaterialityWorkshop
       canWrite={canWrite}
+      sector={ctx.activeOrg.sector ?? ""}
       initialAssessment={
         found.docs[0]
           ? {
