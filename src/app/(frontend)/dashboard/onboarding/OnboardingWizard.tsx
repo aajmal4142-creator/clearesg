@@ -23,6 +23,14 @@ import { cn } from "@/lib/utils";
 
 type Option = { value: string; label: string };
 
+type ObligationGift = {
+  name: string;
+  filingDeadline: string | null;
+  reason: string;
+  confidence: "derived" | "needs_confirmation";
+  daysToFiling: number | null;
+};
+
 const QUESTIONS = [
   {
     key: "sector",
@@ -161,6 +169,8 @@ export function OnboardingWizard() {
   const router = useRouter();
   const [step, setStep] = useState(0);
   const [done, setDone] = useState(false);
+  const [gift, setGift] = useState<ObligationGift | null>(null);
+  const [voluntary, setVoluntary] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [hydrated, setHydrated] = useState(false);
   const [values, setValues] = useState<Record<string, string>>({
@@ -216,8 +226,12 @@ export function OnboardingWizard() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(values),
     });
+    const data = (await res.json().catch(() => ({}))) as {
+      error?: string;
+      voluntary?: boolean;
+      obligation?: ObligationGift | null;
+    };
     if (!res.ok) {
-      const data = (await res.json().catch(() => ({}))) as { error?: string };
       const raw = data.error ?? "Onboarding failed";
       setError(
         raw === "Forbidden"
@@ -231,39 +245,69 @@ export function OnboardingWizard() {
     } catch {
       /* ignore */
     }
+    setVoluntary(Boolean(data.voluntary));
+    setGift(data.obligation ?? null);
     setDone(true);
     router.refresh();
   }
 
   if (done) {
+    const days = gift?.daysToFiling ?? null;
+    const deadlineLabel = gift?.filingDeadline
+      ? new Date(gift.filingDeadline).toLocaleDateString("en-GB", {
+          day: "numeric",
+          month: "short",
+          year: "numeric",
+        })
+      : null;
+
     return (
       <Assemble
         layer="data"
         className="mx-auto flex max-w-2xl flex-col items-center px-6 py-16"
       >
-        <p className="label-caps mb-4">Baseline</p>
-        <Metric
-          value={estimate.score}
-          size="display"
-          decimals={0}
-          tone="amber"
-          inView={false}
-        />
-        <p className="label-caps mt-2 text-amber">Estimated score</p>
-        <div className="mt-6">
-          <Metric
-            value={estimate.tCO2e}
-            unit="tCO2e"
-            size="xl"
-            decimals={0}
-            tone="amber"
-            inView={false}
-          />
-        </div>
-        <p className="label-caps mt-1 text-amber">Estimated footprint</p>
-        <p className="measure-body mt-6 text-center text-ink-muted">
-          Replace estimates with measured data to raise your confidence score. Your
-          Compliance Runway is ready.
+        <p className="label-caps mb-4">Scope</p>
+        {voluntary || !gift?.filingDeadline ? (
+          <>
+            <h1
+              className="text-center text-3xl font-medium tracking-tight text-ink sm:text-4xl"
+              style={{ fontFamily: "var(--font-display)" }}
+            >
+              You&apos;re not in mandatory scope yet
+            </h1>
+            <p className="measure-body mt-6 text-center text-ink-muted">
+              {gift?.reason ??
+                "Buyers may still ask — you can start voluntarily and be ready when they do."}
+            </p>
+          </>
+        ) : (
+          <>
+            <h1
+              className="text-center text-3xl font-medium tracking-tight text-ink sm:text-4xl"
+              style={{ fontFamily: "var(--font-display)" }}
+            >
+              You&apos;re likely in {gift.name}
+            </h1>
+            {days !== null ? (
+              <div className="mt-8">
+                <Metric value={days} size="display" decimals={0} inView={false} />
+                <p className="label-caps mt-2 text-center">Days to first report</p>
+              </div>
+            ) : null}
+            <p className="mt-4 text-center text-ink-muted">
+              Due {deadlineLabel}
+              {gift.confidence === "needs_confirmation"
+                ? " — confirm this on your Runway"
+                : null}
+            </p>
+            <p className="measure-body mt-6 text-center text-ink-muted">{gift.reason}</p>
+          </>
+        )}
+        <p className="mt-8 text-center text-xs text-ink-muted">
+          Estimated score <span className="font-data text-amber">{estimate.score}</span>
+          {" · "}
+          <span className="font-data text-amber">{estimate.tCO2e}</span> tCO2e — replace
+          with measured data on the Runway.
         </p>
         <Button
           type="button"

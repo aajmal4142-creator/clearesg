@@ -13,8 +13,11 @@ import { calmStatus, readinessBreakdown } from "@/lib/governance/calmStatus";
 import { detectAnomalies } from "@/lib/governance/anomalies";
 import { rankGaps } from "@/lib/governance/gaps";
 import { plainGapCopy } from "@/lib/governance/plainGaps";
+import { hasBaselineDrift, parseRevenueBand } from "@/lib/obligations";
 import { spendCoveragePct } from "@/lib/suppliers";
 import config from "@/payload.config";
+
+import { ObligationControls } from "./ObligationControls";
 
 function daysUntil(iso: string): number {
   const target = new Date(iso).getTime();
@@ -24,6 +27,14 @@ function daysUntil(iso: string): number {
 
 function isPastDue(iso: string): boolean {
   return Date.parse(String(iso)) < Date.now();
+}
+
+function formatDeadline(iso: string): string {
+  return new Date(iso).toLocaleDateString("en-GB", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
 }
 
 export default async function RunwayPage() {
@@ -39,12 +50,44 @@ export default async function RunwayPage() {
   const obligations = await payload.find({
     collection: "compliance-obligations",
     where: { organisation: { equals: ctx.activeOrg.id } },
-    limit: 1,
+    limit: 10,
     sort: "filingDeadline",
     overrideAccess: true,
   });
-  const obligation = obligations.docs[0];
-  const days = obligation ? daysUntil(String(obligation.filingDeadline)) : null;
+  // Nearest binding deadline first; voluntary (null deadline) sorts last in Mongo.
+  const withDeadline = obligations.docs.filter((o) => o.filingDeadline);
+  const obligation = withDeadline[0] ?? obligations.docs[0];
+  const secondary = withDeadline.slice(1);
+  const deadlineIso = obligation?.filingDeadline
+    ? String(obligation.filingDeadline)
+    : null;
+  const days = deadlineIso ? daysUntil(deadlineIso) : null;
+  const filingOverdue = deadlineIso ? isPastDue(deadlineIso) : false;
+  const canManage = ctx.role === "owner" || ctx.role === "admin";
+
+  const orgDoc = await payload.findByID({
+    collection: "organisations",
+    id: ctx.activeOrg.id,
+    depth: 0,
+    overrideAccess: true,
+  });
+  const drift = obligation
+    ? hasBaselineDrift(
+        obligation.derivedInputs
+          ? {
+              country: obligation.derivedInputs.country ?? "",
+              headcount: obligation.derivedInputs.headcount ?? null,
+              revenueBand: parseRevenueBand(obligation.derivedInputs.revenueBand),
+              asOf: obligation.derivedInputs.asOf ?? "",
+            }
+          : null,
+        {
+          country: orgDoc.country,
+          employeeCount: orgDoc.employeeCount ?? null,
+          revenueBand: parseRevenueBand(orgDoc.revenueBand),
+        },
+      )
+    : false;
 
   const periods = await payload.find({
     collection: "reporting-periods",
@@ -365,13 +408,126 @@ export default async function RunwayPage() {
       </Assemble>
 
       {days === null ? (
-        <p className="mt-8 text-ink-muted">
-          No filing deadline on file. Add a compliance obligation to start the countdown.
-        </p>
+        <Assemble layer="data" className="mt-8">
+          {obligation && !deadlineIso ? (
+            <>
+              <h2
+                className="text-2xl font-medium tracking-tight text-ink"
+                style={{ fontFamily: "var(--font-display)" }}
+              >
+                Not in mandatory scope yet
+              </h2>
+              <p className="measure-body mt-3 text-ink-muted">
+                {obligation.derivationReason ??
+                  "Buyers may still ask — you can start voluntarily and keep evidence ready."}
+              </p>
+            </>
+          ) : !orgDoc.country || orgDoc.employeeCount == null || !orgDoc.revenueBand ? (
+            <p className="text-ink-muted">
+              Complete your baseline
+              {!orgDoc.country ? " (country)" : null}
+              {orgDoc.employeeCount == null ? " (headcount)" : null}
+              {!orgDoc.revenueBand ? " (revenue band)" : null}{" "}
+              <Link href="/dashboard/onboarding" className="editorial-link">
+                on onboarding
+              </Link>{" "}
+              so we can derive a filing deadline.
+            </p>
+          ) : (
+            <p className="text-ink-muted">
+              No filing deadline on file. Re-run derivation from your baseline, or set a
+              manual date.
+            </p>
+          )}
+          {obligation ? (
+            <ObligationControls
+              obligationId={obligation.id}
+              filingDeadline={null}
+              canManage={canManage}
+              needsConfirmation={obligation.confidence === "needs_confirmation"}
+              baselineDrift={drift && obligation.source === "manual"}
+              source={obligation.source ?? null}
+            />
+          ) : null}
+          {obligation?.derivationReason ? (
+            <details className="mt-4 max-w-[66ch] border-t border-rule pt-3">
+              <summary className="editorial-link cursor-pointer list-none text-sm [&::-webkit-details-marker]:hidden">
+                Why this scope?
+              </summary>
+              <p className="mt-3 text-sm leading-relaxed text-ink-muted">
+                {obligation.derivationReason}
+              </p>
+            </details>
+          ) : null}
+          <div className="mt-8 flex items-baseline gap-1">
+            <Metric value={readiness.pct} size="lg" decimals={0} inView={false} />
+            <span className="font-data text-xl text-ink-muted">%</span>
+          </div>
+          <p className="label-caps mt-1">{readiness.label}</p>
+        </Assemble>
       ) : (
         <Assemble layer="data" className="mt-8">
-          <Metric value={days} size="display" decimals={0} inView={false} />
-          <p className="label-caps mt-2">Days to filing</p>
+          {filingOverdue ? (
+            <p className="mb-4 max-w-[66ch] text-sm text-rust">
+              This was due {formatDeadline(deadlineIso!)} — here is how to get audit-ready
+              now: finish the gaps below and publish a living report.
+            </p>
+          ) : null}
+          <Metric
+            value={days}
+            size="display"
+            decimals={0}
+            tone={filingOverdue ? "rust" : undefined}
+            inView={false}
+          />
+          <p className="label-caps mt-2">
+            {filingOverdue ? "Days past filing" : "Days to filing"}
+          </p>
+          {deadlineIso ? (
+            <p className="mt-1 text-sm text-ink-muted">
+              {formatDeadline(deadlineIso)}
+              {obligation?.standardVersion ? ` · ${obligation.standardVersion}` : null}
+              {obligation?.wave &&
+              !["other", "brsr_listed", "brsr_supply"].includes(obligation.wave)
+                ? ` Wave ${obligation.wave}`
+                : null}
+            </p>
+          ) : null}
+          {secondary.length > 0 ? (
+            <ul className="mt-3 space-y-1 text-xs text-ink-muted">
+              {secondary.map((o) => (
+                <li key={o.id}>
+                  Also: {o.standardVersion}
+                  {o.filingDeadline
+                    ? ` due ${formatDeadline(String(o.filingDeadline))}`
+                    : ""}
+                </li>
+              ))}
+            </ul>
+          ) : null}
+          {obligation ? (
+            <ObligationControls
+              obligationId={obligation.id}
+              filingDeadline={deadlineIso}
+              canManage={canManage}
+              needsConfirmation={
+                obligation.confidence === "needs_confirmation" &&
+                obligation.source !== "manual"
+              }
+              baselineDrift={drift && obligation.source === "manual"}
+              source={obligation.source ?? null}
+            />
+          ) : null}
+          {obligation?.derivationReason ? (
+            <details className="mt-4 max-w-[66ch] border-t border-rule pt-3">
+              <summary className="editorial-link cursor-pointer list-none text-sm [&::-webkit-details-marker]:hidden">
+                Why this date?
+              </summary>
+              <p className="mt-3 text-sm leading-relaxed text-ink-muted">
+                {obligation.derivationReason}
+              </p>
+            </details>
+          ) : null}
           <div className="mt-8 flex items-baseline gap-1">
             <Metric value={readiness.pct} size="lg" decimals={0} inView={false} />
             <span className="font-data text-xl text-ink-muted">%</span>
@@ -398,7 +554,7 @@ export default async function RunwayPage() {
               <p className="label-caps mt-1">Supplier spend covered</p>
             </>
           ) : null}
-          {projectedMiss > 0 ? (
+          {projectedMiss > 0 && !filingOverdue ? (
             <p className="mt-4 text-rust">
               At your current rate you will miss the deadline by{" "}
               <Metric
@@ -411,7 +567,7 @@ export default async function RunwayPage() {
               />{" "}
               days.
             </p>
-          ) : calm.level === "on_track" ? (
+          ) : calm.level === "on_track" && !filingOverdue ? (
             <p className="mt-4 text-signal">On track at current collection rate.</p>
           ) : (
             <p className="mt-4 text-ink-muted">
