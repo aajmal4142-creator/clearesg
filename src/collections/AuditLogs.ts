@@ -47,7 +47,11 @@ export const AuditLogs: CollectionConfig = {
       name: "actor",
       type: "relationship",
       relationTo: "users",
-      required: true,
+      required: false,
+      admin: {
+        description:
+          "Optional — public supplier token submits may omit actor; reconstruct from after.tokenId / supplierId",
+      },
     },
     { name: "action", type: "text", required: true },
     { name: "entityType", type: "text", required: true },

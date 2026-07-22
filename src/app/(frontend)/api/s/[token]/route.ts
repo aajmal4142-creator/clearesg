@@ -1,13 +1,18 @@
 import { getPayload } from "payload";
 import { NextResponse } from "next/server";
 
+import { writeAuditLog } from "@/lib/audit/write";
 import {
   assertRateLimit,
   isTokenExpired,
   SUPPLIER_FORM_FIELDS,
   type SupplierFormValues,
 } from "@/lib/suppliers";
-import { ensureOpenPeriod, reaggregateSupplierReported } from "@/lib/suppliers/aggregate";
+import {
+  ensureOpenPeriod,
+  reaggregateScope3Contributions,
+} from "@/lib/suppliers/aggregate";
+import { buildPublicSubmitAuditAfter } from "@/lib/suppliers/tokenSecurity";
 import config from "@/payload.config";
 
 type Ctx = { params: Promise<{ token: string }> };
@@ -16,6 +21,21 @@ function clientKey(req: Request, token: string): string {
   const fwd = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim();
   const ip = fwd || req.headers.get("x-real-ip") || "unknown";
   return `${token}:${ip}`;
+}
+
+function orgIdOf(supplier: { organisation: string | { id: string } }): string {
+  return typeof supplier.organisation === "object" && supplier.organisation !== null
+    ? supplier.organisation.id
+    : String(supplier.organisation);
+}
+
+function periodIdOf(value: unknown): string | null {
+  if (!value) return null;
+  if (typeof value === "string") return value;
+  if (typeof value === "object" && value !== null && "id" in value) {
+    return String((value as { id: string }).id);
+  }
+  return null;
 }
 
 export async function GET(req: Request, ctx: Ctx) {
@@ -58,14 +78,15 @@ export async function GET(req: Request, ctx: Ctx) {
   const expired = isTokenExpired(
     supplier.requestExpiresAt ? String(supplier.requestExpiresAt) : null,
   );
-  const used = supplier.requestStatus === "submitted";
 
   return NextResponse.json({
     orgName: org && "name" in org ? String(org.name) : "ClearESG customer",
     supplierName: supplier.name,
     fields: SUPPLIER_FORM_FIELDS,
     expired,
-    used,
+    /** Corrections allowed within TTL — not single-use. */
+    used: false,
+    alreadySubmitted: supplier.requestStatus === "submitted",
     expiresAt: supplier.requestExpiresAt ?? null,
   });
 }
@@ -92,17 +113,14 @@ export async function POST(req: Request, ctx: Ctx) {
   if (!supplier) {
     return NextResponse.json({ error: "Link not found" }, { status: 404 });
   }
-  if (supplier.requestStatus === "submitted") {
-    return NextResponse.json({ error: "This link was already used" }, { status: 409 });
-  }
   if (
     isTokenExpired(supplier.requestExpiresAt ? String(supplier.requestExpiresAt) : null)
   ) {
     return NextResponse.json({ error: "This link has expired" }, { status: 410 });
   }
 
-  const body = (await req.json()) as SupplierFormValues;
-  const submitted: Record<string, number | null> = {};
+  const body = (await req.json()) as SupplierFormValues & { is_metered?: boolean };
+  const submitted: Record<string, number | null | boolean> = {};
   for (const field of SUPPLIER_FORM_FIELDS) {
     const raw = body[field.key];
     if (raw === undefined || raw === null || raw === ("" as unknown)) {
@@ -121,27 +139,51 @@ export async function POST(req: Request, ctx: Ctx) {
     }
     submitted[field.key] = n;
   }
+  submitted.is_metered = Boolean(body.is_metered);
 
-  const orgId =
-    typeof supplier.organisation === "object" && supplier.organisation !== null
-      ? supplier.organisation.id
-      : String(supplier.organisation);
+  const orgId = orgIdOf(supplier);
+  const isResubmit = supplier.requestStatus === "submitted";
+  const submittedAt = new Date().toISOString();
+
+  const boundPeriod = periodIdOf(supplier.requestPeriod);
+  const periodId = boundPeriod ?? (await ensureOpenPeriod(payload, orgId));
 
   await payload.update({
     collection: "suppliers",
     id: supplier.id,
     data: {
       requestStatus: "submitted",
-      respondedAt: new Date().toISOString(),
+      respondedAt: submittedAt,
       submittedData: submitted,
-      // Invalidate token for single-use
-      requestToken: `used-${supplier.id}-${Date.now()}`,
+      requestPeriod: periodId,
+      // Keep token valid within TTL so the supplier can correct their answer.
     },
     overrideAccess: true,
   });
 
-  const periodId = await ensureOpenPeriod(payload, orgId);
-  await reaggregateSupplierReported(payload, orgId, periodId);
+  await reaggregateScope3Contributions(payload, orgId, periodId);
 
-  return NextResponse.json({ ok: true });
+  await writeAuditLog(payload, {
+    organisationId: orgId,
+    actorId: null,
+    action: isResubmit ? "supplier.resubmit" : "supplier.submit",
+    entityType: "suppliers",
+    entityId: supplier.id,
+    after: buildPublicSubmitAuditAfter({
+      supplierId: supplier.id,
+      tokenId: token,
+      periodId,
+      submittedAt,
+      organisationId: orgId,
+      values: submitted,
+      isResubmit,
+    }),
+  });
+
+  return NextResponse.json({
+    ok: true,
+    orgName: undefined as string | undefined,
+    periodId,
+    isResubmit,
+  });
 }

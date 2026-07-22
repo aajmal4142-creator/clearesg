@@ -17,3 +17,8 @@ export {
   type Scope3Contribution,
 } from "./composition";
 export { metricsAndCompositionFromDatapoints } from "./metricsFromDatapoints";
+export {
+  buildPublicSubmitAuditAfter,
+  findSupplierByToken,
+  tokenAuthorizesSupplier,
+} from "./tokenSecurity";

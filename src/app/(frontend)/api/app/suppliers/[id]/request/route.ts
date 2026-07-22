@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 
 import { getCurrentContext } from "@/lib/auth";
 import { newRequestToken, requestExpiryFrom } from "@/lib/suppliers";
+import { ensureOpenPeriod } from "@/lib/suppliers/aggregate";
 import config from "@/payload.config";
 
 type Ctx = { params: Promise<{ id: string }> };
@@ -16,7 +17,7 @@ async function deliverRequestEmail(opts: {
   const subject = `${opts.orgName} requests your emissions data`;
   const html = `<p>${opts.orgName} needs a short Scope 3 data return.</p>
 <p>Complete the form (about 90 seconds): <a href="${opts.link}">${opts.link}</a></p>
-<p>This link expires on ${opts.expiresIso.slice(0, 10)}. It can be used once.</p>`;
+<p>This link expires on ${opts.expiresIso.slice(0, 10)}. You may correct your answers until then.</p>`;
 
   const key = process.env.RESEND_API_KEY;
   const from = process.env.RESEND_FROM ?? "ClearESG <onboarding@resend.dev>";
@@ -69,10 +70,7 @@ export async function POST(req: Request, ctx: Ctx) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
   if (supplier.requestStatus === "submitted") {
-    return NextResponse.json(
-      { error: "Already submitted — token is single-use" },
-      { status: 409 },
-    );
+    // Corrections allowed via the existing token within TTL — resend refreshes expiry.
   }
 
   const token = supplier.requestToken ?? newRequestToken();
@@ -80,14 +78,17 @@ export async function POST(req: Request, ctx: Ctx) {
   const origin = new URL(req.url).origin;
   const link = `${origin}/s/${token}`;
 
+  const periodId = await ensureOpenPeriod(payload, orgId);
+
   await payload.update({
     collection: "suppliers",
     id,
     data: {
       requestToken: token,
-      requestStatus: "sent",
+      requestStatus: supplier.requestStatus === "submitted" ? "submitted" : "sent",
       sentAt: new Date().toISOString(),
       requestExpiresAt: expires.toISOString(),
+      requestPeriod: periodId,
     },
     overrideAccess: true,
   });

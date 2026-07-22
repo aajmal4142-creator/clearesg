@@ -616,7 +616,10 @@ export interface Report {
 export interface AuditLog {
   id: string;
   organisation: string | Organisation;
-  actor: string | User;
+  /**
+   * Optional — public supplier token submits may omit actor; reconstruct from after.tokenId / supplierId
+   */
+  actor?: (string | null) | User;
   action: string;
   entityType: string;
   entityId: string;

@@ -9,13 +9,34 @@ export type SupplierFormMeta = {
   orgName: string;
   supplierName: string;
   expired: boolean;
+  /** @deprecated Corrections allowed — prefer alreadySubmitted. */
   used: boolean;
+  alreadySubmitted?: boolean;
   expiresAt: string | null;
   error?: string;
 };
 
 function draftKey(token: string) {
   return `clearesg-supplier-draft:${token}`;
+}
+
+function whyCopy(key: string): string {
+  switch (key) {
+    case "electricity_kwh":
+      return "Helps estimate energy-related emissions in your operations.";
+    case "diesel_litres":
+      return "Fuel used in vehicles or generators.";
+    case "natural_gas_m3":
+      return "Heating and process gas.";
+    case "business_travel_km":
+      return "Staff travel distance for work trips.";
+    case "employees_total":
+      return "Used to scale intensity figures fairly.";
+    case "estimated_tco2e":
+      return "If you already calculate your footprint, share that total. Leave blank if not.";
+    default:
+      return "";
+  }
 }
 
 export function SupplierPublicForm({
@@ -26,8 +47,10 @@ export function SupplierPublicForm({
   initial: SupplierFormMeta;
 }) {
   const [error, setError] = useState<string | null>(initial.error ?? null);
-  const [done, setDone] = useState(initial.used);
+  const [done, setDone] = useState(false);
+  const [isResubmit, setIsResubmit] = useState(false);
   const [values, setValues] = useState<Record<string, string>>({});
+  const [isMetered, setIsMetered] = useState(false);
   const [saving, setSaving] = useState(false);
   const meta = initial;
 
@@ -52,10 +75,10 @@ export function SupplierPublicForm({
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
-    if (meta.expired || meta.used || meta.error) return;
+    if (meta.expired || meta.error) return;
     setSaving(true);
     setError(null);
-    const body: Record<string, number | null> = {};
+    const body: Record<string, number | null | boolean> = {};
     for (const f of SUPPLIER_FORM_FIELDS) {
       const raw = values[f.key]?.trim() ?? "";
       if (!raw) {
@@ -64,6 +87,7 @@ export function SupplierPublicForm({
       }
       body[f.key] = Number(raw);
     }
+    body.is_metered = isMetered;
     const res = await fetch(`/api/s/${token}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -75,11 +99,13 @@ export function SupplierPublicForm({
       setError(data.error ?? "Could not submit");
       return;
     }
+    const data = (await res.json().catch(() => ({}))) as { isResubmit?: boolean };
     try {
       sessionStorage.removeItem(draftKey(token));
     } catch {
       /* ignore */
     }
+    setIsResubmit(Boolean(data.isResubmit));
     setDone(true);
   }
 
@@ -91,15 +117,44 @@ export function SupplierPublicForm({
     );
   }
 
-  if (done || meta.used) {
+  if (done) {
     return (
       <main className="mx-auto max-w-lg px-6 py-16 text-ink">
-        <p className="label-caps">{meta.orgName}</p>
-        <h1 className="font-display mt-4 text-3xl">You&apos;re done</h1>
-        <p className="mt-4 text-lg text-ink-muted">
-          Thank you. Your response is recorded for {meta.orgName}. This link cannot be
-          used again.
-        </p>
+        <div className="panel float-shadow p-8">
+          <p className="label-caps text-signal">Recorded</p>
+          <h1
+            className="mt-4 text-3xl font-medium tracking-tight"
+            style={{ fontFamily: "var(--font-display)" }}
+          >
+            Thank you — you helped {meta.orgName}
+          </h1>
+          <p className="measure-body mt-4 text-ink-muted">
+            {isResubmit
+              ? "Your corrected figures replaced the previous response."
+              : `Your response is on file for ${meta.orgName}'s compliance report.`}{" "}
+            Keep this page as your acknowledgement.
+          </p>
+          <dl className="mt-8 space-y-2 border-t border-rule pt-6 text-sm">
+            <div className="flex justify-between gap-4">
+              <dt className="text-ink-muted">Buyer</dt>
+              <dd>{meta.orgName}</dd>
+            </div>
+            <div className="flex justify-between gap-4">
+              <dt className="text-ink-muted">Supplier</dt>
+              <dd>{meta.supplierName}</dd>
+            </div>
+            <div className="flex justify-between gap-4">
+              <dt className="text-ink-muted">Status</dt>
+              <dd className="text-signal">{isResubmit ? "Updated" : "Submitted"}</dd>
+            </div>
+          </dl>
+          {meta.expiresAt && !isTokenPast(meta.expiresAt) ? (
+            <p className="mt-6 text-xs text-ink-muted">
+              Need to correct a figure? Reopen this link before{" "}
+              <span className="font-data">{meta.expiresAt.slice(0, 10)}</span>.
+            </p>
+          ) : null}
+        </div>
       </main>
     );
   }
@@ -108,7 +163,12 @@ export function SupplierPublicForm({
     return (
       <main className="mx-auto max-w-lg px-6 py-16 text-ink">
         <p className="label-caps">{meta.orgName}</p>
-        <h1 className="font-display mt-4 text-3xl">Link expired</h1>
+        <h1
+          className="mt-4 text-3xl font-medium"
+          style={{ fontFamily: "var(--font-display)" }}
+        >
+          Link expired
+        </h1>
         <p className="mt-4 text-ink-muted">Ask {meta.orgName} to send a new request.</p>
       </main>
     );
@@ -117,18 +177,27 @@ export function SupplierPublicForm({
   return (
     <main className="mx-auto max-w-lg px-5 py-10 text-ink sm:px-6 sm:py-12">
       <p className="label-caps">{meta.orgName}</p>
-      <h1 className="font-display mt-4 text-3xl leading-tight sm:text-4xl">
-        Supplier data return
+      <h1
+        className="mt-4 text-3xl leading-tight font-medium sm:text-4xl"
+        style={{ fontFamily: "var(--font-display)" }}
+      >
+        Quick data return
       </h1>
       <p className="mt-3 text-base text-ink-muted sm:text-lg">
-        For {meta.supplierName}. Six fields. About 90 seconds. Numbers only — measured
-        where possible. Your draft is kept on this device until you submit.
+        For <span className="text-ink">{meta.supplierName}</span>. About 90 seconds.
+        {meta.alreadySubmitted
+          ? " You already submitted — changing values below will update your response."
+          : " Plain figures only. Your draft stays on this device until you submit."}
+      </p>
+      <p className="mt-2 text-sm text-ink-muted">
+        Why am I being asked? {meta.orgName} needs value-chain data for mandatory ESG
+        reporting. Accurate answers make you a lower-risk supplier.
       </p>
       {error ? <p className="mt-4 text-sm text-rust">{error}</p> : null}
 
       <form className="mt-10 space-y-7" onSubmit={(e) => void submit(e)}>
         {SUPPLIER_FORM_FIELDS.map((f) => (
-          <div key={f.key}>
+          <div key={f.key} className="input-well p-4">
             <label
               className="flex items-baseline justify-between gap-2 text-base"
               htmlFor={f.key}
@@ -139,6 +208,7 @@ export function SupplierPublicForm({
               </span>
               <span className="font-data text-sm text-ink-muted">{f.unit}</span>
             </label>
+            <p className="mt-1 text-xs text-ink-muted">{whyCopy(f.key)}</p>
             <input
               id={f.key}
               type="number"
@@ -146,26 +216,42 @@ export function SupplierPublicForm({
               min={0}
               step="any"
               required={f.required}
-              className="mt-2 min-h-12 w-full rounded-[4px] border border-rule bg-surface-1 px-4 py-3 font-data text-base text-ink"
+              className="mt-2 min-h-12 w-full rounded-[var(--radius)] border border-rule bg-canvas px-4 py-3 font-data text-base text-ink"
               value={values[f.key] ?? ""}
               onChange={(e) => setValues((v) => ({ ...v, [f.key]: e.target.value }))}
             />
           </div>
         ))}
+        <label className="flex items-start gap-3 text-sm text-ink-muted">
+          <input
+            type="checkbox"
+            className="mt-1"
+            checked={isMetered}
+            onChange={(e) => setIsMetered(e.target.checked)}
+          />
+          <span>
+            These emissions figures come from metered or inventoried measurement (not an
+            estimate). Leave unchecked if unsure.
+          </span>
+        </label>
         <button
           type="submit"
           disabled={saving}
-          className="min-h-12 w-full rounded-[4px] border border-accent bg-accent px-4 py-3 text-base font-medium text-canvas disabled:opacity-50 sm:w-auto"
+          className="min-h-12 w-full rounded-[var(--radius)] border border-accent bg-accent px-4 py-3 text-base font-medium text-canvas disabled:opacity-50 sm:w-auto"
         >
-          {saving ? "Submitting…" : "Submit"}
+          {saving ? "Submitting…" : meta.alreadySubmitted ? "Update response" : "Submit"}
         </button>
       </form>
       <p className="mt-12 border-t border-rule pt-6 text-xs text-ink-muted">
-        Need to report your own emissions?{" "}
-        <Link href="/" className="text-accent underline-offset-2 hover:underline">
+        Powered by{" "}
+        <Link href="/" className="editorial-link">
           ClearESG
         </Link>
       </p>
     </main>
   );
+}
+
+function isTokenPast(iso: string): boolean {
+  return Date.parse(iso) < Date.now();
 }

@@ -49,7 +49,8 @@ export default async function SupplierTokenPage({
       expired: isTokenExpired(
         supplier.requestExpiresAt ? String(supplier.requestExpiresAt) : null,
       ),
-      used: supplier.requestStatus === "submitted",
+      used: false,
+      alreadySubmitted: supplier.requestStatus === "submitted",
       expiresAt: supplier.requestExpiresAt ? String(supplier.requestExpiresAt) : null,
     };
   }
