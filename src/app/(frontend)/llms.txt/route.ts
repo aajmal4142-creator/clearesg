@@ -13,7 +13,7 @@ export function GET() {
     "",
     "## Product",
     `- Pricing: ${siteUrl("/pricing")}`,
-    `- App: ${siteUrl("/app")}`,
+    `- App: ${siteUrl("/dashboard")}`,
     "",
     "## Free tools (ungated)",
     `- CSRD scope checker: ${siteUrl("/tools/csrd-scope")}`,

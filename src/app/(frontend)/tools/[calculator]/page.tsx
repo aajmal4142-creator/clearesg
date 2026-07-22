@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
-import { MarketingFooter, MarketingNav } from "@/components/marketing/chrome";
+import { MarketingLayout } from "@/components/marketing/MarketingLayout";
 import { CsrdScopeChecker } from "@/app/(frontend)/tools/CsrdScopeChecker";
 import { Scope2Calculator } from "@/app/(frontend)/tools/Scope2Calculator";
 import { SITE_NAME } from "@/lib/marketing/site";
@@ -45,13 +45,12 @@ export default async function ToolPage({ params }: Props) {
   const Component = tool.Component;
 
   return (
-    <div className="flex min-h-full flex-col bg-canvas text-ink">
-      <MarketingNav />
+    <MarketingLayout>
       <main className="mx-auto max-w-xl flex-1 px-6 py-16">
-        <p className="label-caps text-ink-muted">Tools</p>
-        <h1 className="mt-2 font-display text-[40px] text-ink">{tool.title}</h1>
+        <p className="acid-label">Tools</p>
+        <h1 className="mt-2 acid-display-sm text-ink">{tool.title}</h1>
         <p className="mt-4 text-ink-muted">{tool.description}</p>
-        <div className="mt-8">
+        <div className="mt-8 rounded-[var(--radius-panel)] border border-rule bg-surface-1 p-6 shadow-[var(--shadow-float)]">
           <Component />
         </div>
         <p className="mt-6 text-xs text-ink-muted">
@@ -59,7 +58,6 @@ export default async function ToolPage({ params }: Props) {
           versioned factor registry.
         </p>
       </main>
-      <MarketingFooter />
-    </div>
+    </MarketingLayout>
   );
 }

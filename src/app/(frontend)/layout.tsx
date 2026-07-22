@@ -1,9 +1,10 @@
 import { ClerkProvider } from "@clerk/nextjs";
 import type { Metadata } from "next";
 import { cookies } from "next/headers";
-import { Fraunces, Inter_Tight, JetBrains_Mono } from "next/font/google";
+import { Fraunces, Inter_Tight, JetBrains_Mono, Space_Grotesk } from "next/font/google";
+import NextTopLoader from "nextjs-toploader";
 
-import { isTheme, THEME_BOOT_SCRIPT, type Theme } from "@/lib/theme";
+import { isTheme, type Theme } from "@/lib/theme";
 
 import "./globals.css";
 
@@ -29,6 +30,14 @@ const fraunces = Fraunces({
   axes: ["SOFT", "WONK", "opsz"],
 });
 
+/** Design A (Acid Climate) marketing — geometric sans, scoped via [data-design="acid"] */
+const spaceGrotesk = Space_Grotesk({
+  variable: "--font-space-grotesk",
+  subsets: ["latin"],
+  display: "swap",
+  preload: true,
+});
+
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL ?? "https://clearesg.com"),
   title: {
@@ -37,6 +46,10 @@ export const metadata: Metadata = {
   },
   description:
     "Enterprise ESG software costs six figures and takes six months. ClearESG gets you audit-ready this quarter.",
+  icons: {
+    icon: [{ url: "/icon", type: "image/png" }],
+    apple: [{ url: "/apple-icon", type: "image/png" }],
+  },
   openGraph: {
     type: "website",
     siteName: "ClearESG",
@@ -74,31 +87,32 @@ export default async function RootLayout({
   const raw = jar.get("clearesg-theme")?.value;
   const theme: Theme = isTheme(raw) ? raw : "light";
 
-  const body = (
+  const content = hasClerk ? (
+    <ClerkProvider appearance={clerkAppearance} afterSignOutUrl="/">
+      {children}
+    </ClerkProvider>
+  ) : (
+    children
+  );
+
+  return (
     <html
       lang="en"
       data-theme={theme}
       style={{ colorScheme: theme === "dark" ? "dark" : "light" }}
-      className={`${interTight.variable} ${jetbrainsMono.variable} ${fraunces.variable} h-full`}
+      className={`${interTight.variable} ${jetbrainsMono.variable} ${fraunces.variable} ${spaceGrotesk.variable} h-full`}
       suppressHydrationWarning
     >
-      <head>
-        <script dangerouslySetInnerHTML={{ __html: THEME_BOOT_SCRIPT }} />
-      </head>
       <body className="flex min-h-full flex-col" suppressHydrationWarning>
+        <NextTopLoader
+          color="var(--accent)"
+          height={2}
+          showSpinner={false}
+          shadow={false}
+        />
         <div className="noise-overlay" aria-hidden />
-        {children}
+        {content}
       </body>
     </html>
-  );
-
-  if (!hasClerk) {
-    return body;
-  }
-
-  return (
-    <ClerkProvider appearance={clerkAppearance} afterSignOutUrl="/">
-      {body}
-    </ClerkProvider>
   );
 }

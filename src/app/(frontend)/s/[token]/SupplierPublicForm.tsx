@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import Link from "next/link";
+import { useEffect, useState } from "react";
 
 import { SUPPLIER_FORM_FIELDS } from "@/lib/suppliers/fields";
 
@@ -12,6 +13,10 @@ export type SupplierFormMeta = {
   expiresAt: string | null;
   error?: string;
 };
+
+function draftKey(token: string) {
+  return `clearesg-supplier-draft:${token}`;
+}
 
 export function SupplierPublicForm({
   token,
@@ -25,6 +30,25 @@ export function SupplierPublicForm({
   const [values, setValues] = useState<Record<string, string>>({});
   const [saving, setSaving] = useState(false);
   const meta = initial;
+
+  useEffect(() => {
+    void Promise.resolve().then(() => {
+      try {
+        const raw = sessionStorage.getItem(draftKey(token));
+        if (raw) setValues(JSON.parse(raw) as Record<string, string>);
+      } catch {
+        /* ignore */
+      }
+    });
+  }, [token]);
+
+  useEffect(() => {
+    try {
+      sessionStorage.setItem(draftKey(token), JSON.stringify(values));
+    } catch {
+      /* ignore */
+    }
+  }, [token, values]);
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -51,6 +75,11 @@ export function SupplierPublicForm({
       setError(data.error ?? "Could not submit");
       return;
     }
+    try {
+      sessionStorage.removeItem(draftKey(token));
+    } catch {
+      /* ignore */
+    }
     setDone(true);
   }
 
@@ -66,8 +95,8 @@ export function SupplierPublicForm({
     return (
       <main className="mx-auto max-w-lg px-6 py-16 text-ink">
         <p className="label-caps">{meta.orgName}</p>
-        <h1 className="font-display mt-4 text-3xl">Received</h1>
-        <p className="mt-4 text-ink-muted">
+        <h1 className="font-display mt-4 text-3xl">You&apos;re done</h1>
+        <p className="mt-4 text-lg text-ink-muted">
           Thank you. Your response is recorded for {meta.orgName}. This link cannot be
           used again.
         </p>
@@ -86,19 +115,24 @@ export function SupplierPublicForm({
   }
 
   return (
-    <main className="mx-auto max-w-lg px-6 py-12 text-ink">
+    <main className="mx-auto max-w-lg px-5 py-10 text-ink sm:px-6 sm:py-12">
       <p className="label-caps">{meta.orgName}</p>
-      <h1 className="font-display mt-4 text-3xl">Supplier data return</h1>
-      <p className="mt-3 text-ink-muted">
+      <h1 className="font-display mt-4 text-3xl leading-tight sm:text-4xl">
+        Supplier data return
+      </h1>
+      <p className="mt-3 text-base text-ink-muted sm:text-lg">
         For {meta.supplierName}. Six fields. About 90 seconds. Numbers only — measured
-        where possible.
+        where possible. Your draft is kept on this device until you submit.
       </p>
       {error ? <p className="mt-4 text-sm text-rust">{error}</p> : null}
 
-      <form className="mt-10 space-y-6" onSubmit={(e) => void submit(e)}>
+      <form className="mt-10 space-y-7" onSubmit={(e) => void submit(e)}>
         {SUPPLIER_FORM_FIELDS.map((f) => (
           <div key={f.key}>
-            <label className="flex items-baseline justify-between gap-2" htmlFor={f.key}>
+            <label
+              className="flex items-baseline justify-between gap-2 text-base"
+              htmlFor={f.key}
+            >
               <span>
                 {f.label}
                 {f.required ? "" : " (optional)"}
@@ -108,10 +142,11 @@ export function SupplierPublicForm({
             <input
               id={f.key}
               type="number"
+              inputMode="decimal"
               min={0}
               step="any"
               required={f.required}
-              className="mt-2 w-full border border-rule bg-surface-1 px-3 py-2 font-data text-ink"
+              className="mt-2 min-h-12 w-full rounded-[4px] border border-rule bg-surface-1 px-4 py-3 font-data text-base text-ink"
               value={values[f.key] ?? ""}
               onChange={(e) => setValues((v) => ({ ...v, [f.key]: e.target.value }))}
             />
@@ -120,11 +155,17 @@ export function SupplierPublicForm({
         <button
           type="submit"
           disabled={saving}
-          className="border border-rule bg-surface-1 px-4 py-2 text-sm text-ink hover:border-rule-strong disabled:opacity-50"
+          className="min-h-12 w-full rounded-[4px] border border-accent bg-accent px-4 py-3 text-base font-medium text-canvas disabled:opacity-50 sm:w-auto"
         >
           {saving ? "Submitting…" : "Submit"}
         </button>
       </form>
+      <p className="mt-12 border-t border-rule pt-6 text-xs text-ink-muted">
+        Need to report your own emissions?{" "}
+        <Link href="/" className="text-accent underline-offset-2 hover:underline">
+          ClearESG
+        </Link>
+      </p>
     </main>
   );
 }

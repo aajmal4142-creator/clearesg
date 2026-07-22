@@ -100,6 +100,41 @@ export const Datapoints: CollectionConfig = {
         { label: "Supplier", value: "supplier" },
         { label: "Estimate", value: "estimate" },
         { label: "API", value: "api" },
+        { label: "Internal survey", value: "internal_survey" },
+      ],
+    },
+    {
+      name: "approvalState",
+      type: "select",
+      required: true,
+      defaultValue: "pending",
+      index: true,
+      options: [
+        { label: "Pending", value: "pending" },
+        { label: "Approved", value: "approved" },
+        { label: "Rejected", value: "rejected" },
+      ],
+    },
+    {
+      name: "approvalReason",
+      type: "textarea",
+      admin: { description: "Required when approvalState is rejected." },
+    },
+    {
+      name: "assignedTo",
+      type: "relationship",
+      relationTo: "users",
+      index: true,
+    },
+    { name: "dueDate", type: "date", index: true },
+    {
+      name: "taskStatus",
+      type: "select",
+      defaultValue: "open",
+      options: [
+        { label: "Open", value: "open" },
+        { label: "Submitted", value: "submitted" },
+        { label: "Approved", value: "approved" },
       ],
     },
     {

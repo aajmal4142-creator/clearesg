@@ -2,11 +2,12 @@ import { getPayload } from "payload";
 import { NextResponse } from "next/server";
 
 import { getCurrentContext } from "@/lib/auth";
+import { sendTransactionalEmail } from "@/lib/email/send";
 import config from "@/payload.config";
 
 /**
  * Invite by email → Membership status: invited.
- * Resend delivery is logged when RESEND_API_KEY is absent (dev).
+ * Delivers via Resend when RESEND_API_KEY is set; otherwise console.
  */
 export async function POST(req: Request) {
   const ctx = await getCurrentContext();
@@ -26,6 +27,8 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Valid email required" }, { status: 400 });
   }
   const role = body.role ?? "contributor";
+  const rolePlain =
+    role === "admin" ? "Can approve" : role === "viewer" ? "View only" : "Can edit data";
 
   const payload = await getPayload({ config });
 
@@ -93,19 +96,19 @@ export async function POST(req: Request) {
     });
   }
 
-  if (process.env.RESEND_API_KEY) {
-    // Resend + React Email wired in a later hardening pass; key presence is the gate.
-    console.info(`[invite] Resend queued for ${email} org=${ctx.activeOrg.slug}`);
-  } else {
-    console.info(
-      `[invite] DEV — no RESEND_API_KEY. Invite ${email} as ${role} to ${ctx.activeOrg.name} (membership ${membership.id})`,
-    );
-  }
+  const origin = new URL(req.url).origin;
+  const delivery = await sendTransactionalEmail({
+    to: email,
+    subject: `You are invited to ${ctx.activeOrg.name} on ClearESG`,
+    html: `<p>You have been invited to join <strong>${ctx.activeOrg.name}</strong> as <strong>${rolePlain}</strong> (${role}).</p><p><a href="${origin}/sign-in">Sign in to accept</a></p>`,
+    text: `You are invited to ${ctx.activeOrg.name} as ${rolePlain}. Sign in at ${origin}/sign-in`,
+  });
 
   return NextResponse.json({
     ok: true,
     membershipId: membership.id,
     status: "invited",
+    delivery: delivery.delivery,
   });
 }
 

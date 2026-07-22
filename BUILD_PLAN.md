@@ -6,6 +6,10 @@
 > the Progress Ledger at the bottom of this file (change `[ ]` to `[x]` and add a one-line note).
 > Do not skip ahead. Do not start Phase N+1 until Phase N builds clean and is committed.
 > If a decision in this file conflicts with your instinct, follow this file and note the objection in the ledger.
+>
+> **Status key:** Ledger `[x]` = phase **surface shipped in-repo**. It does **not** mean production-ready
+> or §1 fully deep. After phases 0–14, continue with **§12 Remaining work** and keep **§11 Open decisions**
+> unresolved until a human decides. Reconcile the ledger whenever reality drifts from the notes.
 
 ---
 
@@ -709,6 +713,10 @@ Not marketing bolted on afterward. These are features that happen to compound.
 
 ## 9. Definition of Done — every phase
 
+Use this checklist for every future change set. It is the quality floor, not a one-time ceremony.
+
+**As of 2026-07-21:** phases 0–14 are marked complete for **surface delivery** (routes, collections, calc, marketing shell). The items below are **not** fully re-audited across every `/dashboard` surface — treat them as ongoing gates for §12 remaining work.
+
 - [ ] `pnpm build` clean. Zero TS errors. Zero `any`.
 - [ ] Zero hardcoded hex — all colour via CSS var.
 - [ ] Every number monospaced, tabular figures.
@@ -724,42 +732,91 @@ Not marketing bolted on afterward. These are features that happen to compound.
 
 ## 10. Progress Ledger
 
-Update after every phase. This is how you resume if context is lost.
+Update after every phase **and** whenever remaining-work status changes. `[x]` means the phase surface shipped in-repo — **not** “production-ready for paying customers.” See §12 for gaps.
 
-| Phase               | Status | Notes                                                                                                                                                                                                    |
-| ------------------- | ------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 0 — Foundation      | [x]    | Next 16.2.10 + Payload 3.86 + shadcn + tokens; sharp cast for types; /admin needs real DATABASE_URL (no local Mongo yet).                                                                                |
-| 1 — Data model      | [x]    | 1a+1b done. 1c Step 2: 1201 DPs. Step 3: all 6 raw E→ESRS candidates rejected — no 1:1. Derivation layer + DerivedMetricDefinitions hold approved E1-5 mappings. BRSR/VSME skipped.                      |
-| 2 — Auth            | [x]    | Clerk identity + Membership authz; webhook; org switch; invites API; CLEARESG_DEV_BYPASS when keys absent.                                                                                               |
-| 3 — Calc engine     | [x]    | Pure calc + factor resolve ladder + narrative; 70 tests via test:calc; missing ≠ zero.                                                                                                                   |
-| 4 — Onboarding      | [x]    | 60-second baseline wizard; writes org profile + ComplianceObligations; redirects to Runway when onboardedAt set.                                                                                         |
-| 5 — Runway          | [x]    | Days-to-filing countdown, collection progress, Gauge placeholder, next actions; CountUp + reduced-motion.                                                                                                |
-| 6 — Data collection | [x]    | Wizard for 18 metrics + quality; evidence vault (sha256); CSV dry-run; raw→ESRS notes via derive registry only.                                                                                          |
-| 7 — Supplier chains | [x]    | CRUD + spend categories; /s/[token] 6-field public form (single-use, expiry, rate-limit); reminders day 7/14; coverage meter; supplier_reported_tco2e → Scope 3. Email via console adapter until Resend. |
-| 8 — Materiality     | [x]    | ESRS topics E1–E5/S1–S4/G1; impact+financial scoring; drag matrix; narrative + audit; /app/materiality.                                                                                                  |
-| 9 — Reports         | [x]    | Immutable snapshot publish; React-PDF; living /r/[token]; JSON/CSV; version diff; assurance disclaimer.                                                                                                  |
-| 10 — Consultant CC  | [x]    | Client table by deadline risk; bulk nudge/export; sector templates; white-label BrandVars; /app/consultant + /api/app/consultant/*.                                                                      |
-| 11 — Benchmarking   | [x]    | Percentiles + n≥8 hard gate; recompute API; demo cohort when empty; /app/benchmarks.                                                                                                                     |
-| 12 — Billing        | [x]    | Stripe Checkout/Portal/webhooks; `lib/billing/can()`; usage meters; Free watermark PDF; DEV bypass upgrade when keys absent.                                                                             |
-| 13 — Marketing/SEO  | [x]    | Home+Gauge, pricing, glossary/answers/tools/csrd/compare/deadlines; sitemap/robots; llms.txt; JSON-LD; OG image. Seed corpus (expandable).                                                               |
-| 14 — Hardening      | [x]    | Health `/api/health`; Upstash/memory rate limits; Sentry init when DSN set; structured logs; focus-visible + reduced-motion; Playwright + axe smoke.                                                     |
-| Design depth pass   | [x]    | Five-surface elevation + noise; Metric primitive; bravura Gauge (hero/runway/PDF); springs+stagger; live marketing calc hero; chrome→structure→data.                                                     |
-| Editorial redesign  | [x]    | §3 Editorial: Fraunces/Inter Tight/JetBrains Mono; dual theme cookie; oxblood accent; restyled Gauge; light PDF cover; paper grain.                                                                      |
-| Editorial motion    | [x]    | Printed-report assembly: rule-draw, ink-settle, Metric count-up, Gauge staging; `useInkReveal`/`useRuleDraw`/`useCountUp`; hero chrome→masthead→gauge; PDF stays static.                                 |
-| Cream-primary fix   | [x]    | Default theme forced cream (no OS-dark inference); dark = warm #14120F opt-in; gauge-lead hero; printed-dial oxblood needle; strip instrument copy.                                                      |
+**Last reconciled with codebase: 2026-07-21.**
+
+| Phase               | Status | Notes                                                                                                                                                                                                                                                                                                                                 |
+| ------------------- | ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 0 — Foundation      | [x]    | Next 16.2.10 + Payload 3.86 + shadcn + editorial tokens. `/admin` and product need real `DATABASE_URL` (Atlas; never M0 for real data).                                                                                                                                                                                               |
+| 1 — Data model      | [x]    | 16 collections registered. ~1201 ESRS datapoint defs seeded. Derivation layer + DerivedMetricDefinitions for approved E1–E5. **BRSR/VSME seed mappings still skipped** — publish UI can label BRSR but mappings are not beachhead-complete.                                                                                           |
+| 2 — Auth            | [x]    | Clerk identity + Membership authz; webhook; org switch; invites API. `CLEARESG_DEV_BYPASS=1` when Clerk keys absent. **Must hard-disable bypass in production.**                                                                                                                                                                      |
+| 3 — Calc engine     | [x]    | Pure `lib/calc` + factor resolve + narrative. **71** tests via `pnpm test:calc` (2026-07-21). Missing ≠ zero.                                                                                                                                                                                                                         |
+| 4 — Onboarding      | [x]    | 60-second baseline wizard; org profile + ComplianceObligations; redirects to Runway when `onboardedAt` set. Country `IN` → BRSR obligation label.                                                                                                                                                                                     |
+| 5 — Runway          | [x]    | Days-to-filing, collection progress, Gauge, next actions, CountUp + reduced-motion. **Depth gap:** next actions still largely hardcoded — not full impact×ease ranking from §1.                                                                                                                                                       |
+| 6 — Data collection | [x]    | Wizard + quality flags; evidence vault (sha256); CSV dry-run; derive registry only. **OCR:** uploads set `ocrStatus: "pending"` — no worker completes OCR.                                                                                                                                                                            |
+| 7 — Supplier chains | [x]    | CRUD + `/s/[token]` 6-field form (single-use, expiry, rate-limit); reminders day 7/14; coverage → Scope 3. **Email:** Resend path exists but falls back to **console** when `RESEND_API_KEY` absent; Payload email adapter is console.                                                                                                |
+| 8 — Materiality     | [x]    | ESRS topics E1–E5/S1–S4/G1; impact+financial; drag matrix; narrative + audit; `/dashboard/materiality`.                                                                                                                                                                                                                               |
+| 9 — Reports         | [x]    | Immutable snapshot; React-PDF (light cover); living `/r/[token]`; JSON/CSV; version diff; assurance disclaimer present (**lawyer review still open — §11**). XBRL-ready = structured export depth, not full iXBRL tagging.                                                                                                            |
+| 10 — Consultant CC  | [x]    | Client table by deadline risk; bulk nudge/export; sector templates; white-label BrandVars; `/dashboard/consultant` + APIs. **Needs end-to-end QA** (logo/colours on `/s`, `/r`, PDF).                                                                                                                                                 |
+| 11 — Benchmarking   | [x]    | Percentiles + **n≥8** hard gate; recompute API; demo cohort when empty; `/dashboard/benchmarks`. **No scheduled cron** wired — recompute is on-demand only.                                                                                                                                                                           |
+| 12 — Billing        | [x]    | Stripe Checkout/Portal/webhooks; `lib/billing/can()`; Free watermark PDF; DEV bypass upgrade without Stripe keys. List prices EUR Free €0 / Pro €49 / Consultant €199 (+€15/client). **INR/Razorpay still open (§11).**                                                                                                               |
+| 13 — Marketing/SEO  | [x]    | Acid cinematic home + Gauge; pricing; tools (CSRD scope, Scope 2); glossary/answers; `/csrd/[sector]` (3 sectors); `/compare` (Workiva, Persefoni, Greenly only); `/deadlines` (IE, DE, IN); sitemap/robots; llms.txt; JSON-LD; OG. Corpus **thin vs §7 targets**. No `/brsr/[sector]`, no Envizi compare, no public price estimator. |
+| 14 — Hardening      | [x]    | `/api/health`; Upstash/memory rate limits; Sentry when DSN set; structured logs; focus-visible + reduced-motion. Playwright = **smoke only** (`e2e/home.spec.ts`, `e2e/app-smoke.spec.ts`) — not full signup→publish path.                                                                                                            |
+| Design depth pass   | [x]    | Five-surface elevation + noise; Metric primitive; bravura Gauge; springs+stagger; marketing calc hero.                                                                                                                                                                                                                                |
+| Editorial redesign  | [x]    | §3 Editorial: Fraunces / Inter Tight / JetBrains Mono; dual theme cookie; oxblood accent; light PDF cover; paper grain.                                                                                                                                                                                                               |
+| Editorial motion    | [x]    | Printed-report assembly: rule-draw, ink-settle, Metric count-up, Gauge staging; `useInkReveal` / `useRuleDraw` / `useCountUp`.                                                                                                                                                                                                        |
+| Cream-primary fix   | [x]    | Default theme forced cream (no OS-dark inference); dark = warm `#14120F` opt-in via cookie only.                                                                                                                                                                                                                                      |
 
 ---
 
 ## 11. Open Decisions — ask, don't assume
 
-Flag these to the human rather than guessing:
+These still block **charging real customers**. Phase 12 code exists; commercial GTM is not closed.
 
 1. **Emission factor licensing.** DEFRA is open. IEA and some EPA datasets are not freely redistributable.
-   Seed with open factors only; flag any that need a licence before commercial use. **This is a legal risk,
-   not a technical one.**
-2. **Region/currency.** Pricing is in EUR here. India needs INR and Razorpay — Stripe's India support for
-   recurring is poor. Confirm before Phase 12.
-3. **DPDP Act (India), enforceable May 2027** — data residency may be required for Indian customers. Affects
-   Atlas region choice. Confirm before shipping to India.
-4. **We are not an assurance provider.** Every report needs a visible disclaimer. Get it reviewed.
-5. **Benchmark consent.** Aggregate use of customer data needs to be in the ToS from day one, opt-out available.
+   Seed with open factors only; licence before commercial redistribution. **Legal risk, not technical.**
+2. **Region/currency.** Product lists EUR (Free / Pro / Consultant). India beachhead needs a decision:
+   **INR + Razorpay**, or soft-launch EUR-only with explicit copy. Stripe India recurring remains weak.
+3. **DPDP Act (India), enforceable May 2027** — data residency may require Atlas region choice.
+   Confirm before shipping to Indian customers.
+4. **Assurance disclaimer.** UI includes “we are not an assurance provider.” Get **lawyer-reviewed** copy on every report/PDF/living page.
+5. **Benchmark consent.** Aggregate cohort use must be in ToS from day one, with **opt-out**.
+
+**Market reference (not an open decision):** IBM Envizi Essential for ~10 facilities with full GHG + value-chain + frameworks quotes roughly **USD 90k–110k/year** indicative ([Envizi pricing](https://www.ibm.com/products/envizi/pricing)). ClearESG wedge stays SME/consultant self-serve at €0/€49/€199 — do not copy Account-volume enterprise SKUs as the primary model.
+
+---
+
+## 12. Remaining work — customer-ready (post phases 0–14)
+
+Phases are demoable. Paying-customer readiness is **not** done. Work in this order.
+
+### 12.1 Production plumbing
+
+- [ ] Resend + React Email live for invites, supplier requests, day-7/14 chases, consultant nudges (kill console-only path in prod)
+- [ ] Production Clerk + Stripe keys; **disable** `CLEARESG_DEV_BYPASS` in production
+- [ ] Mongo Atlas (non-M0), backups, Sentry DSN live
+- [ ] Benchmark recompute **cron** (e.g. Vercel cron → existing recompute API)
+- [ ] Evidence OCR: ship a worker **or** remove OCR from customer-facing claims until ready
+
+### 12.2 Beachhead depth (India / BRSR + §1 honesty)
+
+- [ ] Seed real BRSR metric / derivation mappings; BRSR publish must be principle-aligned, not a label on CSRD data
+- [ ] Runway: projected miss math + ranked next actions (impact×ease)
+- [ ] Evidence click-through on PDF + living report; flag missing evidence loudly
+- [ ] Confidence % on Runway, report cover, living report
+- [ ] Narrative diffs visible in UI (not only unit tests)
+- [ ] Framework mapping UX: which ESRS/BRSR cells a datapoint satisfies
+- [ ] Consultant white-label E2E QA on `/s`, `/r`, PDF
+
+### 12.3 Journey QA
+
+- [ ] Playwright happy path: signup → onboard → data → supplier → publish → share
+- [ ] Manual pilot checklist: Free watermark; Pro paywall; Consultant seats; auditor trace (number → evidence hash → factor version → quality)
+
+### 12.4 Growth (after 12.1–12.3 trustworthy)
+
+- [ ] `/compare/envizi` (+ Plan A, Sweep, Watershed); honest “they win volume/ERP; we win speed/price/consultant”
+- [ ] Public price / readiness estimator (sites + Scope 3 need + framework → Free/Pro/Consultant) with Envizi price footnote
+- [ ] `/brsr/[sector]` pages + BRSR readiness free tool; expand glossary/answers toward §7 counts
+- [ ] Buyer’s guide + pilot case-study outcome templates
+- [ ] Site/facility progress in Runway + usage-visible billing meters
+- [ ] Later (post-revenue): emissions calc API / Excel export with cited factors — not v1
+
+### 12.5 Explicitly still out of scope
+
+- Heavy-industry / financed-emissions carbon accounting
+- IoT sensors
+- Full ERP connectors (Envizi strength — defer)
+- Live assurance marketplace
+- AI chatbot that guesses regulation (Copilot only if scoped + cited)

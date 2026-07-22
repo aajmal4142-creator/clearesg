@@ -35,6 +35,7 @@ export async function POST(req: Request) {
   const form = await req.formData();
   const file = form.get("file");
   const metricKey = String(form.get("metricKey") ?? "");
+  const whyNote = String(form.get("whyNote") ?? "").trim();
   const datapointId = form.get("datapointId")
     ? String(form.get("datapointId"))
     : undefined;
@@ -71,8 +72,9 @@ export async function POST(req: Request) {
       uploadedBy: ctx.user.id,
       uploadedAt: new Date().toISOString(),
       linkedDatapoints: datapointId ? [datapointId] : undefined,
-      extractedData: { metricKey },
-      ocrStatus: "pending",
+      whyNote: whyNote || undefined,
+      extractedData: { metricKey, whyNote: whyNote || undefined },
+      ocrStatus: "skipped",
     },
     overrideAccess: true,
   });

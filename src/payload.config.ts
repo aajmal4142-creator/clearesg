@@ -12,6 +12,7 @@ import { Datapoints } from "./collections/Datapoints";
 import { DerivedMetricDefinitions } from "./collections/DerivedMetricDefinitions";
 import { EmissionFactors } from "./collections/EmissionFactors";
 import { Evidence } from "./collections/Evidence";
+import { InternalDataRequests } from "./collections/InternalDataRequests";
 import { MaterialityAssessments } from "./collections/MaterialityAssessments";
 import { Media } from "./collections/Media";
 import { Memberships } from "./collections/Memberships";
@@ -56,6 +57,7 @@ export default buildConfig({
     Datapoints,
     Evidence,
     Suppliers,
+    InternalDataRequests,
     MaterialityAssessments,
     Reports,
     AuditLogs,

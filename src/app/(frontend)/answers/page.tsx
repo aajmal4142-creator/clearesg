@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
-import { JsonLd, MarketingFooter, MarketingNav } from "@/components/marketing/chrome";
+import { MarketingLayout } from "@/components/marketing/MarketingLayout";
 import { ANSWERS } from "@/lib/marketing/answers";
 import { SITE_NAME } from "@/lib/marketing/site";
 
@@ -14,38 +14,42 @@ export const metadata: Metadata = {
 
 export default function AnswersIndexPage() {
   return (
-    <div className="flex min-h-full flex-col bg-canvas text-ink">
-      <MarketingNav />
+    <MarketingLayout
+      jsonLd={{
+        "@context": "https://schema.org",
+        "@type": "ItemList",
+        itemListElement: ANSWERS.map((a, i) => ({
+          "@type": "ListItem",
+          position: i + 1,
+          url: `/answers/${a.slug}`,
+          name: a.question,
+        })),
+      }}
+    >
       <main className="mx-auto max-w-3xl flex-1 px-6 py-16">
-        <h1 className="font-display text-[48px] text-ink">Answers</h1>
-        <p className="mt-4 text-ink-muted">
+        <p className="acid-label mb-3">AEO</p>
+        <h1 className="acid-display-sm text-ink">Answers</h1>
+        <p className="mt-5 text-ink-muted">
           One question per page. The first paragraph stands alone so answer engines can
           lift it.
         </p>
-        <ul className="mt-10 space-y-6">
+        <ul className="mt-10 space-y-4">
           {ANSWERS.map((a) => (
-            <li key={a.slug}>
-              <Link href={`/answers/${a.slug}`} className="text-ink hover:underline">
+            <li
+              key={a.slug}
+              className="rounded-[var(--radius-panel)] border border-rule bg-surface-1 p-5"
+            >
+              <Link
+                href={`/answers/${a.slug}`}
+                className="text-lg font-medium text-ink hover:text-accent"
+              >
                 {a.question}
               </Link>
               <p className="mt-2 text-sm text-ink-muted">{a.answer}</p>
             </li>
           ))}
         </ul>
-        <JsonLd
-          data={{
-            "@context": "https://schema.org",
-            "@type": "ItemList",
-            itemListElement: ANSWERS.map((a, i) => ({
-              "@type": "ListItem",
-              position: i + 1,
-              url: `/answers/${a.slug}`,
-              name: a.question,
-            })),
-          }}
-        />
       </main>
-      <MarketingFooter />
-    </div>
+    </MarketingLayout>
   );
 }

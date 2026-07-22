@@ -99,16 +99,19 @@ export async function GET(req: Request) {
     improve:
       rank !== null && rank > 50
         ? [
-            { label: "Enter measured electricity", href: "/app/data#electricity_kwh" },
+            {
+              label: "Enter measured electricity",
+              href: "/dashboard/data#electricity_kwh",
+            },
             {
               label: "Raise renewable share",
-              href: "/app/data#electricity_renewable_pct",
+              href: "/dashboard/data#electricity_renewable_pct",
             },
-            { label: "Request supplier data", href: "/app/suppliers" },
+            { label: "Request supplier data", href: "/dashboard/suppliers" },
           ]
         : [
-            { label: "Review material topics", href: "/app/materiality" },
-            { label: "Publish living report", href: "/app/reports" },
+            { label: "Review material topics", href: "/dashboard/materiality" },
+            { label: "Publish living report", href: "/dashboard/reports" },
           ],
   });
 }

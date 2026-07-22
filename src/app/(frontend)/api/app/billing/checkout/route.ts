@@ -10,11 +10,16 @@ import {
   stripePriceIdForPlan,
   type PlanId,
 } from "@/lib/billing";
+import {
+  mayEnablePaidBilling,
+  paidBillingDenial,
+  devBypassAllowed,
+} from "@/lib/launch/gates";
 import config from "@/payload.config";
 
 /**
  * Start Checkout for Pro or Consultant.
- * Without Stripe keys + CLEARESG_DEV_BYPASS=1, applies the plan locally for testing.
+ * Paid LIVE requires WS0 sign-off (§17.2). Dev bypass only outside production.
  */
 export async function POST(req: Request) {
   const ctx = await getCurrentContext();
@@ -34,11 +39,15 @@ export async function POST(req: Request) {
   }
   const target = body.plan as Exclude<PlanId, "free">;
 
+  if (!mayEnablePaidBilling()) {
+    return NextResponse.json(paidBillingDenial(), { status: 403 });
+  }
+
   const origin = appOrigin(req);
   const payload = await getPayload({ config });
 
   if (!stripeConfigured()) {
-    if (process.env.CLEARESG_DEV_BYPASS !== "1") {
+    if (!devBypassAllowed()) {
       return NextResponse.json(
         { error: "Stripe is not configured. Set STRIPE_SECRET_KEY." },
         { status: 503 },
@@ -56,7 +65,7 @@ export async function POST(req: Request) {
     return NextResponse.json({
       ok: true,
       mode: "dev_bypass",
-      url: `${origin}/app/billing?upgraded=${target}`,
+      url: `${origin}/dashboard/billing?upgraded=${target}`,
     });
   }
 
@@ -101,8 +110,8 @@ export async function POST(req: Request) {
     mode: "subscription",
     customer: customerId,
     line_items: [{ price: priceId, quantity: 1 }],
-    success_url: `${origin}/app/billing?checkout=success`,
-    cancel_url: `${origin}/app/billing?checkout=cancel`,
+    success_url: `${origin}/dashboard/billing?checkout=success`,
+    cancel_url: `${origin}/dashboard/billing?checkout=cancel`,
     metadata: {
       organisationId: org.id,
       plan: target,

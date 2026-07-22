@@ -1,37 +1,63 @@
 "use client";
 
+import { AppSelectNative } from "@/components/ui/AppField";
+import { cn } from "@/lib/utils";
+
 type OrgOption = { id: string; name: string };
 
 export function OrgSwitcher({
   orgs,
   activeOrgId,
+  compact = false,
+  iconOnly = false,
 }: {
   orgs: OrgOption[];
   activeOrgId: string | null;
+  compact?: boolean;
+  iconOnly?: boolean;
 }) {
   if (orgs.length === 0) return null;
 
-  return (
-    <label className="flex items-center gap-2 text-sm text-ink-muted">
-      <span className="label-caps">Organisation</span>
-      <select
-        className="border border-rule bg-surface-1 px-2 py-1 text-ink"
+  async function switchOrg(organisationId: string) {
+    await fetch("/api/org/switch", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ organisationId }),
+    });
+    window.location.reload();
+  }
+
+  if (iconOnly) {
+    if (orgs.length <= 1) return null;
+    return (
+      <AppSelectNative
+        aria-label="Organisation"
+        className="w-full px-1 py-1 text-[10px]"
         value={activeOrgId ?? ""}
-        onChange={async (e) => {
-          await fetch("/api/org/switch", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ organisationId: e.target.value }),
-          });
-          window.location.reload();
-        }}
+        onChange={(e) => void switchOrg(e.target.value)}
       >
         {orgs.map((org) => (
           <option key={org.id} value={org.id}>
             {org.name}
           </option>
         ))}
-      </select>
-    </label>
+      </AppSelectNative>
+    );
+  }
+
+  return (
+    <AppSelectNative
+      label={compact ? undefined : "Organisation"}
+      aria-label="Organisation"
+      className={cn(!compact && "text-sm")}
+      value={activeOrgId ?? ""}
+      onChange={(e) => void switchOrg(e.target.value)}
+    >
+      {orgs.map((org) => (
+        <option key={org.id} value={org.id}>
+          {org.name}
+        </option>
+      ))}
+    </AppSelectNative>
   );
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import { motion, type HTMLMotionProps } from "motion/react";
-import type { ReactNode } from "react";
+import type { CSSProperties, ReactNode } from "react";
 
 import {
   type PageLayer,
@@ -17,9 +17,10 @@ type AssembleProps = {
   layer: PageLayer;
   children: ReactNode;
   className?: string;
-  as?: "div" | "header" | "main" | "section" | "nav" | "article";
+  as?: "div" | "header" | "main" | "section" | "nav" | "article" | "aside";
   /** Mount assembly (default) vs scroll-enter */
   onMount?: boolean;
+  style?: CSSProperties;
 };
 
 /**
@@ -32,6 +33,7 @@ export function Assemble({
   className,
   as = "div",
   onMount = true,
+  style,
 }: AssembleProps) {
   const props = useInkReveal({
     layer,
@@ -41,7 +43,7 @@ export function Assemble({
   const Comp = motion[as];
 
   return (
-    <Comp className={className} {...props}>
+    <Comp className={className} style={style} {...props}>
       {children}
     </Comp>
   );

@@ -1,7 +1,7 @@
 "use client";
 
 import { motion, useInView, useMotionValue, useSpring, useTransform } from "motion/react";
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef, useSyncExternalStore } from "react";
 
 import { Metric } from "@/components/ui/metric";
 import {
@@ -11,6 +11,17 @@ import {
   usePrefersReducedMotion,
 } from "@/lib/motion";
 import { cn } from "@/lib/utils";
+
+const emptySubscribe = () => () => {};
+
+/** false on server + hydration; true after client mount (avoids motion mismatch). */
+function useIsClient(): boolean {
+  return useSyncExternalStore(
+    emptySubscribe,
+    () => true,
+    () => false,
+  );
+}
 
 type GaugeProps = {
   score: number;
@@ -45,7 +56,11 @@ function polar(
   radius: number,
 ): { x: number; y: number } {
   const rad = (angleDeg * Math.PI) / 180;
-  return { x: cx + radius * Math.cos(rad), y: cy + radius * Math.sin(rad) };
+  /* Round for stable SSR/client SVG attribute strings */
+  return {
+    x: Math.round((cx + radius * Math.cos(rad)) * 1000) / 1000,
+    y: Math.round((cy + radius * Math.sin(rad)) * 1000) / 1000,
+  };
 }
 
 /** Tapered needle: 7px at hub → 1.5px at tip — oxblood ink */
@@ -76,7 +91,10 @@ export function Gauge({
   playOnView = true,
   playDelay = 0,
 }: GaugeProps) {
-  const reduced = usePrefersReducedMotion();
+  const reducedPref = usePrefersReducedMotion();
+  const mounted = useIsClient();
+  /** Prefer false until mount so SSR markup matches the first client paint. */
+  const reduced = mounted ? reducedPref : false;
   const rootRef = useRef<HTMLDivElement>(null);
   const inView = useInView(rootRef, { once: true, margin: "-40px 0px", amount: 0.25 });
   const canPlay = live || !playOnView || inView || reduced;
@@ -147,6 +165,17 @@ export function Gauge({
   const band = bandColor(clamped);
   const readoutDelay = reduced || live ? 0 : playDelay + 1.3;
 
+  /* Avoid SSR/client float drift on SVG tick coordinates (Node vs browser Math). */
+  if (!mounted) {
+    return (
+      <div
+        className={cn("relative inline-flex flex-col items-center", className)}
+        style={{ width: size, height: size * 0.72 + 48 }}
+        aria-hidden
+      />
+    );
+  }
+
   return (
     <div
       ref={rootRef}
@@ -188,11 +217,11 @@ export function Gauge({
             return (
               <motion.g
                 key={v}
-                initial={reduced || !canPlay ? false : { opacity: 0 }}
-                animate={{ opacity: canPlay || reduced ? 1 : 0 }}
+                initial={false}
+                animate={{ opacity: !mounted || canPlay || reduced ? 1 : 0 }}
                 transition={{
                   ...springSoft,
-                  delay: reduced || !canPlay ? 0 : playDelay + i * 0.008,
+                  delay: reduced || !canPlay || !mounted ? 0 : playDelay + i * 0.008,
                 }}
               >
                 <line

@@ -4,9 +4,12 @@ import { getPayload } from "payload";
 import { NextResponse } from "next/server";
 
 import { getCurrentContext } from "@/lib/auth";
+import { writeAuditLog } from "@/lib/audit/write";
 import { BillingDeniedError, billingDeniedResponse } from "@/lib/billing";
+import { mayPublishReports, publishDenial } from "@/lib/launch/gates";
 import { ensureOpenPeriod } from "@/lib/org/period";
 import { buildReportSnapshot, diffSnapshots, type ReportSnapshot } from "@/lib/reports";
+import { recordJourneyEvent } from "@/lib/telemetry/journey";
 import config from "@/payload.config";
 
 async function withPeriod<T>(run: () => Promise<T>): Promise<T | NextResponse> {
@@ -72,12 +75,43 @@ export async function POST(req: Request) {
   const body = (await req.json()) as {
     framework?: "CSRD_SET1" | "CSRD_SIMPLIFIED" | "BRSR" | "VSME" | "GRI" | "CUSTOM";
     shareDays?: number;
+    requireApproved?: boolean;
   };
   const framework = body.framework ?? "CSRD_SIMPLIFIED";
+
+  if (!mayPublishReports()) {
+    return NextResponse.json(publishDenial(), { status: 403 });
+  }
 
   return withPeriod(async () => {
     const payload = await getPayload({ config });
     const periodId = await ensureOpenPeriod(ctx.activeOrg!.id, ctx.activeOrg!.plan);
+
+    const requireApproved = body.requireApproved === true;
+    if (requireApproved) {
+      const pending = await payload.find({
+        collection: "datapoints",
+        where: {
+          and: [
+            { organisation: { equals: ctx.activeOrg!.id } },
+            { period: { equals: periodId } },
+            { approvalState: { not_equals: "approved" } },
+            { quality: { not_equals: "missing" } },
+          ],
+        },
+        limit: 1,
+        overrideAccess: true,
+      });
+      if (pending.docs[0]) {
+        return NextResponse.json(
+          {
+            error:
+              "Publishing requires all material datapoints to be approved. Review pending figures first.",
+          },
+          { status: 409 },
+        );
+      }
+    }
 
     const existing = await payload.find({
       collection: "reports",
@@ -129,6 +163,16 @@ export async function POST(req: Request) {
         publishedBy: ctx.user.id,
       },
       overrideAccess: true,
+    });
+
+    recordJourneyEvent(ctx.activeOrg!.id, "first_publish");
+    await writeAuditLog(payload, {
+      organisationId: ctx.activeOrg!.id,
+      actorId: ctx.user.id,
+      action: "report.publish",
+      entityType: "reports",
+      entityId: report.id,
+      after: { framework, version: nextVersion },
     });
 
     let diff: ReturnType<typeof diffSnapshots> = [];

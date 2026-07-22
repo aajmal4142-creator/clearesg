@@ -39,6 +39,14 @@ export const Evidence: CollectionConfig = {
       relationTo: "datapoints",
       hasMany: true,
     },
+    {
+      name: "whyNote",
+      type: "textarea",
+      admin: {
+        description:
+          "Why this document proves the figure — shown to auditors and reviewers.",
+      },
+    },
     { name: "extractedData", type: "json" },
     {
       name: "ocrStatus",
@@ -48,7 +56,15 @@ export const Evidence: CollectionConfig = {
         { label: "Pending", value: "pending" },
         { label: "Done", value: "done" },
         { label: "Failed", value: "failed" },
+        {
+          label: "Skipped",
+          value: "skipped",
+        },
       ],
+      admin: {
+        description:
+          "OCR is not productized; new uploads should set skipped until a worker ships.",
+      },
     },
   ],
 };

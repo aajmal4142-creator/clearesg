@@ -5,6 +5,7 @@ import { getPayload } from "payload";
 import { cache } from "react";
 
 import type { MembershipRole } from "@/lib/access/membership";
+import { devBypassAllowed } from "@/lib/launch/gates";
 import config from "@/payload.config";
 
 export type AuthContext = {
@@ -129,7 +130,7 @@ export const getCurrentContext = cache(async (): Promise<AuthContext> => {
   const payload = await getPayload({ config });
 
   if (!hasClerk) {
-    if (process.env.CLEARESG_DEV_BYPASS !== "1") {
+    if (!devBypassAllowed()) {
       redirect("/sign-in");
     }
     const demo = await payload.find({
