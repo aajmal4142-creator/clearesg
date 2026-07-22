@@ -12,6 +12,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:calc": "vitest run src/lib/calc src/lib/narrative",
+    "test:obligations": "vitest run src/lib/obligations",
     "test:e2e": "playwright test",
     "seed": "cross-env NODE_OPTIONS=--no-deprecation tsx src/seed/seed.ts",
     "inspect-esrs": "cross-env NODE_OPTIONS=--no-deprecation tsx scripts/inspect-esrs.ts",
