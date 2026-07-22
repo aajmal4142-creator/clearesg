@@ -1,12 +1,8 @@
 import { getPayload } from "payload";
 
-import {
-  calculate,
-  type CalcResult,
-  type DatapointValue,
-  type FactorRecord,
-} from "@/lib/calc";
+import { calculate, type CalcResult, type FactorRecord } from "@/lib/calc";
 import type { MatrixPoint } from "@/lib/materiality";
+import { metricsAndCompositionFromDatapoints } from "@/lib/suppliers";
 import config from "@/payload.config";
 
 import { REPORT_DISCLAIMER, type ReportSnapshot } from "./types";
@@ -39,18 +35,30 @@ export async function buildReportSnapshot(opts: {
         { period: { equals: opts.periodId } },
       ],
     },
-    limit: 200,
+    limit: 500,
     overrideAccess: true,
   });
 
-  const metrics: Record<string, DatapointValue> = {};
-  for (const dp of dps.docs) {
-    metrics[dp.metricKey] = {
-      value: typeof dp.value === "number" ? dp.value : null,
-      quality: dp.quality,
-      unit: dp.unit ?? undefined,
-    };
-  }
+  const suppliers = await payload.find({
+    collection: "suppliers",
+    where: { organisation: { equals: opts.organisationId } },
+    limit: 500,
+    overrideAccess: true,
+  });
+
+  const { metrics, composition } = metricsAndCompositionFromDatapoints(
+    dps.docs.map((d) => ({
+      id: d.id,
+      metricKey: d.metricKey,
+      value: d.value,
+      quality: d.quality,
+      unit: d.unit,
+      provenance: d.provenance,
+      supplierKey: d.supplierKey,
+      supplier: d.supplier,
+    })),
+    suppliers.docs.map((s) => s.id),
+  );
 
   const year = new Date(String(period.endDate)).getFullYear() || new Date().getFullYear();
   const region = org.country || "GB";
@@ -129,6 +137,9 @@ export async function buildReportSnapshot(opts: {
       scope3: calc.emissions.scope3.value,
       total: calc.emissions.total.value,
       dataQualityPct: calc.dataQualityPct,
+      scope3PrimarySharePct: composition.primarySharePct,
+      scope3PrimaryTco2e: composition.primaryTco2e,
+      scope3EstimateTco2e: composition.estimateTco2e,
     },
     band: calc.band,
     breakdown: calc.breakdown,

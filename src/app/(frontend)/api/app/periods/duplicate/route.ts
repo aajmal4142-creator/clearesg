@@ -65,7 +65,13 @@ export async function POST(_req: Request) {
   let created = 0;
   for (const dp of priorDps.docs) {
     if (existing.has(dp.metricKey)) continue;
-    await payload.create({
+    await (
+      payload.create as (args: {
+        collection: "datapoints";
+        data: Record<string, unknown>;
+        overrideAccess: true;
+      }) => Promise<unknown>
+    )({
       collection: "datapoints",
       data: {
         organisation: ctx.activeOrg.id,
@@ -76,6 +82,8 @@ export async function POST(_req: Request) {
         quality: "missing",
         source: "manual",
         approvalState: "pending",
+        supplierKey: "",
+        provenance: "manual",
       },
       overrideAccess: true,
     });

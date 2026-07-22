@@ -50,6 +50,22 @@ export function LivingReportView({ snapshot }: { snapshot: ReportSnapshot }) {
           <Metric value={snapshot.emissions.scope3} unit="S3" size="sm" decimals={2} />
           <Metric value={snapshot.emissions.total} unit="total" size="sm" decimals={2} />
         </div>
+        {typeof snapshot.emissions.scope3PrimarySharePct === "number" &&
+        (snapshot.emissions.scope3PrimaryTco2e ?? 0) +
+          (snapshot.emissions.scope3EstimateTco2e ?? 0) >
+          0 ? (
+          <p className="mt-3 text-xs text-ink-muted">
+            <span className="font-data text-signal">
+              {snapshot.emissions.scope3PrimarySharePct}%
+            </span>{" "}
+            supplier-verified
+            {" · "}
+            <span className="font-data text-amber">
+              {(100 - (snapshot.emissions.scope3PrimarySharePct ?? 0)).toFixed(1)}%
+            </span>{" "}
+            spend estimate
+          </p>
+        ) : null}
         <div className="mt-2">
           <Metric
             value={snapshot.emissions.dataQualityPct}

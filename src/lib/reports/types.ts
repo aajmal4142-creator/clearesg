@@ -17,6 +17,10 @@ export type ReportSnapshot = {
     scope3: number;
     total: number;
     dataQualityPct: number;
+    /** Share of Scope 3 from supplier primary data (0–100). */
+    scope3PrimarySharePct?: number;
+    scope3PrimaryTco2e?: number;
+    scope3EstimateTco2e?: number;
   };
   band: CalcResult["band"];
   breakdown: CalcResult["breakdown"];

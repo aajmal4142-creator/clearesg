@@ -536,6 +536,20 @@ export function ReportPdfDocument({
             <Text style={styles.colLabel}>Scope 3 — value chain</Text>
             <Text style={styles.colValue}>{formatTco2e(snapshot.emissions.scope3)}</Text>
           </View>
+          {typeof snapshot.emissions.scope3PrimarySharePct === "number" &&
+          (snapshot.emissions.scope3PrimaryTco2e ?? 0) +
+            (snapshot.emissions.scope3EstimateTco2e ?? 0) >
+            0 ? (
+            <View style={styles.tableRow}>
+              <Text style={[styles.colLabel, styles.muted]}>
+                of which supplier-verified / spend estimate
+              </Text>
+              <Text style={[styles.colValue, styles.muted]}>
+                {snapshot.emissions.scope3PrimarySharePct}% /{" "}
+                {(100 - snapshot.emissions.scope3PrimarySharePct).toFixed(1)}%
+              </Text>
+            </View>
+          ) : null}
           <View style={styles.tableRowLast}>
             <Text style={[styles.colLabel, { fontWeight: 500 }]}>Total</Text>
             <Text style={[styles.colValue, { fontWeight: 500 }]}>

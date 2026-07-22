@@ -8,13 +8,13 @@ import { Assemble, InkReveal, RuleDraw } from "@/components/motion";
 import { PageFrame } from "@/components/shell/PageFrame";
 import { Metric } from "@/components/ui/metric";
 import { getCurrentContext } from "@/lib/auth";
-import { calculate, type DatapointValue, type FactorRecord } from "@/lib/calc";
+import { calculate, type FactorRecord } from "@/lib/calc";
 import { calmStatus, readinessBreakdown } from "@/lib/governance/calmStatus";
 import { detectAnomalies } from "@/lib/governance/anomalies";
 import { rankGaps } from "@/lib/governance/gaps";
 import { plainGapCopy } from "@/lib/governance/plainGaps";
 import { hasBaselineDrift, parseRevenueBand } from "@/lib/obligations";
-import { spendCoveragePct } from "@/lib/suppliers";
+import { metricsAndCompositionFromDatapoints, spendCoveragePct } from "@/lib/suppliers";
 import config from "@/payload.config";
 
 import { ObligationControls } from "./ObligationControls";
@@ -222,14 +222,19 @@ export default async function RunwayPage() {
   ).length;
 
   // Live calc — never hardcode Gauge or stack widths
-  const metrics: Record<string, DatapointValue> = {};
-  for (const dp of dps.docs) {
-    metrics[dp.metricKey] = {
-      value: typeof dp.value === "number" ? dp.value : null,
-      quality: dp.quality,
-      unit: dp.unit ?? undefined,
-    };
-  }
+  const { metrics, composition: scope3Composition } = metricsAndCompositionFromDatapoints(
+    dps.docs.map((d) => ({
+      id: d.id,
+      metricKey: d.metricKey,
+      value: d.value,
+      quality: d.quality,
+      unit: d.unit,
+      provenance: d.provenance,
+      supplierKey: d.supplierKey,
+      supplier: d.supplier,
+    })),
+    suppliers.docs.map((s) => s.id),
+  );
   const year = period
     ? new Date(String(period.endDate)).getFullYear()
     : new Date().getFullYear();
@@ -348,6 +353,19 @@ export default async function RunwayPage() {
                     />
                   </span>
                 </div>
+                {scope3Composition.totalTco2e > 0 ? (
+                  <p className="mt-3 text-xs text-ink-muted">
+                    <span className="font-data text-signal">
+                      {scope3Composition.primarySharePct}%
+                    </span>{" "}
+                    supplier-verified
+                    {" · "}
+                    <span className="font-data text-amber">
+                      {(100 - scope3Composition.primarySharePct).toFixed(1)}%
+                    </span>{" "}
+                    spend estimate
+                  </p>
+                ) : null}
               </>
             ) : (
               <p className="text-sm text-ink-muted">
