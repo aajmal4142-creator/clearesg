@@ -135,7 +135,13 @@ export async function persistDerivedObligations(
       });
       outcomes.push({ id: updated.id, result, action: "updated" });
     } else {
-      const created = await payload.create({
+      const created = await (
+        payload.create as (args: {
+          collection: "compliance-obligations";
+          data: Record<string, unknown>;
+          overrideAccess: true;
+        }) => Promise<{ id: string }>
+      )({
         collection: "compliance-obligations",
         data,
         overrideAccess: true,

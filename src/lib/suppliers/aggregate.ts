@@ -81,7 +81,13 @@ export async function reaggregateSupplierReported(
       overrideAccess: true,
     });
   } else {
-    await payload.create({
+    await (
+      payload.create as (args: {
+        collection: "datapoints";
+        data: Record<string, unknown>;
+        overrideAccess: true;
+      }) => Promise<unknown>
+    )({
       collection: "datapoints",
       data,
       overrideAccess: true,
