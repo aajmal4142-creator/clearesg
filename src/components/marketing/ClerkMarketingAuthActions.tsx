@@ -31,7 +31,7 @@ export function ClerkMarketingAuthActions({ variant }: { variant: Variant }) {
           }}
         />
         <Button asChild size="sm" className={buttonClass}>
-          <Link href="/app">Open workspace</Link>
+          <Link href="/dashboard">Open workspace</Link>
         </Button>
       </>
     );

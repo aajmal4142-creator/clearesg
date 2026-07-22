@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { getPayload } from "payload";
 
-import { ConsultantCentre } from "@/app/(frontend)/app/consultant/ConsultantCentre";
+import { ConsultantCentre } from "@/app/(frontend)/dashboard/consultant/ConsultantCentre";
 import { getCurrentContext } from "@/lib/auth";
 import { riskOf, sortByDeadlineRisk, type ClientRiskRow } from "@/lib/consultant";
 import { SECTOR_TEMPLATES } from "@/lib/consultant/templates";
@@ -13,10 +13,10 @@ function daysUntil(iso: string): number {
 
 export default async function ConsultantPage() {
   const ctx = await getCurrentContext();
-  if (!ctx.activeOrg) redirect("/app/onboarding");
-  if (!ctx.activeOrg.onboardedAt) redirect("/app/onboarding");
+  if (!ctx.activeOrg) redirect("/dashboard/onboarding");
+  if (!ctx.activeOrg.onboardedAt) redirect("/dashboard/onboarding");
   if (ctx.activeOrg.type !== "consultancy") {
-    redirect("/app");
+    redirect("/dashboard");
   }
 
   const payload = await getPayload({ config });

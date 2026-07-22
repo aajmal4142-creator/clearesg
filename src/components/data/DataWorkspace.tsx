@@ -14,9 +14,11 @@ import {
   type DiffRow,
   type ImportColumn,
 } from "@/lib/data";
+import { suggestMetricFromFilename } from "@/lib/data/suggestMetric";
 import type { FactorRecord, Quality } from "@/lib/calc";
 import { DERIVED_METRICS } from "@/lib/derive/registry";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
 
 export type DataRowState = {
   metricKey: string;
@@ -77,6 +79,7 @@ export function DataWorkspace({
     "quality",
   ]);
   const [savingKey, setSavingKey] = useState<string | null>(null);
+  const [focusIndex, setFocusIndex] = useState(0);
 
   useEffect(() => {
     void fetch("/api/app/teammates")
@@ -146,9 +149,27 @@ export function DataWorkspace({
   async function onEvidenceDrop(metricKey: string, files: FileList | null) {
     const file = files?.[0];
     if (!file || !canWrite || periodLocked) return;
+    const tip = suggestMetricFromFilename(file.name);
+    if (tip && tip.metricKey !== metricKey) {
+      const ok = window.confirm(
+        `This file looks like “${tip.label}”. Attach to ${metricKey} anyway? Cancel to pick the suggested metric instead.`,
+      );
+      if (!ok) {
+        setStatusTone("neutral");
+        setStatus(
+          `Suggested metric: ${tip.label} (${tip.metricKey}). Drop the file on that row.`,
+        );
+        return;
+      }
+    }
     const form = new FormData();
     form.set("file", file);
     form.set("metricKey", metricKey);
+    const why = window.prompt(
+      "Why does this document prove the figure? (optional note for auditors)",
+      "",
+    );
+    if (why) form.set("whyNote", why);
     const res = await fetch("/api/evidence", { method: "POST", body: form });
     if (!res.ok) {
       setStatusTone("error");
@@ -161,6 +182,28 @@ export function DataWorkspace({
     });
     setStatusTone("ok");
     setStatus(`Evidence attached to ${metricKey}`);
+  }
+
+  async function duplicatePriorStructure() {
+    if (!canWrite || periodLocked) return;
+    setStatusTone("neutral");
+    setStatus("Duplicating prior period structure…");
+    const res = await fetch("/api/app/periods/duplicate", { method: "POST" });
+    const data = (await res.json().catch(() => ({}))) as {
+      error?: string;
+      created?: number;
+    };
+    if (!res.ok) {
+      setStatusTone("error");
+      setStatus(data.error ?? "Could not duplicate period structure");
+      return;
+    }
+    setStatusTone("ok");
+    setStatus(`Added ${data.created ?? 0} missing metric rows from the prior period.`);
+    toast.message("Structure duplicated", {
+      description: "Fill values in the new rows when you have the numbers.",
+    });
+    window.location.reload();
   }
 
   async function onPaste(e: React.ClipboardEvent, startKey: string) {
@@ -268,7 +311,7 @@ export function DataWorkspace({
       wide
       actions={
         canWrite ? (
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
             <Button
               type="button"
               size="sm"
@@ -284,6 +327,15 @@ export function DataWorkspace({
               onClick={() => setMode("spreadsheet")}
             >
               Use a spreadsheet
+            </Button>
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
+              disabled={periodLocked}
+              onClick={() => void duplicatePriorStructure()}
+            >
+              Duplicate prior structure
             </Button>
           </div>
         ) : (
@@ -397,7 +449,27 @@ export function DataWorkspace({
           ) : null}
         </div>
       ) : (
-        <div className="overflow-x-auto border-t border-rule">
+        <div
+          className="overflow-x-auto border-t border-rule"
+          tabIndex={0}
+          role="grid"
+          aria-label="Datapoints"
+          onKeyDown={(e) => {
+            if (mode !== "enter") return;
+            if (e.key === "ArrowDown") {
+              e.preventDefault();
+              setFocusIndex((i) => Math.min(rows.length - 1, i + 1));
+            } else if (e.key === "ArrowUp") {
+              e.preventDefault();
+              setFocusIndex((i) => Math.max(0, i - 1));
+            } else if (e.key === "Escape") {
+              (document.activeElement as HTMLElement | null)?.blur?.();
+            }
+          }}
+        >
+          <p className="py-2 text-[11px] text-ink-muted">
+            Keyboard: ↑↓ move · Enter focuses value · Esc blurs
+          </p>
           <table className="w-full min-w-[640px] text-left text-sm">
             <thead>
               <tr className="border-b border-rule text-xs text-ink-muted">
@@ -430,7 +502,9 @@ export function DataWorkspace({
                       "border-b border-rule",
                       idx % 2 === 1 && "bg-surface-2/60",
                       locked && "opacity-70",
+                      focusIndex === idx && "outline outline-1 outline-accent",
                     )}
+                    onClick={() => setFocusIndex(idx)}
                     onDragOver={(e) => e.preventDefault()}
                     onDrop={(e) => {
                       e.preventDefault();

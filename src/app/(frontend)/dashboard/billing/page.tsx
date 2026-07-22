@@ -1,15 +1,15 @@
 import { redirect } from "next/navigation";
 import { getPayload } from "payload";
 
-import { BillingClient } from "@/app/(frontend)/app/billing/BillingClient";
+import { BillingClient } from "@/app/(frontend)/dashboard/billing/BillingClient";
 import { getCurrentContext } from "@/lib/auth";
 import { getUsageMeters, normalizePlan } from "@/lib/billing";
 import config from "@/payload.config";
 
 export default async function BillingPage() {
   const ctx = await getCurrentContext();
-  if (!ctx.activeOrg) redirect("/app/onboarding");
-  if (!ctx.activeOrg.onboardedAt) redirect("/app/onboarding");
+  if (!ctx.activeOrg) redirect("/dashboard/onboarding");
+  if (!ctx.activeOrg.onboardedAt) redirect("/dashboard/onboarding");
 
   const payload = await getPayload({ config });
   const org = await payload.findByID({

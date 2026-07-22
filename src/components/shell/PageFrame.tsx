@@ -2,7 +2,7 @@
 
 import type { ReactNode } from "react";
 
-import { Assemble, RuleDraw } from "@/components/motion";
+import { Assemble, InkReveal, RuleDraw } from "@/components/motion";
 import { cn } from "@/lib/utils";
 
 type PageFrameProps = {
@@ -16,10 +16,12 @@ type PageFrameProps = {
   actions?: ReactNode;
   /** Full primary width (data grid) — still pairs with rail when set */
   wide?: boolean;
+  /** Sticky context: period label + last saved */
+  context?: { period?: string; lastSaved?: string; status?: string };
 };
 
 /**
- * Shared /app page chrome — label-caps → Fraunces H1 → help → accent rule → content.
+ * Shared /dashboard page chrome — label-caps → Fraunces H1 → help → accent rule → content.
  * Optional 66ch primary + 280px rail (BUILD_PLAN §3).
  */
 export function PageFrame({
@@ -31,14 +33,38 @@ export function PageFrame({
   className,
   actions,
   wide = false,
+  context,
 }: PageFrameProps) {
   return (
     <Assemble layer="structure" className={cn("px-6 py-8", className)}>
       <div className="mx-auto max-w-6xl">
+        {context ? (
+          <div className="sticky top-0 z-20 -mx-2 mb-4 border-b border-rule bg-canvas/95 px-2 py-2 backdrop-blur-sm lg:top-0">
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-ink-muted">
+              {context.period ? (
+                <span>
+                  Period <span className="font-data text-ink">{context.period}</span>
+                </span>
+              ) : null}
+              {context.lastSaved ? (
+                <span>
+                  Last saved{" "}
+                  <span className="font-data text-ink">{context.lastSaved}</span>
+                </span>
+              ) : null}
+              {context.status ? (
+                <span className="label-caps text-accent">{context.status}</span>
+              ) : null}
+            </div>
+          </div>
+        ) : null}
+
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div className="min-w-0">
             <p className="label-caps text-accent">{eyebrow}</p>
-            <h1 className="font-display mt-2 text-3xl text-ink md:text-4xl">{title}</h1>
+            <InkReveal onMount>
+              <h1 className="font-display mt-2 text-3xl text-ink md:text-4xl">{title}</h1>
+            </InkReveal>
             {help ? (
               <p className="mt-2 max-w-[66ch] text-sm leading-relaxed text-ink-muted">
                 {help}
@@ -78,10 +104,10 @@ export function EmptyState({
   action?: ReactNode;
 }) {
   return (
-    <div className="border-t border-rule py-10">
+    <div className="rounded-[6px] border border-dashed border-rule bg-surface-1 px-6 py-10 text-center">
       <p className="font-display text-xl text-ink">{title}</p>
-      <p className="mt-2 max-w-[66ch] text-sm text-ink-muted">{body}</p>
-      {action ? <div className="mt-4">{action}</div> : null}
+      <p className="mx-auto mt-2 max-w-[66ch] text-sm text-ink-muted">{body}</p>
+      {action ? <div className="mt-6 flex justify-center">{action}</div> : null}
     </div>
   );
 }

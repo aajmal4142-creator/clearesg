@@ -184,6 +184,24 @@ export function SuppliersClient({
     await refresh();
   }
 
+  function copyChase(r: SupplierRow) {
+    const origin = window.location.origin;
+    const link = r.requestToken ? `${origin}/s/${r.requestToken}` : null;
+    const text = [
+      `Hi ${r.name},`,
+      ``,
+      `Please complete our sustainability data request for ClearESG.`,
+      link ? `Link: ${link}` : `Ask us to resend your secure link.`,
+      ``,
+      `Outstanding: electricity, fuels, water, waste, travel, and Scope 3 where available.`,
+      `About 90 seconds. Numbers only.`,
+    ].join("\n");
+    void navigator.clipboard.writeText(text).then(
+      () => note("Chase message copied.", "ok"),
+      () => note("Could not copy — select and copy manually.", "error"),
+    );
+  }
+
   return (
     <PageFrame
       eyebrow="Supplier chains"
@@ -322,6 +340,13 @@ export function SuppliersClient({
                             {r.requestStatus === "not_sent" ? "Send request" : "Resend"}
                           </button>
                         ) : null}
+                        <button
+                          type="button"
+                          className="text-sm text-ink underline-offset-2 hover:underline"
+                          onClick={() => copyChase(r)}
+                        >
+                          Copy chase
+                        </button>
                         <button
                           type="button"
                           className="text-sm text-ink-muted hover:text-rust"

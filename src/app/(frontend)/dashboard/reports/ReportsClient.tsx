@@ -3,6 +3,7 @@
 import { useState } from "react";
 
 import { EmptyState, PageFrame, StatusLine } from "@/components/shell/PageFrame";
+import { BUYER_FAQ } from "@/lib/reports/buyerFaq";
 
 type ReportRow = {
   id: string;
@@ -90,7 +91,14 @@ export function ReportsClient({
         } catch {
           /* ignore */
         }
-        setStatus(`Published v${data.version}. Living report link copied.`);
+        setStatus(
+          `Published v${data.version}. Living report link copied. Next: share it with your buyer or bank.`,
+        );
+        try {
+          window.localStorage.setItem("clearesg-first-share", "1");
+        } catch {
+          /* ignore */
+        }
       } else {
         setStatus(`Published v${data.version}`);
       }
@@ -130,15 +138,46 @@ export function ReportsClient({
         )
       }
       rail={
-        <div className="space-y-4 text-sm text-ink-muted">
-          <p className="label-caps text-ink">Frameworks</p>
-          <p>
-            CSRD (simplified) is the primary publish path. BRSR-readiness labels the same
-            snapshot for India beachhead prep — principle-level BRSR mappings are not
-            complete yet.
-          </p>
-          <p className="label-caps text-ink">Assurance</p>
-          <p>ClearESG does not provide assurance or audit opinions.</p>
+        <div className="space-y-6 text-sm text-ink-muted">
+          <div>
+            <p className="label-caps text-ink">Narrative starter</p>
+            <p className="mt-2">
+              In this period we measured our material emissions and linked source evidence
+              where available. Scope totals update when datapoints change. Replace this
+              with your board wording before external use.
+            </p>
+            <p className="mt-2">
+              Electricity and fuels drive most of our operational footprint; supplier data
+              closes Scope 3 gaps as responses arrive.
+            </p>
+            <p className="mt-2">
+              This living report is the source of truth for buyers and lenders until the
+              next publish.
+            </p>
+          </div>
+          <div>
+            <p className="label-caps text-ink">Frameworks</p>
+            <p className="mt-2">
+              CSRD (simplified) is the primary publish path. BRSR-readiness labels the
+              same snapshot for India beachhead prep — principle-level BRSR mappings are
+              not complete yet.
+            </p>
+          </div>
+          <div>
+            <p className="label-caps text-ink">For banks &amp; buyers</p>
+            <ul className="mt-2 space-y-2">
+              {BUYER_FAQ.slice(0, 2).map((f) => (
+                <li key={f.q}>
+                  <span className="text-ink">{f.q}</span>
+                  <span className="mt-0.5 block text-xs">{f.a}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+          <div>
+            <p className="label-caps text-ink">Assurance</p>
+            <p className="mt-2">ClearESG does not provide assurance or audit opinions.</p>
+          </div>
         </div>
       }
     >

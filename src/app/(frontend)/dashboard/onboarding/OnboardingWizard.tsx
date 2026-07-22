@@ -2,7 +2,7 @@
 
 import { motion, AnimatePresence } from "motion/react";
 import { useRouter } from "nextjs-toploader/app";
-import { useState } from "react";
+import { useEffect, useId, useState } from "react";
 
 import { Assemble } from "@/components/motion";
 import { StatusLine } from "@/components/shell/PageFrame";
@@ -105,6 +105,7 @@ function SearchSelect({
   placeholder: string;
 }) {
   const [open, setOpen] = useState(false);
+  const listId = useId();
   const selected = options.find((o) => o.value === value);
 
   return (
@@ -113,6 +114,7 @@ function SearchSelect({
         <button
           type="button"
           role="combobox"
+          aria-controls={listId}
           aria-expanded={open}
           className="flex h-11 w-full items-center justify-between rounded-[4px] border border-rule bg-surface-1 px-3 text-left text-ink hover:border-rule-strong"
         >
@@ -128,7 +130,7 @@ function SearchSelect({
       >
         <Command>
           <CommandInput placeholder={`Filter ${placeholder.toLowerCase()}…`} />
-          <CommandList>
+          <CommandList id={listId}>
             <CommandEmpty>No match.</CommandEmpty>
             <CommandGroup>
               {options.map((o) => (
@@ -160,6 +162,7 @@ export function OnboardingWizard() {
   const [step, setStep] = useState(0);
   const [done, setDone] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [hydrated, setHydrated] = useState(false);
   const [values, setValues] = useState<Record<string, string>>({
     sector: "C25",
     headcount: "80",
@@ -168,6 +171,39 @@ export function OnboardingWizard() {
     sites: "2",
     tenure: "lease",
   });
+
+  useEffect(() => {
+    void Promise.resolve().then(() => {
+      try {
+        const raw = window.localStorage.getItem("clearesg-onboarding-draft");
+        if (raw) {
+          const parsed = JSON.parse(raw) as {
+            step?: number;
+            values?: Record<string, string>;
+          };
+          if (parsed.values) setValues((v) => ({ ...v, ...parsed.values }));
+          if (typeof parsed.step === "number") {
+            setStep(Math.min(QUESTIONS.length - 1, Math.max(0, parsed.step)));
+          }
+        }
+      } catch {
+        /* ignore */
+      }
+      setHydrated(true);
+    });
+  }, []);
+
+  useEffect(() => {
+    if (!hydrated || done) return;
+    try {
+      window.localStorage.setItem(
+        "clearesg-onboarding-draft",
+        JSON.stringify({ step, values }),
+      );
+    } catch {
+      /* ignore */
+    }
+  }, [step, values, hydrated, done]);
 
   const q = QUESTIONS[step];
   const progress = ((step + (done ? 1 : 0)) / QUESTIONS.length) * 100;
@@ -189,6 +225,11 @@ export function OnboardingWizard() {
           : raw,
       );
       return;
+    }
+    try {
+      window.localStorage.removeItem("clearesg-onboarding-draft");
+    } catch {
+      /* ignore */
     }
     setDone(true);
     router.refresh();
@@ -229,7 +270,7 @@ export function OnboardingWizard() {
           className="mt-10"
           onClick={() => {
             router.refresh();
-            router.push("/app");
+            router.push("/dashboard");
           }}
         >
           Open runway

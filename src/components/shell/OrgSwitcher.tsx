@@ -5,17 +5,25 @@ type OrgOption = { id: string; name: string };
 export function OrgSwitcher({
   orgs,
   activeOrgId,
+  compact = false,
 }: {
   orgs: OrgOption[];
   activeOrgId: string | null;
+  compact?: boolean;
 }) {
   if (orgs.length === 0) return null;
 
   return (
-    <label className="flex items-center gap-2 text-sm text-ink-muted">
-      <span className="label-caps">Organisation</span>
+    <label
+      className={
+        compact
+          ? "flex flex-col gap-1 text-xs text-ink-muted"
+          : "flex items-center gap-2 text-sm text-ink-muted"
+      }
+    >
+      {!compact ? <span className="label-caps">Organisation</span> : null}
       <select
-        className="border border-rule bg-surface-1 px-2 py-1 text-ink"
+        className="w-full border border-rule bg-surface-1 px-2 py-1 text-ink"
         value={activeOrgId ?? ""}
         onChange={async (e) => {
           await fetch("/api/org/switch", {

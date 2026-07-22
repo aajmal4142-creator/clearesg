@@ -19,7 +19,7 @@ export async function POST(req: Request) {
     return NextResponse.json(
       {
         error: "Stripe is not configured. Manage plans via Checkout in DEV bypass.",
-        upgradePath: "/app/billing",
+        upgradePath: "/dashboard/billing",
       },
       { status: 503 },
     );
@@ -43,7 +43,7 @@ export async function POST(req: Request) {
   const stripe = getStripe();
   const session = await stripe.billingPortal.sessions.create({
     customer: org.stripeCustomerId,
-    return_url: `${appOrigin(req)}/app/billing`,
+    return_url: `${appOrigin(req)}/dashboard/billing`,
   });
 
   return NextResponse.json({ ok: true, url: session.url });

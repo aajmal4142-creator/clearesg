@@ -73,7 +73,7 @@ export default async function AnswerPage({ params }: Props) {
             </Link>
           </li>
           <li>
-            <Link href="/app" className="acid-link">
+            <Link href="/dashboard" className="sand-link">
               Open ClearESG
             </Link>
           </li>

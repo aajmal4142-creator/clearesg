@@ -430,6 +430,10 @@ export interface Evidence {
   uploadedBy?: (string | null) | User;
   uploadedAt: string;
   linkedDatapoints?: (string | Datapoint)[] | null;
+  /**
+   * Why this document proves the figure — shown to auditors and reviewers.
+   */
+  whyNote?: string | null;
   extractedData?:
     | {
         [k: string]: unknown;
@@ -1018,6 +1022,7 @@ export interface EvidenceSelect<T extends boolean = true> {
   uploadedBy?: T;
   uploadedAt?: T;
   linkedDatapoints?: T;
+  whyNote?: T;
   extractedData?: T;
   ocrStatus?: T;
   updatedAt?: T;

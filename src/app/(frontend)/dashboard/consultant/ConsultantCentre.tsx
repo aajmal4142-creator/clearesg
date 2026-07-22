@@ -269,62 +269,91 @@ export function ConsultantCentre({
           body="Invite a client above, or link a company by setting its parent organisation to this consultancy."
         />
       ) : (
-        <div className="mt-8 overflow-x-auto border-t border-rule">
-          <table className="w-full text-left text-sm">
-            <thead className="border-b border-rule text-ink-muted">
-              <tr>
-                <th className="px-3 py-2 font-normal" />
-                <th className="px-3 py-2 font-normal">Client</th>
-                <th className="px-3 py-2 font-normal">Days</th>
-                <th className="px-3 py-2 font-normal">Data</th>
-                <th className="px-3 py-2 font-normal">Score</th>
-                <th className="px-3 py-2 font-normal">Risk</th>
-              </tr>
-            </thead>
-            <tbody>
-              {clients.map((c) => (
-                <tr key={c.id} className="border-b border-rule/60">
-                  <td className="px-3 py-3">
-                    <input
-                      type="checkbox"
-                      checked={selected.includes(c.id)}
-                      onChange={() => toggle(c.id)}
-                      disabled={!canWrite}
-                    />
-                  </td>
-                  <td className="px-3 py-3">
-                    <div className="text-ink">{c.name}</div>
-                    <div className="font-data text-xs text-ink-muted">
-                      {c.sector} · {c.country}
-                    </div>
-                  </td>
-                  <td className="px-3 py-3 font-data text-ink">
-                    {c.daysToFiling === null ? "—" : c.daysToFiling}
-                  </td>
-                  <td className="px-3 py-3 font-data text-ink-muted">
-                    {c.datapointsCollected}/{c.datapointsRequired}
-                  </td>
-                  <td className="px-3 py-3 font-data text-ink">
-                    {c.overallScore === null ? "—" : c.overallScore}
-                  </td>
-                  <td
-                    className={`px-3 py-3 font-data ${
-                      c.risk === "critical"
-                        ? "text-rust"
-                        : c.risk === "at_risk"
-                          ? "text-amber"
-                          : c.risk === "on_track"
-                            ? "text-signal"
-                            : "text-ink-muted"
-                    }`}
-                  >
-                    {c.risk}
-                  </td>
+        <>
+          <section className="mt-8 grid gap-3 sm:grid-cols-3">
+            {(
+              [
+                ["on_track", "On track", "text-signal", "border-signal/30"],
+                ["at_risk", "At risk", "text-amber", "border-amber/30"],
+                ["critical", "Critical", "text-rust", "border-rust/30"],
+              ] as const
+            ).map(([key, label, tone, border]) => {
+              const n = clients.filter((c) => c.risk === key).length;
+              return (
+                <div
+                  key={key}
+                  className={`rounded-[6px] border bg-surface-1 px-4 py-3 ${border}`}
+                >
+                  <p className={`label-caps ${tone}`}>{label}</p>
+                  <p className={`font-data mt-2 text-2xl ${tone}`}>{n}</p>
+                  <p className="mt-1 text-xs text-ink-muted">clients</p>
+                </div>
+              );
+            })}
+          </section>
+          <div className="mt-8 overflow-x-auto border-t border-rule">
+            <table className="w-full text-left text-sm">
+              <thead className="border-b border-rule text-ink-muted">
+                <tr>
+                  <th className="px-3 py-2 font-normal" />
+                  <th className="px-3 py-2 font-normal">Client</th>
+                  <th className="px-3 py-2 font-normal">Days</th>
+                  <th className="px-3 py-2 font-normal">Data</th>
+                  <th className="px-3 py-2 font-normal">Score</th>
+                  <th className="px-3 py-2 font-normal">Health</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody>
+                {clients.map((c) => (
+                  <tr key={c.id} className="border-b border-rule/60">
+                    <td className="px-3 py-3">
+                      <input
+                        type="checkbox"
+                        checked={selected.includes(c.id)}
+                        onChange={() => toggle(c.id)}
+                        disabled={!canWrite}
+                      />
+                    </td>
+                    <td className="px-3 py-3">
+                      <div className="text-ink">{c.name}</div>
+                      <div className="font-data text-xs text-ink-muted">
+                        {c.sector} · {c.country}
+                      </div>
+                    </td>
+                    <td className="px-3 py-3 font-data text-ink">
+                      {c.daysToFiling === null ? "—" : c.daysToFiling}
+                    </td>
+                    <td className="px-3 py-3 font-data text-ink-muted">
+                      {c.datapointsCollected}/{c.datapointsRequired}
+                    </td>
+                    <td className="px-3 py-3 font-data text-ink">
+                      {c.overallScore === null ? "—" : c.overallScore}
+                    </td>
+                    <td
+                      className={`px-3 py-3 font-data ${
+                        c.risk === "critical"
+                          ? "text-rust"
+                          : c.risk === "at_risk"
+                            ? "text-amber"
+                            : c.risk === "on_track"
+                              ? "text-signal"
+                              : "text-ink-muted"
+                      }`}
+                    >
+                      {c.risk === "on_track"
+                        ? "On track"
+                        : c.risk === "at_risk"
+                          ? "At risk"
+                          : c.risk === "critical"
+                            ? "Critical"
+                            : c.risk}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </>
       )}
     </PageFrame>
   );

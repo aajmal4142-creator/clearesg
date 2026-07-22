@@ -51,10 +51,10 @@ export default async function DeadlinePage({ params }: Props) {
           ))}
         </ul>
         <p className="mt-10 flex flex-wrap gap-4 text-sm">
-          <Link href="/answers/does-csrd-apply-outside-eu" className="acid-link">
+          <Link href="/answers/does-csrd-apply-outside-eu" className="sand-link">
             Does CSRD apply outside the EU?
           </Link>
-          <Link href="/app" className="acid-link">
+          <Link href="/dashboard" className="sand-link">
             Open runway
           </Link>
         </p>

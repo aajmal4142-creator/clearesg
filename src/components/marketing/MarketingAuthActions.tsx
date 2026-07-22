@@ -34,7 +34,7 @@ export function MarketingAuthActions({ variant = "acid" }: { variant?: Variant }
           size="sm"
           className={variant === "acid" ? "rounded-full px-4" : undefined}
         >
-          <Link href="/app">Open workspace</Link>
+          <Link href="/dashboard">Open workspace</Link>
         </Button>
       </>
     );

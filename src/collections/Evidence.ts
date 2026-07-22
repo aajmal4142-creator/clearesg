@@ -39,6 +39,14 @@ export const Evidence: CollectionConfig = {
       relationTo: "datapoints",
       hasMany: true,
     },
+    {
+      name: "whyNote",
+      type: "textarea",
+      admin: {
+        description:
+          "Why this document proves the figure — shown to auditors and reviewers.",
+      },
+    },
     { name: "extractedData", type: "json" },
     {
       name: "ocrStatus",

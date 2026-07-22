@@ -1,15 +1,15 @@
 import { redirect } from "next/navigation";
 import { getPayload } from "payload";
 
-import { BenchmarksClient } from "@/app/(frontend)/app/benchmarks/BenchmarksClient";
+import { BenchmarksClient } from "@/app/(frontend)/dashboard/benchmarks/BenchmarksClient";
 import { getCurrentContext } from "@/lib/auth";
 import { MIN_COHORT_SIZE } from "@/lib/benchmarks";
 import config from "@/payload.config";
 
 export default async function BenchmarksPage() {
   const ctx = await getCurrentContext();
-  if (!ctx.activeOrg) redirect("/app/onboarding");
-  if (!ctx.activeOrg.onboardedAt) redirect("/app/onboarding");
+  if (!ctx.activeOrg) redirect("/dashboard/onboarding");
+  if (!ctx.activeOrg.onboardedAt) redirect("/dashboard/onboarding");
 
   const payload = await getPayload({ config });
   const sectorPrefix = ctx.activeOrg.sector.trim().charAt(0).toUpperCase() || "C";
@@ -39,9 +39,9 @@ export default async function BenchmarksPage() {
         userValue: null as number | null,
         percentileRank: null as number | null,
         improve: [
-          { label: "Enter electricity (kWh)", href: "/app/data#electricity_kwh" },
-          { label: "Request supplier data", href: "/app/suppliers" },
-          { label: "Publish report", href: "/app/reports" },
+          { label: "Enter electricity (kWh)", href: "/dashboard/data#electricity_kwh" },
+          { label: "Request supplier data", href: "/dashboard/suppliers" },
+          { label: "Publish report", href: "/dashboard/reports" },
         ],
       }
     : {

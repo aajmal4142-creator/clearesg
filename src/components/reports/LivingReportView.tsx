@@ -3,6 +3,7 @@
 import { Assemble, InkReveal, PageMasthead, RuleDraw } from "@/components/motion";
 import { Metric } from "@/components/ui/metric";
 import type { ReportSnapshot } from "@/lib/reports";
+import { BUYER_FAQ } from "@/lib/reports/buyerFaq";
 
 export function LivingReportView({ snapshot }: { snapshot: ReportSnapshot }) {
   return (
@@ -108,7 +109,36 @@ export function LivingReportView({ snapshot }: { snapshot: ReportSnapshot }) {
         </ul>
       </InkReveal>
 
-      <p className="mt-12 text-xs text-ink-muted">{snapshot.disclaimer}</p>
+      <InkReveal className="mt-10 border border-rule p-4" delay={0.2}>
+        <p className="label-caps mb-3">For banks &amp; buyers</p>
+        <ul className="space-y-3 text-sm">
+          {BUYER_FAQ.map((item) => (
+            <li key={item.q}>
+              <p className="font-medium text-ink">{item.q}</p>
+              <p className="mt-1 text-ink-muted">{item.a}</p>
+            </li>
+          ))}
+        </ul>
+      </InkReveal>
+
+      <div className="mt-10 flex flex-wrap gap-x-4 gap-y-1 border-t border-rule pt-4 text-xs text-ink-muted">
+        <span>
+          Last updated{" "}
+          <span className="font-data text-ink">
+            {new Date(snapshot.publishedAt).toISOString().slice(0, 16).replace("T", " ")}{" "}
+            UTC
+          </span>
+        </span>
+        <span>
+          Evidence linked{" "}
+          <span className="font-data text-ink">{snapshot.evidenceIndex.length}</span>
+        </span>
+        <span>
+          Calculation <span className="font-data text-ink">v{snapshot.version}</span>
+        </span>
+      </div>
+
+      <p className="mt-6 text-xs text-ink-muted">{snapshot.disclaimer}</p>
     </main>
   );
 }

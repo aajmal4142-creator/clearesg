@@ -91,9 +91,9 @@ export async function POST(req: Request) {
   if (existing.totalDocs >= max) {
     return NextResponse.json(
       {
-        error: `Supplier limit reached (${max}). Upgrade at /app/billing.`,
+        error: `Supplier limit reached (${max}). Upgrade at /dashboard/billing.`,
         code: "BILLING_DENIED",
-        upgradePath: "/app/billing",
+        upgradePath: "/dashboard/billing",
       },
       { status: 402 },
     );

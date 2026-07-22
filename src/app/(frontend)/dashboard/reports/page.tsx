@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { getPayload } from "payload";
 
-import { ReportsClient } from "@/app/(frontend)/app/reports/ReportsClient";
+import { ReportsClient } from "@/app/(frontend)/dashboard/reports/ReportsClient";
 import { getCurrentContext } from "@/lib/auth";
 import { BillingDeniedError } from "@/lib/billing";
 import { ensureOpenPeriod } from "@/lib/org/period";
@@ -9,15 +9,15 @@ import config from "@/payload.config";
 
 export default async function ReportsPage() {
   const ctx = await getCurrentContext();
-  if (!ctx.activeOrg) redirect("/app/onboarding");
-  if (!ctx.activeOrg.onboardedAt) redirect("/app/onboarding");
+  if (!ctx.activeOrg) redirect("/dashboard/onboarding");
+  if (!ctx.activeOrg.onboardedAt) redirect("/dashboard/onboarding");
 
   const payload = await getPayload({ config });
   let periodId: string;
   try {
     periodId = await ensureOpenPeriod(ctx.activeOrg.id, ctx.activeOrg.plan);
   } catch (err) {
-    if (err instanceof BillingDeniedError) redirect("/app/billing");
+    if (err instanceof BillingDeniedError) redirect("/dashboard/billing");
     throw err;
   }
   const reports = await payload.find({

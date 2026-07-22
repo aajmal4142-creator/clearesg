@@ -9,8 +9,10 @@ import { PageFrame } from "@/components/shell/PageFrame";
 import { Metric } from "@/components/ui/metric";
 import { getCurrentContext } from "@/lib/auth";
 import { calculate, type DatapointValue, type FactorRecord } from "@/lib/calc";
+import { calmStatus, readinessBreakdown } from "@/lib/governance/calmStatus";
 import { detectAnomalies } from "@/lib/governance/anomalies";
-import { rankGaps, REQUIRED_RUNWAY_METRICS } from "@/lib/governance/gaps";
+import { rankGaps } from "@/lib/governance/gaps";
+import { plainGapCopy } from "@/lib/governance/plainGaps";
 import { spendCoveragePct } from "@/lib/suppliers";
 import config from "@/payload.config";
 
@@ -27,10 +29,10 @@ function isPastDue(iso: string): boolean {
 export default async function RunwayPage() {
   const ctx = await getCurrentContext();
   if (!ctx.activeOrg) {
-    redirect("/app/onboarding");
+    redirect("/dashboard/onboarding");
   }
   if (!ctx.activeOrg.onboardedAt) {
-    redirect("/app/onboarding");
+    redirect("/dashboard/onboarding");
   }
 
   const payload = await getPayload({ config });
@@ -136,15 +138,23 @@ export default async function RunwayPage() {
   );
 
   const nextActions = [
-    ...gaps.missing.slice(0, 5).map((g) => ({
-      label: `Enter ${g.label}`,
-      href: `/app/data#${g.metricKey}`,
-      meta: `impact×ease ${g.rank}`,
-      metricKey: g.metricKey,
-    })),
+    ...gaps.missing.slice(0, 5).map((g) => {
+      const plain = plainGapCopy(g.metricKey, g.label);
+      return {
+        label: plain.action,
+        need: plain.need,
+        href:
+          g.metricKey === "supplier_reported_tco2e"
+            ? "/dashboard/suppliers"
+            : `/dashboard/data#${g.metricKey}`,
+        meta: `impact×ease ${g.rank}`,
+        metricKey: g.metricKey,
+      };
+    }),
     ...anomalies.slice(0, 3).map((a) => ({
       label: `Review unusual figure: ${a.metricKey}`,
-      href: `/app/data#${a.metricKey}`,
+      need: a.reason,
+      href: `/dashboard/data#${a.metricKey}`,
       meta: a.reason,
       metricKey: a.metricKey,
     })),
@@ -153,11 +163,16 @@ export default async function RunwayPage() {
   if (nextActions.length === 0) {
     nextActions.push({
       label: "Publish a living report",
-      href: "/app/reports",
+      need: "Required runway metrics are present. Share a living link.",
+      href: "/dashboard/reports",
       meta: "All required runway metrics present",
       metricKey: "",
     });
   }
+
+  const primaryAction = nextActions[0]!;
+  const calm = calmStatus({ daysLeft: days, collected, required });
+  const readiness = readinessBreakdown(collected, required);
 
   const pendingApproval = dps.docs.filter(
     (d) => (d.approvalState ?? "pending") === "pending" && d.quality !== "missing",
@@ -219,6 +234,14 @@ export default async function RunwayPage() {
       eyebrow="Compliance runway"
       title={ctx.activeOrg.name}
       help="Countdown to filing — live scores from your datapoints, not placeholders."
+      context={
+        period
+          ? {
+              period: `${String(period.startDate).slice(0, 10)} → ${String(period.endDate).slice(0, 10)}`,
+              status: calm.label,
+            }
+          : { status: calm.label }
+      }
       rail={
         <div className="flex flex-col">
           {calcOk ? (
@@ -288,16 +311,28 @@ export default async function RunwayPage() {
                 No emissions yet. Enter electricity, fuel, or spend on Data.
               </p>
             )}
+            <div className="mt-8 rounded-[6px] border border-rule bg-surface-1 p-4">
+              <p className="label-caps mb-2">Living report</p>
+              <p className="text-sm text-ink-muted">
+                Share a link that stays current as you update figures.
+              </p>
+              <Link
+                href="/dashboard/reports"
+                className="mt-3 inline-block text-sm text-accent underline-offset-2 hover:underline"
+              >
+                Open reports
+              </Link>
+            </div>
             <p className="mt-6 text-xs text-ink-muted">
               <Link
-                href="/app/guide"
+                href="/dashboard/guide"
                 className="text-accent underline-offset-2 hover:underline"
               >
                 First-report guided mode
               </Link>
               {" · "}
               <Link
-                href="/app/audit"
+                href="/dashboard/audit"
                 className="text-accent underline-offset-2 hover:underline"
               >
                 Change log
@@ -307,28 +342,48 @@ export default async function RunwayPage() {
         </div>
       }
     >
+      <Assemble layer="data">
+        <div
+          className={
+            calm.level === "critical"
+              ? "rounded-[6px] border border-rust/40 bg-rust/5 px-4 py-3"
+              : calm.level === "at_risk"
+                ? "rounded-[6px] border border-amber/40 bg-amber/5 px-4 py-3"
+                : "rounded-[6px] border border-rule bg-surface-1 px-4 py-3"
+          }
+        >
+          <p className="label-caps text-ink">{calm.label}</p>
+          <p className="mt-1 text-sm text-ink-muted">{calm.hint}</p>
+          <Link
+            href={primaryAction.href}
+            className="mt-3 inline-flex text-sm font-medium text-accent underline-offset-2 hover:underline"
+          >
+            Next: {primaryAction.label}
+          </Link>
+          <p className="mt-1 text-xs text-ink-muted">{primaryAction.need}</p>
+        </div>
+      </Assemble>
+
       {days === null ? (
-        <p className="text-ink-muted">
+        <p className="mt-8 text-ink-muted">
           No filing deadline on file. Add a compliance obligation to start the countdown.
         </p>
       ) : (
-        <Assemble layer="data">
+        <Assemble layer="data" className="mt-8">
           <Metric value={days} size="display" decimals={0} inView={false} />
           <p className="label-caps mt-2">Days to filing</p>
           <div className="mt-8 flex items-baseline gap-1">
-            <Metric value={collected} size="lg" decimals={0} inView={false} />
-            <span className="font-data text-xl text-ink-muted">/</span>
-            <Metric
-              value={required}
-              size="lg"
-              decimals={0}
-              animate={false}
-              tone="muted"
+            <Metric value={readiness.pct} size="lg" decimals={0} inView={false} />
+            <span className="font-data text-xl text-ink-muted">%</span>
+          </div>
+          <p className="label-caps mt-1">{readiness.label}</p>
+          <p className="mt-2 max-w-[66ch] text-xs text-ink-muted">{readiness.detail}</p>
+          <div className="mt-3 h-1.5 w-full max-w-xs overflow-hidden rounded-full bg-surface-2">
+            <div
+              className="h-full rounded-full bg-accent"
+              style={{ width: `${Math.min(100, readiness.pct)}%` }}
             />
           </div>
-          <p className="label-caps mt-1">
-            Of {REQUIRED_RUNWAY_METRICS.length} readiness datapoints
-          </p>
           {coveragePct !== null ? (
             <>
               <div className="mt-6">
@@ -372,20 +427,28 @@ export default async function RunwayPage() {
 
       {anomalies.length > 0 ? (
         <InkReveal className="mt-8" delay={0.08}>
-          <p className="text-sm text-amber">
-            {anomalies.length} figure
-            {anomalies.length === 1 ? "" : "s"} look unusual — review before publishing.
-          </p>
+          <p className="label-caps mb-2">Unusual figures</p>
+          <ul className="space-y-2 text-sm text-amber">
+            {anomalies.slice(0, 4).map((a) => (
+              <li key={a.metricKey + a.reason}>
+                <Link
+                  href={`/dashboard/data#${a.metricKey}`}
+                  className="underline-offset-2 hover:underline"
+                >
+                  {a.metricKey}
+                </Link>
+                <span className="text-ink-muted"> — {a.reason}</span>
+              </li>
+            ))}
+          </ul>
         </InkReveal>
       ) : null}
 
       <InkReveal className="mt-12" delay={0.12}>
         <RuleDraw delay={0} duration={0.4} className="mb-4" />
-        <p className="label-caps mb-4">
-          Gap analysis — missing {gaps.missing.length} of {required}
-        </p>
+        <p className="label-caps mb-4">What&apos;s missing — next three</p>
         <ul className="space-y-0">
-          {nextActions.map((a) => (
+          {nextActions.slice(0, 3).map((a) => (
             <li key={a.href + a.label} className="border-b border-rule">
               <Link
                 href={a.href}
@@ -401,9 +464,7 @@ export default async function RunwayPage() {
                     <ApprovalChip placeholder />
                   )}
                 </span>
-                {a.meta ? (
-                  <span className="mt-1 block text-xs text-ink-muted">{a.meta}</span>
-                ) : null}
+                <span className="mt-1 block text-xs text-ink-muted">{a.need}</span>
               </Link>
             </li>
           ))}

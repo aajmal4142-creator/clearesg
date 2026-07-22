@@ -2,154 +2,93 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useId, useState } from "react";
 
+import {
+  buildNavGroups,
+  isNavActive,
+  type NavBadges,
+} from "@/components/shell/navConfig";
 import type { MembershipRole } from "@/lib/access/membership";
 import { cn } from "@/lib/utils";
-
-type NavItem = {
-  href: string;
-  label: string;
-  /** Exact match for home; otherwise prefix */
-  exact?: boolean;
-};
-
-type NavGroup = {
-  id: string;
-  label: string;
-  items: NavItem[];
-};
-
-function buildGroups(opts: {
-  orgType: "company" | "consultancy" | null;
-  onboarded: boolean;
-}): NavGroup[] {
-  const work: NavItem[] = [
-    { href: "/app", label: "Runway", exact: true },
-    { href: "/app/data", label: "Data" },
-    { href: "/app/suppliers", label: "Suppliers" },
-    { href: "/app/materiality", label: "Materiality" },
-    { href: "/app/reports", label: "Reports" },
-  ];
-
-  const collaborate: NavItem[] = [
-    { href: "/app/requests", label: "Requests" },
-    { href: "/app/questionnaires", label: "Questionnaires" },
-  ];
-  if (opts.orgType === "consultancy") {
-    collaborate.push({ href: "/app/consultant", label: "Clients" });
-  }
-
-  const assure: NavItem[] = [
-    { href: "/app/guide", label: "Guide" },
-    { href: "/app/audit", label: "Audit" },
-    { href: "/app/benchmarks", label: "Benchmarks" },
-  ];
-
-  const account: NavItem[] = [{ href: "/app/billing", label: "Billing" }];
-  if (!opts.onboarded) {
-    account.push({ href: "/app/onboarding", label: "Baseline" });
-  }
-
-  return [
-    { id: "work", label: "Work", items: work },
-    { id: "collaborate", label: "Collaborate", items: collaborate },
-    { id: "assure", label: "Assure", items: assure },
-    { id: "account", label: "Account", items: account },
-  ];
-}
-
-function isActive(pathname: string, item: NavItem): boolean {
-  if (item.exact) return pathname === item.href;
-  return pathname === item.href || pathname.startsWith(`${item.href}/`);
-}
 
 export function AppNav({
   orgType,
   onboarded,
   role: _role,
+  collapsed,
+  badges,
+  onNavigate,
 }: {
   orgType: "company" | "consultancy" | null;
   onboarded: boolean;
   role: MembershipRole | null;
+  collapsed?: boolean;
+  badges?: NavBadges;
+  onNavigate?: () => void;
 }) {
   const pathname = usePathname();
-  const groups = buildGroups({ orgType, onboarded });
-  const [open, setOpen] = useState(false);
-  const panelId = useId();
+  const groups = buildNavGroups({ orgType, onboarded });
 
   return (
-    <>
-      <nav className="hidden items-start gap-6 lg:flex" aria-label="Product">
-        {groups.map((group) => (
-          <div key={group.id} className="flex flex-col gap-1">
-            <span className="label-caps text-[10px] text-ink-muted">{group.label}</span>
-            <div className="flex flex-wrap gap-x-3 gap-y-1 text-sm">
-              {group.items.map((item) => {
-                const active = isActive(pathname, item);
-                return (
+    <nav className="flex flex-col gap-5" aria-label="Product">
+      {groups.map((group) => (
+        <div key={group.id}>
+          {!collapsed ? (
+            <p className="label-caps mb-2 px-2 text-[10px] text-ink-muted">
+              {group.label}
+            </p>
+          ) : (
+            <div className="mx-2 mb-2 h-px bg-rule" aria-hidden />
+          )}
+          <ul className="flex flex-col gap-0.5">
+            {group.items.map((item) => {
+              const active = isNavActive(pathname, item);
+              const Icon = item.icon;
+              const count = item.badgeKey && badges ? badges[item.badgeKey] : 0;
+              return (
+                <li key={item.href}>
                   <Link
-                    key={item.href}
                     href={item.href}
+                    title={collapsed ? item.label : undefined}
+                    onClick={onNavigate}
                     className={cn(
-                      "border-b border-transparent pb-0.5 transition-colors",
-                      active ? "border-accent text-ink" : "text-ink-muted hover:text-ink",
+                      "group relative flex items-center gap-2.5 rounded-[4px] px-2 py-1.5 text-sm transition-colors",
+                      collapsed && "justify-center px-0",
+                      active
+                        ? "bg-accent-quiet text-ink"
+                        : "text-ink-muted hover:bg-surface-2 hover:text-ink",
                     )}
                     aria-current={active ? "page" : undefined}
                   >
-                    {item.label}
+                    {active ? (
+                      <span
+                        className="absolute top-1/2 left-0 h-4 w-0.5 -translate-y-1/2 rounded-full bg-accent"
+                        aria-hidden
+                      />
+                    ) : null}
+                    <span className="relative shrink-0">
+                      <Icon className="size-4" aria-hidden />
+                      {collapsed && count > 0 ? (
+                        <span className="absolute -top-0.5 -right-0.5 size-1.5 rounded-full bg-accent" />
+                      ) : null}
+                    </span>
+                    {!collapsed ? (
+                      <>
+                        <span className="min-w-0 flex-1 truncate">{item.label}</span>
+                        {count > 0 ? (
+                          <span className="font-data rounded-[2px] bg-accent px-1.5 py-0.5 text-[10px] text-canvas">
+                            {count > 99 ? "99+" : count}
+                          </span>
+                        ) : null}
+                      </>
+                    ) : null}
                   </Link>
-                );
-              })}
-            </div>
-          </div>
-        ))}
-      </nav>
-
-      <div className="lg:hidden">
-        <button
-          type="button"
-          className="rounded-[4px] border border-rule bg-surface-1 px-3 py-1.5 text-sm text-ink"
-          aria-expanded={open}
-          aria-controls={panelId}
-          onClick={() => setOpen((v) => !v)}
-        >
-          Menu
-        </button>
-        {open ? (
-          <div
-            id={panelId}
-            className="absolute left-0 right-0 top-full z-50 border-b border-rule bg-canvas px-6 py-4 shadow-none"
-          >
-            <div className="mx-auto flex max-w-6xl flex-col gap-4">
-              {groups.map((group) => (
-                <div key={group.id}>
-                  <p className="label-caps mb-2 text-ink-muted">{group.label}</p>
-                  <div className="flex flex-col gap-2">
-                    {group.items.map((item) => {
-                      const active = isActive(pathname, item);
-                      return (
-                        <Link
-                          key={item.href}
-                          href={item.href}
-                          className={cn(
-                            "text-sm",
-                            active ? "text-accent" : "text-ink-muted",
-                          )}
-                          onClick={() => setOpen(false)}
-                          aria-current={active ? "page" : undefined}
-                        >
-                          {item.label}
-                        </Link>
-                      );
-                    })}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        ) : null}
-      </div>
-    </>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      ))}
+    </nav>
   );
 }

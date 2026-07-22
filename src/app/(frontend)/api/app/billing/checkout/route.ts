@@ -65,7 +65,7 @@ export async function POST(req: Request) {
     return NextResponse.json({
       ok: true,
       mode: "dev_bypass",
-      url: `${origin}/app/billing?upgraded=${target}`,
+      url: `${origin}/dashboard/billing?upgraded=${target}`,
     });
   }
 
@@ -110,8 +110,8 @@ export async function POST(req: Request) {
     mode: "subscription",
     customer: customerId,
     line_items: [{ price: priceId, quantity: 1 }],
-    success_url: `${origin}/app/billing?checkout=success`,
-    cancel_url: `${origin}/app/billing?checkout=cancel`,
+    success_url: `${origin}/dashboard/billing?checkout=success`,
+    cancel_url: `${origin}/dashboard/billing?checkout=cancel`,
     metadata: {
       organisationId: org.id,
       plan: target,

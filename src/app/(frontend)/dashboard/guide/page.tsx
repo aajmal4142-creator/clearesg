@@ -12,15 +12,15 @@ import {
 import { Button } from "@/components/ui/button";
 
 const STEPS = [
-  { id: "sector", label: "Confirm sector and country", href: "/app/onboarding" },
-  { id: "baseline", label: "Finish 60-second baseline", href: "/app/onboarding" },
+  { id: "sector", label: "Confirm sector and country", href: "/dashboard/onboarding" },
+  { id: "baseline", label: "Finish 60-second baseline", href: "/dashboard/onboarding" },
   {
     id: "top3",
     label: "Replace top three estimated figures",
-    href: "/app/data",
+    href: "/dashboard/data",
   },
-  { id: "supplier", label: "Request one supplier", href: "/app/suppliers" },
-  { id: "publish", label: "Publish living report", href: "/app/reports" },
+  { id: "supplier", label: "Request one supplier", href: "/dashboard/suppliers" },
+  { id: "publish", label: "Publish living report", href: "/dashboard/reports" },
 ] as const;
 
 type GuideResult =

@@ -4,15 +4,15 @@ import { getPayload } from "payload";
 import {
   SuppliersClient,
   type SupplierRow,
-} from "@/app/(frontend)/app/suppliers/SuppliersClient";
+} from "@/app/(frontend)/dashboard/suppliers/SuppliersClient";
 import { getCurrentContext } from "@/lib/auth";
 import { responseRatePct, spendCoveragePct } from "@/lib/suppliers";
 import config from "@/payload.config";
 
 export default async function SuppliersPage() {
   const ctx = await getCurrentContext();
-  if (!ctx.activeOrg) redirect("/app/onboarding");
-  if (!ctx.activeOrg.onboardedAt) redirect("/app/onboarding");
+  if (!ctx.activeOrg) redirect("/dashboard/onboarding");
+  if (!ctx.activeOrg.onboardedAt) redirect("/dashboard/onboarding");
 
   const payload = await getPayload({ config });
   const result = await payload.find({

@@ -27,6 +27,8 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Valid email required" }, { status: 400 });
   }
   const role = body.role ?? "contributor";
+  const rolePlain =
+    role === "admin" ? "Can approve" : role === "viewer" ? "View only" : "Can edit data";
 
   const payload = await getPayload({ config });
 
@@ -98,8 +100,8 @@ export async function POST(req: Request) {
   const delivery = await sendTransactionalEmail({
     to: email,
     subject: `You are invited to ${ctx.activeOrg.name} on ClearESG`,
-    html: `<p>You have been invited to join <strong>${ctx.activeOrg.name}</strong> as <strong>${role}</strong>.</p><p><a href="${origin}/sign-in">Sign in to accept</a></p>`,
-    text: `You are invited to ${ctx.activeOrg.name} as ${role}. Sign in at ${origin}/sign-in`,
+    html: `<p>You have been invited to join <strong>${ctx.activeOrg.name}</strong> as <strong>${rolePlain}</strong> (${role}).</p><p><a href="${origin}/sign-in">Sign in to accept</a></p>`,
+    text: `You are invited to ${ctx.activeOrg.name} as ${rolePlain}. Sign in at ${origin}/sign-in`,
   });
 
   return NextResponse.json({

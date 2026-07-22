@@ -9,7 +9,7 @@ import config from "@/payload.config";
 
 export default async function DataPage() {
   const ctx = await getCurrentContext();
-  if (!ctx.activeOrg) redirect("/app/onboarding");
+  if (!ctx.activeOrg) redirect("/dashboard/onboarding");
 
   const payload = await getPayload({ config });
   const periods = await payload.find({

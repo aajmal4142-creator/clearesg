@@ -1,4 +1,4 @@
-# ClearESG — public pages (outside `/app`)
+# ClearESG — public pages (outside `/dashboard`)
 
 Example links use local dev: `http://localhost:3000`
 
@@ -90,4 +90,4 @@ Example links use local dev: `http://localhost:3000`
 
 ## Not included
 
-Authenticated product UI lives under `/app/*` and is intentionally excluded from this list.
+Authenticated product UI lives under `/dashboard/*` and is intentionally excluded from this list.

@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { getPayload } from "payload";
 
-import { MaterialityWorkshop } from "@/app/(frontend)/app/materiality/MaterialityWorkshop";
+import { MaterialityWorkshop } from "@/app/(frontend)/dashboard/materiality/MaterialityWorkshop";
 import { getCurrentContext } from "@/lib/auth";
 import { BillingDeniedError } from "@/lib/billing";
 import { ESRS_TOPICS } from "@/lib/materiality";
@@ -10,15 +10,15 @@ import config from "@/payload.config";
 
 export default async function MaterialityPage() {
   const ctx = await getCurrentContext();
-  if (!ctx.activeOrg) redirect("/app/onboarding");
-  if (!ctx.activeOrg.onboardedAt) redirect("/app/onboarding");
+  if (!ctx.activeOrg) redirect("/dashboard/onboarding");
+  if (!ctx.activeOrg.onboardedAt) redirect("/dashboard/onboarding");
 
   const payload = await getPayload({ config });
   let periodId: string;
   try {
     periodId = await ensureOpenPeriod(ctx.activeOrg.id, ctx.activeOrg.plan);
   } catch (err) {
-    if (err instanceof BillingDeniedError) redirect("/app/billing");
+    if (err instanceof BillingDeniedError) redirect("/dashboard/billing");
     throw err;
   }
   const found = await payload.find({
