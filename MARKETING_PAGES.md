@@ -14,10 +14,12 @@ Example links use local dev: `http://localhost:3000`
 
 ## Free tools
 
-| Page               | Example link                           |
-| ------------------ | -------------------------------------- |
-| CSRD scope checker | http://localhost:3000/tools/csrd-scope |
-| Scope 2 calculator | http://localhost:3000/tools/scope-2    |
+| Page               | Example link                               |
+| ------------------ | ------------------------------------------ |
+| CSRD scope checker | http://localhost:3000/tools/csrd-scope     |
+| Scope 2 calculator | http://localhost:3000/tools/scope-2        |
+| Price estimate     | http://localhost:3000/tools/price-estimate |
+| BRSR readiness     | http://localhost:3000/tools/brsr-readiness |
 
 ## Glossary
 
@@ -42,6 +44,9 @@ Example links use local dev: `http://localhost:3000`
 | Workiva    | http://localhost:3000/compare/workiva   |
 | Persefoni  | http://localhost:3000/compare/persefoni |
 | Greenly    | http://localhost:3000/compare/greenly   |
+| Envizi     | http://localhost:3000/compare/envizi    |
+| Novisto    | http://localhost:3000/compare/novisto   |
+| Sweep      | http://localhost:3000/compare/sweep     |
 
 ## CSRD by sector
 
@@ -50,6 +55,14 @@ Example links use local dev: `http://localhost:3000`
 | Manufacturing         | http://localhost:3000/csrd/manufacturing         |
 | Logistics & transport | http://localhost:3000/csrd/logistics             |
 | Professional services | http://localhost:3000/csrd/professional-services |
+
+## BRSR readiness by sector
+
+| Sector                | Example link                                     |
+| --------------------- | ------------------------------------------------ |
+| Manufacturing         | http://localhost:3000/brsr/manufacturing         |
+| Logistics & transport | http://localhost:3000/brsr/logistics             |
+| Professional services | http://localhost:3000/brsr/professional-services |
 
 ## Deadlines by country
 

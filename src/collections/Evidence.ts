@@ -48,7 +48,15 @@ export const Evidence: CollectionConfig = {
         { label: "Pending", value: "pending" },
         { label: "Done", value: "done" },
         { label: "Failed", value: "failed" },
+        {
+          label: "Skipped",
+          value: "skipped",
+        },
       ],
+      admin: {
+        description:
+          "OCR is not productized; new uploads should set skipped until a worker ships.",
+      },
     },
   ],
 };

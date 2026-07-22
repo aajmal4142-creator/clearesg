@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 
 import { SUPPLIER_FORM_FIELDS } from "@/lib/suppliers/fields";
@@ -125,6 +126,12 @@ export function SupplierPublicForm({
           {saving ? "Submitting…" : "Submit"}
         </button>
       </form>
+      <p className="mt-12 border-t border-rule pt-6 text-xs text-ink-muted">
+        Need to report your own emissions?{" "}
+        <Link href="/" className="text-accent underline-offset-2 hover:underline">
+          ClearESG
+        </Link>
+      </p>
     </main>
   );
 }

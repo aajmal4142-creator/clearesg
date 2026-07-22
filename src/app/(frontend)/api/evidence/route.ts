@@ -72,7 +72,7 @@ export async function POST(req: Request) {
       uploadedAt: new Date().toISOString(),
       linkedDatapoints: datapointId ? [datapointId] : undefined,
       extractedData: { metricKey },
-      ocrStatus: "pending",
+      ocrStatus: "skipped",
     },
     overrideAccess: true,
   });

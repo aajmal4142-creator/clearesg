@@ -5,8 +5,8 @@ import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import { ClearESGLogo } from "@/components/brand/ClearESGLogo";
+import { MarketingAuthActions } from "@/components/marketing/MarketingAuthActions";
 import { ThemeToggle } from "@/components/shell/ThemeToggle";
-import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 const HOME_SECTIONS = [
@@ -83,15 +83,7 @@ export function AcidNav() {
 
         <div className="flex items-center gap-2 sm:gap-3">
           <ThemeToggle />
-          <Link
-            href="/sign-in"
-            className="hidden text-sm text-ink-muted hover:text-ink sm:inline"
-          >
-            Sign in
-          </Link>
-          <Button asChild size="sm" className="rounded-full px-4">
-            <Link href="/sign-up">Start free</Link>
-          </Button>
+          <MarketingAuthActions variant="acid" />
         </div>
       </div>
 

@@ -1,20 +1,33 @@
 "use client";
 
 import { motion, AnimatePresence } from "motion/react";
-import { useRouter } from "next/navigation";
+import { useRouter } from "nextjs-toploader/app";
 import { useState } from "react";
 
 import { Assemble } from "@/components/motion";
+import { StatusLine } from "@/components/shell/PageFrame";
 import { Button } from "@/components/ui/button";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
 import { Input } from "@/components/ui/input";
 import { Metric } from "@/components/ui/metric";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useMotionSafe } from "@/lib/motion";
+import { cn } from "@/lib/utils";
+
+type Option = { value: string; label: string };
 
 const QUESTIONS = [
   {
     key: "sector",
     label: "Sector",
-    type: "select" as const,
+    type: "search" as const,
     options: [
       { value: "C25", label: "Manufacturing" },
       { value: "J62", label: "IT / Services" },
@@ -27,7 +40,7 @@ const QUESTIONS = [
   {
     key: "country",
     label: "Country",
-    type: "select" as const,
+    type: "search" as const,
     options: [
       { value: "GB", label: "United Kingdom" },
       { value: "IN", label: "India" },
@@ -80,11 +93,73 @@ function estimateScore(
   return { score, tCO2e };
 }
 
+function SearchSelect({
+  options,
+  value,
+  onChange,
+  placeholder,
+}: {
+  options: Option[];
+  value: string;
+  onChange: (next: string) => void;
+  placeholder: string;
+}) {
+  const [open, setOpen] = useState(false);
+  const selected = options.find((o) => o.value === value);
+
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <button
+          type="button"
+          role="combobox"
+          aria-expanded={open}
+          className="flex h-11 w-full items-center justify-between rounded-[4px] border border-rule bg-surface-1 px-3 text-left text-ink hover:border-rule-strong"
+        >
+          <span className={cn(!selected && "text-ink-muted")}>
+            {selected ? selected.label : placeholder}
+          </span>
+          <span className="font-data text-xs text-ink-muted">Search</span>
+        </button>
+      </PopoverTrigger>
+      <PopoverContent
+        className="w-[var(--radix-popover-trigger-width)] border-rule bg-surface-1 p-0"
+        align="start"
+      >
+        <Command>
+          <CommandInput placeholder={`Filter ${placeholder.toLowerCase()}…`} />
+          <CommandList>
+            <CommandEmpty>No match.</CommandEmpty>
+            <CommandGroup>
+              {options.map((o) => (
+                <CommandItem
+                  key={o.value}
+                  value={`${o.label} ${o.value}`}
+                  onSelect={() => {
+                    onChange(o.value);
+                    setOpen(false);
+                  }}
+                >
+                  <span className="text-ink">{o.label}</span>
+                  <span className="font-data ml-auto text-xs text-ink-muted">
+                    {o.value}
+                  </span>
+                </CommandItem>
+              ))}
+            </CommandGroup>
+          </CommandList>
+        </Command>
+      </PopoverContent>
+    </Popover>
+  );
+}
+
 export function OnboardingWizard() {
   const transition = useMotionSafe();
   const router = useRouter();
   const [step, setStep] = useState(0);
   const [done, setDone] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [values, setValues] = useState<Record<string, string>>({
     sector: "C25",
     headcount: "80",
@@ -99,6 +174,7 @@ export function OnboardingWizard() {
   const estimate = estimateScore(values.sector, Number(values.headcount) || 1);
 
   async function finish() {
+    setError(null);
     const res = await fetch("/api/onboarding", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -106,7 +182,12 @@ export function OnboardingWizard() {
     });
     if (!res.ok) {
       const data = (await res.json().catch(() => ({}))) as { error?: string };
-      window.alert(data.error ?? "Onboarding failed");
+      const raw = data.error ?? "Onboarding failed";
+      setError(
+        raw === "Forbidden"
+          ? "You do not have permission to complete onboarding. Ask an owner."
+          : raw,
+      );
       return;
     }
     setDone(true);
@@ -159,9 +240,9 @@ export function OnboardingWizard() {
 
   return (
     <div className="mx-auto max-w-xl px-6 py-16">
-      <div className="mb-10 h-px w-full bg-graphite">
+      <div className="mb-10 h-0.5 w-full bg-surface-2">
         <div
-          className="h-px bg-bone transition-[width]"
+          className="h-0.5 bg-accent transition-[width]"
           style={{ width: `${progress}%` }}
         />
       </div>
@@ -185,9 +266,16 @@ export function OnboardingWizard() {
                 value={values[q.key] ?? ""}
                 onChange={(e) => setValues((v) => ({ ...v, [q.key]: e.target.value }))}
               />
+            ) : q.type === "search" ? (
+              <SearchSelect
+                options={q.options ?? []}
+                value={values[q.key] ?? ""}
+                onChange={(next) => setValues((v) => ({ ...v, [q.key]: next }))}
+                placeholder={q.label}
+              />
             ) : (
               <select
-                className="surface-2 h-11 w-full rounded-[4px] px-3 text-ink"
+                className="h-11 w-full rounded-[4px] border border-rule bg-surface-1 px-3 text-ink"
                 value={values[q.key] ?? ""}
                 onChange={(e) => setValues((v) => ({ ...v, [q.key]: e.target.value }))}
               >
@@ -199,18 +287,23 @@ export function OnboardingWizard() {
               </select>
             )}
           </div>
+          {error ? <StatusLine tone="error">{error}</StatusLine> : null}
           <div className="mt-10 flex gap-3">
             <Button
               type="button"
               variant="secondary"
               disabled={step === 0}
-              onClick={() => setStep((s) => Math.max(0, s - 1))}
+              onClick={() => {
+                setError(null);
+                setStep((s) => Math.max(0, s - 1));
+              }}
             >
               Back
             </Button>
             <Button
               type="button"
               onClick={() => {
+                setError(null);
                 if (step >= QUESTIONS.length - 1) void finish();
                 else setStep((s) => s + 1);
               }}

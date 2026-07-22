@@ -114,5 +114,20 @@ export const Organisations: CollectionConfig = {
       ],
     },
     { name: "onboardedAt", type: "date" },
+    {
+      name: "guideProgress",
+      type: "json",
+      admin: {
+        description: "First-report guided checklist — org-scoped, not localStorage.",
+      },
+    },
+    {
+      name: "benchmarkOptOut",
+      type: "checkbox",
+      defaultValue: false,
+      admin: {
+        description: "Opt out of anonymised sector benchmark aggregation (ToS consent).",
+      },
+    },
   ],
 };

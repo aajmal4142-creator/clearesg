@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 
-import { PageMasthead } from "@/components/motion";
+import { EmptyState, PageFrame, StatusLine } from "@/components/shell/PageFrame";
+import type { MembershipRole } from "@/lib/access/membership";
 
 type BenchmarkPayload =
   | {
@@ -23,11 +24,20 @@ type BenchmarkPayload =
       improve: Array<{ label: string; href: string }>;
     };
 
-export function BenchmarksClient({ initial }: { initial: BenchmarkPayload }) {
+export function BenchmarksClient({
+  initial,
+  role = null,
+}: {
+  initial: BenchmarkPayload;
+  role?: MembershipRole | null;
+}) {
   const [data, setData] = useState(initial);
   const [status, setStatus] = useState<string | null>(null);
+  const [statusTone, setStatusTone] = useState<"neutral" | "error" | "ok">("neutral");
+  const canRecompute = role === "owner" || role === "admin";
 
   async function recompute() {
+    setStatusTone("neutral");
     setStatus("Recomputing…");
     const res = await fetch("/api/app/benchmarks/recompute", { method: "POST" });
     const body = (await res.json().catch(() => ({}))) as {
@@ -35,38 +45,71 @@ export function BenchmarksClient({ initial }: { initial: BenchmarkPayload }) {
       written?: number;
     };
     if (!res.ok) {
-      setStatus(body.error ?? "Recompute failed");
+      const raw = body.error ?? "Recompute failed";
+      setStatusTone("error");
+      setStatus(
+        raw === "Forbidden"
+          ? "Recompute requires an admin or owner. Ask a teammate with that role."
+          : raw,
+      );
       return;
     }
     const get = await fetch("/api/app/benchmarks?metricKey=electricity_kwh");
     const next = (await get.json()) as BenchmarkPayload;
     setData(next);
+    setStatusTone("ok");
     setStatus(`Wrote ${body.written ?? 0} cohort(s)`);
   }
 
   return (
-    <div className="mx-auto max-w-3xl space-y-8 px-6 py-12">
-      <PageMasthead
-        label="Benchmarking"
-        title="Sector position"
-        description="Cohorts with fewer than 8 organisations are never shown."
-      >
-        {status ? <p className="mt-3 text-sm text-ink-muted">{status}</p> : null}
-      </PageMasthead>
-
-      <button
-        type="button"
-        onClick={() => void recompute()}
-        className="border border-rule px-3 py-2 text-sm text-ink-muted hover:border-rule-strong hover:text-ink"
-      >
-        Recompute cohorts
-      </button>
+    <PageFrame
+      eyebrow="Benchmarking"
+      title="Sector position"
+      help="Cohorts with fewer than 8 organisations are never shown."
+      actions={
+        canRecompute ? (
+          <button
+            type="button"
+            onClick={() => void recompute()}
+            className="border border-rule px-3 py-2 text-sm text-ink-muted hover:border-rule-strong hover:text-ink"
+          >
+            Recompute cohorts
+          </button>
+        ) : role !== null ? (
+          <p className="text-sm text-ink-muted">Recompute is admin-only</p>
+        ) : (
+          <button
+            type="button"
+            onClick={() => void recompute()}
+            className="border border-rule px-3 py-2 text-sm text-ink-muted hover:border-rule-strong hover:text-ink"
+          >
+            Recompute cohorts
+          </button>
+        )
+      }
+      rail={
+        <div className="space-y-3 text-sm text-ink-muted">
+          <p className="label-caps text-ink">Privacy</p>
+          <p>
+            Opted-out organisations are excluded. Small cohorts never surface percentiles.
+          </p>
+        </div>
+      }
+    >
+      {status ? <StatusLine tone={statusTone}>{status}</StatusLine> : null}
 
       {!data.available ? (
-        <p className="text-ink-muted">{data.reason}</p>
+        <EmptyState
+          title="No cohort available"
+          body={
+            data.reason === "Forbidden"
+              ? "This cohort is not available for your organisation yet."
+              : data.reason
+          }
+        />
       ) : (
         <>
-          <div className="border border-rule p-4">
+          <div className="mt-4 border-t border-rule pt-4">
             <p className="label-caps">
               {data.metricKey} · sector {data.sector} · n={data.cohortSize}
             </p>
@@ -80,7 +123,7 @@ export function BenchmarksClient({ initial }: { initial: BenchmarkPayload }) {
               ).map(([label, value]) => (
                 <div key={label} className="flex-1">
                   <div
-                    className="w-full bg-graphite"
+                    className="w-full bg-surface-2"
                     style={{
                       height: `${Math.max(8, (value / (data.p75 * 1.4)) * 120)}px`,
                     }}
@@ -106,14 +149,14 @@ export function BenchmarksClient({ initial }: { initial: BenchmarkPayload }) {
             )}
           </div>
 
-          <div>
+          <div className="mt-8 border-t border-rule pt-4">
             <p className="label-caps mb-3">How to improve</p>
             <ul className="space-y-2">
               {data.improve.map((a) => (
                 <li key={a.href}>
                   <a
                     href={a.href}
-                    className="block border border-rule px-3 py-2 text-sm text-ink hover:border-rule-strong"
+                    className="block border-b border-rule px-0 py-2 text-sm text-ink hover:text-accent"
                   >
                     {a.label}
                   </a>
@@ -123,6 +166,6 @@ export function BenchmarksClient({ initial }: { initial: BenchmarkPayload }) {
           </div>
         </>
       )}
-    </div>
+    </PageFrame>
   );
 }

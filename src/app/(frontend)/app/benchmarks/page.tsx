@@ -2,7 +2,6 @@ import { redirect } from "next/navigation";
 import { getPayload } from "payload";
 
 import { BenchmarksClient } from "@/app/(frontend)/app/benchmarks/BenchmarksClient";
-import { AppShell } from "@/components/shell/AppShell";
 import { getCurrentContext } from "@/lib/auth";
 import { MIN_COHORT_SIZE } from "@/lib/benchmarks";
 import config from "@/payload.config";
@@ -47,19 +46,12 @@ export default async function BenchmarksPage() {
       }
     : {
         available: false as const,
-        reason: `No cohort with n ≥ ${MIN_COHORT_SIZE} for sector ${sectorPrefix}. Run recompute.`,
+        reason:
+          ctx.role === "owner" || ctx.role === "admin"
+            ? `No cohort with n ≥ ${MIN_COHORT_SIZE} for sector ${sectorPrefix}. Recompute when enough organisations have published electricity data.`
+            : `No cohort with n ≥ ${MIN_COHORT_SIZE} for sector ${sectorPrefix} yet. An admin can recompute cohorts when enough organisations have data.`,
         minCohortSize: MIN_COHORT_SIZE,
       };
 
-  return (
-    <AppShell
-      orgs={ctx.memberships.map((m) => ({
-        id: m.organisationId,
-        name: m.organisationName,
-      }))}
-      activeOrgId={ctx.activeOrg.id}
-    >
-      <BenchmarksClient initial={initial} />
-    </AppShell>
-  );
+  return <BenchmarksClient initial={initial} role={ctx.role} />;
 }

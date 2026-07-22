@@ -2,7 +2,6 @@ import { redirect } from "next/navigation";
 import { getPayload } from "payload";
 
 import { ReportsClient } from "@/app/(frontend)/app/reports/ReportsClient";
-import { AppShell } from "@/components/shell/AppShell";
 import { getCurrentContext } from "@/lib/auth";
 import { BillingDeniedError } from "@/lib/billing";
 import { ensureOpenPeriod } from "@/lib/org/period";
@@ -34,26 +33,21 @@ export default async function ReportsPage() {
     overrideAccess: true,
   });
 
+  const canPublish = ctx.role === "owner" || ctx.role === "admin";
+
   return (
-    <AppShell
-      orgs={ctx.memberships.map((m) => ({
-        id: m.organisationId,
-        name: m.organisationName,
+    <ReportsClient
+      canPublish={canPublish}
+      initial={reports.docs.map((r) => ({
+        id: r.id,
+        version: r.version,
+        status: r.status,
+        framework: r.framework,
+        shareToken: r.shareToken ?? null,
+        publishedAt: r.publishedAt ? String(r.publishedAt) : null,
+        scores: r.scores,
+        viewCount: r.viewCount ?? 0,
       }))}
-      activeOrgId={ctx.activeOrg.id}
-    >
-      <ReportsClient
-        initial={reports.docs.map((r) => ({
-          id: r.id,
-          version: r.version,
-          status: r.status,
-          framework: r.framework,
-          shareToken: r.shareToken ?? null,
-          publishedAt: r.publishedAt ? String(r.publishedAt) : null,
-          scores: r.scores,
-          viewCount: r.viewCount ?? 0,
-        }))}
-      />
-    </AppShell>
+    />
   );
 }

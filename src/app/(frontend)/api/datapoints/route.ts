@@ -3,13 +3,17 @@ import { NextResponse } from "next/server";
 
 import { getCurrentContext } from "@/lib/auth";
 import { BillingDeniedError, billingDeniedResponse } from "@/lib/billing";
+import { writeDatapoint } from "@/lib/data";
 import { ensureOpenPeriod } from "@/lib/org/period";
 import config from "@/payload.config";
 
 export async function POST(req: Request) {
   const ctx = await getCurrentContext();
   if (!ctx.activeOrg || !ctx.role) {
-    return NextResponse.json({ error: "No active organisation" }, { status: 403 });
+    return NextResponse.json(
+      { error: "No active organisation. Finish onboarding or switch organisation." },
+      { status: 403 },
+    );
   }
   if (ctx.role === "viewer") {
     return NextResponse.json(
@@ -23,6 +27,7 @@ export async function POST(req: Request) {
     value?: number | null;
     quality?: "measured" | "calculated" | "estimated" | "missing";
     unit?: string;
+    assignedTo?: string | null;
   };
   if (!body.metricKey || !body.quality) {
     return NextResponse.json(
@@ -42,45 +47,34 @@ export async function POST(req: Request) {
   }
 
   const payload = await getPayload({ config });
-  const existing = await payload.find({
-    collection: "datapoints",
-    where: {
-      and: [
-        { organisation: { equals: ctx.activeOrg.id } },
-        { period: { equals: periodId } },
-        { metricKey: { equals: body.metricKey } },
-      ],
-    },
-    limit: 1,
+  const period = await payload.findByID({
+    collection: "reporting-periods",
+    id: periodId,
+    depth: 0,
     overrideAccess: true,
   });
-
-  const data = {
-    organisation: ctx.activeOrg.id,
-    period: periodId,
-    metricKey: body.metricKey,
-    value: body.value ?? undefined,
-    unit: body.unit,
-    quality: body.quality,
-    source: "manual" as const,
-    enteredBy: ctx.user.id,
-    enteredAt: new Date().toISOString(),
-  };
-
-  if (existing.docs[0]) {
-    await payload.update({
-      collection: "datapoints",
-      id: existing.docs[0].id,
-      data,
-      overrideAccess: true,
-    });
-  } else {
-    await payload.create({
-      collection: "datapoints",
-      data,
-      overrideAccess: true,
-    });
+  if (period.status !== "open") {
+    return NextResponse.json(
+      { error: "Reporting period is locked or published. Writes are refused." },
+      { status: 409 },
+    );
   }
 
-  return NextResponse.json({ ok: true });
+  try {
+    const result = await writeDatapoint(payload, {
+      organisationId: ctx.activeOrg.id,
+      periodId,
+      metricKey: body.metricKey,
+      value: body.quality === "missing" ? null : (body.value ?? null),
+      unit: body.unit,
+      quality: body.quality,
+      source: "manual",
+      actorId: ctx.user.id,
+      assignedTo: body.assignedTo,
+    });
+    return NextResponse.json({ ok: true, ...result });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Write failed";
+    return NextResponse.json({ error: message }, { status: 400 });
+  }
 }

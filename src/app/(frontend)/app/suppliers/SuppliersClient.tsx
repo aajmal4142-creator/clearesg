@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-import { Assemble, PageMasthead } from "@/components/motion";
+import { EmptyState, PageFrame, StatusLine } from "@/components/shell/PageFrame";
 import { Metric } from "@/components/ui/metric";
 
 export type SupplierRow = {
@@ -29,15 +29,18 @@ export function SuppliersClient({
   initialSuppliers,
   initialCoveragePct,
   initialResponseRatePct,
+  canWrite = true,
 }: {
   initialSuppliers: SupplierRow[];
   initialCoveragePct: number | null;
   initialResponseRatePct: number | null;
+  canWrite?: boolean;
 }) {
   const [rows, setRows] = useState(initialSuppliers);
   const [coveragePct, setCoveragePct] = useState(initialCoveragePct);
   const [responseRate, setResponseRate] = useState(initialResponseRatePct);
   const [status, setStatus] = useState<string | null>(null);
+  const [statusTone, setStatusTone] = useState<"neutral" | "error" | "ok">("neutral");
   const [form, setForm] = useState({
     name: "",
     contactEmail: "",
@@ -45,10 +48,15 @@ export function SuppliersClient({
     annualSpend: "",
   });
 
+  function note(message: string, tone: "neutral" | "error" | "ok" = "neutral") {
+    setStatusTone(tone);
+    setStatus(message);
+  }
+
   async function refresh() {
     const res = await fetch("/api/app/suppliers");
     if (!res.ok) {
-      setStatus("Could not load suppliers");
+      note("Could not load suppliers. Refresh the page and try again.", "error");
       return;
     }
     const data = (await res.json()) as {
@@ -63,7 +71,11 @@ export function SuppliersClient({
 
   async function addSupplier(e: React.FormEvent) {
     e.preventDefault();
-    setStatus("Saving…");
+    if (!canWrite) {
+      note("Viewers cannot add suppliers. Ask a contributor or admin.", "error");
+      return;
+    }
+    note("Saving…");
     const res = await fetch("/api/app/suppliers", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -75,7 +87,12 @@ export function SuppliersClient({
       }),
     });
     if (!res.ok) {
-      setStatus("Could not add supplier");
+      const data = (await res.json().catch(() => ({}))) as { error?: string };
+      const raw = data.error ?? "Could not add supplier";
+      note(
+        raw === "Forbidden" ? "You do not have permission to add suppliers." : raw,
+        "error",
+      );
       return;
     }
     setForm({
@@ -84,12 +101,16 @@ export function SuppliersClient({
       category: "purchased_goods",
       annualSpend: "",
     });
-    setStatus("Supplier added");
+    note("Supplier added", "ok");
     await refresh();
   }
 
   async function sendRequest(id: string) {
-    setStatus("Sending request…");
+    if (!canWrite) {
+      note("Viewers cannot send requests.", "error");
+      return;
+    }
+    note("Sending request…");
     const res = await fetch(`/api/app/suppliers/${id}/request`, { method: "POST" });
     const data = (await res.json().catch(() => ({}))) as {
       link?: string;
@@ -97,7 +118,13 @@ export function SuppliersClient({
       delivery?: string;
     };
     if (!res.ok) {
-      setStatus(data.error ?? "Could not send request");
+      const raw = data.error ?? "Could not send request";
+      note(
+        raw === "Forbidden"
+          ? "You do not have permission to send supplier requests."
+          : raw,
+        "error",
+      );
       return;
     }
     if (data.link) {
@@ -112,49 +139,61 @@ export function SuppliersClient({
           : data.delivery === "failed"
             ? "Email failed."
             : "No RESEND_API_KEY — email logged to server console only.";
-      setStatus(`${via} Link copied: ${data.link}`);
+      note(`${via} Link copied.`, "ok");
     } else {
-      setStatus(data.error ?? "Request sent");
+      note(data.error ?? "Request sent", "ok");
     }
     await refresh();
   }
 
   async function chaseReminders() {
-    setStatus("Sending reminders…");
+    if (!canWrite) {
+      note("Viewers cannot send reminders.", "error");
+      return;
+    }
+    note("Sending reminders…");
     const res = await fetch("/api/app/suppliers/reminders", { method: "POST" });
     const data = (await res.json().catch(() => ({}))) as {
       remindersSent?: number;
       error?: string;
     };
     if (!res.ok) {
-      setStatus(data.error ?? "Could not send reminders");
+      const raw = data.error ?? "Could not send reminders";
+      note(
+        raw === "Forbidden" ? "You do not have permission to send reminders." : raw,
+        "error",
+      );
       return;
     }
-    setStatus(`Reminders sent: ${data.remindersSent ?? 0}`);
+    note(`Reminders sent: ${data.remindersSent ?? 0}`, "ok");
     await refresh();
   }
 
   async function remove(id: string) {
+    if (!canWrite) {
+      note("Viewers cannot remove suppliers.", "error");
+      return;
+    }
     if (!window.confirm("Remove this supplier?")) return;
     const res = await fetch(`/api/app/suppliers/${id}`, { method: "DELETE" });
     if (!res.ok) {
-      setStatus("Could not remove supplier");
+      note("Could not remove supplier. Try again.", "error");
       return;
     }
-    setStatus("Supplier removed");
+    note("Supplier removed", "ok");
     await refresh();
   }
 
   return (
-    <div className="mx-auto max-w-5xl space-y-10 px-6 py-12">
-      <div className="flex flex-wrap items-end justify-between gap-6">
-        <PageMasthead
-          label="Supplier chains"
-          title="Scope 3 collection"
-          description="Tokenised public forms. No supplier account. Response flows into your Scope 3 as measured supplier data."
-          className="flex-1"
-        />
-        <Assemble layer="data" className="flex gap-8">
+    <PageFrame
+      eyebrow="Supplier chains"
+      title="Scope 3 collection"
+      help="Tokenised public forms. No supplier account. Responses flow into your Scope 3 as measured supplier data."
+      actions={
+        !canWrite ? <p className="text-sm text-ink-muted">View only</p> : undefined
+      }
+      rail={
+        <div className="space-y-6">
           <div>
             {coveragePct === null ? (
               <span className="font-data text-3xl text-ink-muted">—</span>
@@ -171,73 +210,82 @@ export function SuppliersClient({
             )}
             <p className="label-caps mt-1">Response rate</p>
           </div>
-        </Assemble>
-      </div>
+          <p className="text-xs text-ink-muted">
+            Coverage uses annual spend on suppliers you have listed. Response rate counts
+            submitted forms.
+          </p>
+        </div>
+      }
+    >
+      {status ? <StatusLine tone={statusTone}>{status}</StatusLine> : null}
 
-      {status ? <p className="text-sm text-ink-muted">{status}</p> : null}
+      {canWrite ? (
+        <form
+          onSubmit={(e) => void addSupplier(e)}
+          className="mt-4 grid gap-3 border-t border-rule pt-4 md:grid-cols-2"
+        >
+          <input
+            required
+            placeholder="Supplier name"
+            className="border border-rule bg-surface-1 px-2 py-2 text-ink"
+            value={form.name}
+            onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
+          />
+          <input
+            required
+            type="email"
+            placeholder="Contact email"
+            className="border border-rule bg-surface-1 px-2 py-2 text-ink"
+            value={form.contactEmail}
+            onChange={(e) => setForm((f) => ({ ...f, contactEmail: e.target.value }))}
+          />
+          <select
+            className="border border-rule bg-surface-1 px-2 py-2 text-ink"
+            value={form.category}
+            onChange={(e) => setForm((f) => ({ ...f, category: e.target.value }))}
+          >
+            {CATEGORIES.map((c) => (
+              <option key={c.value} value={c.value}>
+                {c.label}
+              </option>
+            ))}
+          </select>
+          <input
+            type="number"
+            min={0}
+            placeholder="Annual spend"
+            className="border border-rule bg-surface-1 px-2 py-2 font-data text-ink"
+            value={form.annualSpend}
+            onChange={(e) => setForm((f) => ({ ...f, annualSpend: e.target.value }))}
+          />
+          <button
+            type="submit"
+            className="border border-rule bg-surface-1 px-3 py-2 text-sm text-ink hover:border-rule-strong md:col-span-2"
+          >
+            Add supplier
+          </button>
+        </form>
+      ) : null}
 
-      <form
-        onSubmit={(e) => void addSupplier(e)}
-        className="grid gap-3 border border-rule p-4 md:grid-cols-5"
-      >
-        <input
-          required
-          placeholder="Supplier name"
-          className="border border-rule bg-surface-1 px-2 py-2 text-ink md:col-span-1"
-          value={form.name}
-          onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
-        />
-        <input
-          required
-          type="email"
-          placeholder="Contact email"
-          className="border border-rule bg-surface-1 px-2 py-2 text-ink"
-          value={form.contactEmail}
-          onChange={(e) => setForm((f) => ({ ...f, contactEmail: e.target.value }))}
-        />
-        <select
-          className="border border-rule bg-surface-1 px-2 py-2 text-ink"
-          value={form.category}
-          onChange={(e) => setForm((f) => ({ ...f, category: e.target.value }))}
-        >
-          {CATEGORIES.map((c) => (
-            <option key={c.value} value={c.value}>
-              {c.label}
-            </option>
-          ))}
-        </select>
-        <input
-          type="number"
-          min={0}
-          placeholder="Annual spend"
-          className="border border-rule bg-surface-1 px-2 py-2 font-data text-ink"
-          value={form.annualSpend}
-          onChange={(e) => setForm((f) => ({ ...f, annualSpend: e.target.value }))}
-        />
-        <button
-          type="submit"
-          className="border border-rule bg-surface-1 px-3 py-2 text-sm text-ink hover:border-rule-strong"
-        >
-          Add supplier
-        </button>
-      </form>
-
-      <div className="flex gap-3">
-        <button
-          type="button"
-          onClick={() => void chaseReminders()}
-          className="border border-rule px-3 py-2 text-sm text-ink-muted hover:border-rule-strong hover:text-ink"
-        >
-          Send due reminders (day 7 / 14)
-        </button>
-      </div>
+      {canWrite && rows.length > 0 ? (
+        <div className="mt-4">
+          <button
+            type="button"
+            onClick={() => void chaseReminders()}
+            className="border border-rule px-3 py-2 text-sm text-ink-muted hover:border-rule-strong hover:text-ink"
+          >
+            Send due reminders (day 7 / 14)
+          </button>
+        </div>
+      ) : null}
 
       {rows.length === 0 ? (
-        <p className="text-ink-muted">
-          No suppliers yet. Add one to start collecting Scope 3 data.
-        </p>
+        <EmptyState
+          title="No suppliers yet"
+          body="Add a supplier with a contact email, then send a tokenised request. Their response lands in Scope 3 without creating an account."
+        />
       ) : (
-        <div className="overflow-x-auto border border-rule">
+        <div className="mt-6 overflow-x-auto border-t border-rule">
           <table className="w-full text-left text-sm">
             <thead className="border-b border-rule text-ink-muted">
               <tr>
@@ -263,24 +311,28 @@ export function SuppliersClient({
                     {r.requestStatus}
                   </td>
                   <td className="px-3 py-3">
-                    <div className="flex flex-wrap gap-2">
-                      {r.requestStatus !== "submitted" ? (
+                    {canWrite ? (
+                      <div className="flex flex-wrap gap-2">
+                        {r.requestStatus !== "submitted" ? (
+                          <button
+                            type="button"
+                            className="text-sm text-ink underline-offset-2 hover:underline"
+                            onClick={() => void sendRequest(r.id)}
+                          >
+                            {r.requestStatus === "not_sent" ? "Send request" : "Resend"}
+                          </button>
+                        ) : null}
                         <button
                           type="button"
-                          className="text-sm text-ink underline-offset-2 hover:underline"
-                          onClick={() => void sendRequest(r.id)}
+                          className="text-sm text-ink-muted hover:text-rust"
+                          onClick={() => void remove(r.id)}
                         >
-                          {r.requestStatus === "not_sent" ? "Send request" : "Resend"}
+                          Remove
                         </button>
-                      ) : null}
-                      <button
-                        type="button"
-                        className="text-sm text-ink-muted hover:text-rust"
-                        onClick={() => void remove(r.id)}
-                      >
-                        Remove
-                      </button>
-                    </div>
+                      </div>
+                    ) : (
+                      <span className="text-ink-muted">—</span>
+                    )}
                   </td>
                 </tr>
               ))}
@@ -288,6 +340,6 @@ export function SuppliersClient({
           </table>
         </div>
       )}
-    </div>
+    </PageFrame>
   );
 }

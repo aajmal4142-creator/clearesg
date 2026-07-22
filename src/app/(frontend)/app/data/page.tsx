@@ -1,9 +1,10 @@
 import { redirect } from "next/navigation";
 import { getPayload } from "payload";
 
-import { DataWizard } from "@/app/(frontend)/app/data/DataWizard";
-import { AppShell } from "@/components/shell/AppShell";
+import { DataWorkspace, type DataRowState } from "@/components/data/DataWorkspace";
 import { getCurrentContext } from "@/lib/auth";
+import type { FactorRecord, Quality } from "@/lib/calc";
+import { DATA_METRICS } from "@/lib/data";
 import config from "@/payload.config";
 
 export default async function DataPage() {
@@ -23,36 +24,66 @@ export default async function DataPage() {
     overrideAccess: true,
   });
 
-  const initial: Record<string, { value: number | null; quality: string }> = {};
-  if (periods.docs[0]) {
+  const period = periods.docs[0];
+  const periodLocked = !period || period.status !== "open";
+
+  const initialRows: DataRowState[] = [];
+  if (period) {
     const dps = await payload.find({
       collection: "datapoints",
       where: {
         and: [
           { organisation: { equals: ctx.activeOrg.id } },
-          { period: { equals: periods.docs[0].id } },
+          { period: { equals: period.id } },
         ],
       },
-      limit: 100,
+      limit: 200,
       overrideAccess: true,
     });
     for (const dp of dps.docs) {
-      initial[dp.metricKey] = {
+      const def = DATA_METRICS.find((m) => m.key === dp.metricKey);
+      initialRows.push({
+        metricKey: dp.metricKey,
         value: typeof dp.value === "number" ? dp.value : null,
-        quality: dp.quality,
-      };
+        quality: dp.quality as Quality,
+        unit: dp.unit ?? def?.unit ?? null,
+        approvalState: dp.approvalState ?? "pending",
+        evidenceCount: Array.isArray(dp.evidence) ? dp.evidence.length : 0,
+        assignedTo:
+          typeof dp.assignedTo === "string" ? dp.assignedTo : (dp.assignedTo?.id ?? null),
+      });
     }
   }
 
+  const factorsResult = await payload.find({
+    collection: "emission-factors",
+    limit: 500,
+    overrideAccess: true,
+  });
+  const factors: FactorRecord[] = factorsResult.docs.map((f) => ({
+    id: f.id,
+    key: f.key,
+    value: f.value,
+    unit: f.unit,
+    source: f.source,
+    publicationYear: f.publicationYear,
+    region: f.region,
+    validFrom: f.validFrom ? String(f.validFrom) : undefined,
+    validUntil: f.validUntil ? String(f.validUntil) : undefined,
+  }));
+
+  const year = period
+    ? new Date(String(period.endDate)).getFullYear()
+    : new Date().getFullYear();
+
   return (
-    <AppShell
-      orgs={ctx.memberships.map((m) => ({
-        id: m.organisationId,
-        name: m.organisationName,
-      }))}
-      activeOrgId={ctx.activeOrg.id}
-    >
-      <DataWizard initial={initial} />
-    </AppShell>
+    <DataWorkspace
+      initialRows={initialRows}
+      periodLocked={periodLocked}
+      factors={factors}
+      region={ctx.activeOrg.country || "GB"}
+      year={year}
+      canWrite={ctx.role !== "viewer" && ctx.role !== null}
+    />
   );
 }

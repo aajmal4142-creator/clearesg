@@ -78,6 +78,7 @@ export interface Config {
     datapoints: Datapoint;
     evidence: Evidence;
     suppliers: Supplier;
+    'internal-data-requests': InternalDataRequest;
     'materiality-assessments': MaterialityAssessment;
     reports: Report;
     'audit-logs': AuditLog;
@@ -101,6 +102,7 @@ export interface Config {
     datapoints: DatapointsSelect<false> | DatapointsSelect<true>;
     evidence: EvidenceSelect<false> | EvidenceSelect<true>;
     suppliers: SuppliersSelect<false> | SuppliersSelect<true>;
+    'internal-data-requests': InternalDataRequestsSelect<false> | InternalDataRequestsSelect<true>;
     'materiality-assessments': MaterialityAssessmentsSelect<false> | MaterialityAssessmentsSelect<true>;
     reports: ReportsSelect<false> | ReportsSelect<true>;
     'audit-logs': AuditLogsSelect<false> | AuditLogsSelect<true>;
@@ -233,6 +235,22 @@ export interface Organisation {
   plan?: ('free' | 'pro' | 'consultant') | null;
   subscriptionStatus?: ('none' | 'active' | 'past_due' | 'canceled') | null;
   onboardedAt?: string | null;
+  /**
+   * First-report guided checklist — org-scoped, not localStorage.
+   */
+  guideProgress?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  /**
+   * Opt out of anonymised sector benchmark aggregation (ToS consent).
+   */
+  benchmarkOptOut?: boolean | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -382,7 +400,15 @@ export interface Datapoint {
   unit?: string | null;
   quality: 'measured' | 'calculated' | 'estimated' | 'missing';
   evidence?: (string | Evidence)[] | null;
-  source: 'manual' | 'import' | 'supplier' | 'estimate' | 'api';
+  source: 'manual' | 'import' | 'supplier' | 'estimate' | 'api' | 'internal_survey';
+  approvalState: 'pending' | 'approved' | 'rejected';
+  /**
+   * Required when approvalState is rejected.
+   */
+  approvalReason?: string | null;
+  assignedTo?: (string | null) | User;
+  dueDate?: string | null;
+  taskStatus?: ('open' | 'submitted' | 'approved') | null;
   enteredBy?: (string | null) | User;
   enteredAt?: string | null;
   note?: string | null;
@@ -413,7 +439,10 @@ export interface Evidence {
     | number
     | boolean
     | null;
-  ocrStatus?: ('pending' | 'done' | 'failed') | null;
+  /**
+   * OCR is not productized; new uploads should set skipped until a worker ships.
+   */
+  ocrStatus?: ('pending' | 'done' | 'failed' | 'skipped') | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -444,6 +473,31 @@ export interface Supplier {
     | boolean
     | null;
   reminderCount?: number | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "internal-data-requests".
+ */
+export interface InternalDataRequest {
+  id: string;
+  organisation: string | Organisation;
+  period: string | ReportingPeriod;
+  title: string;
+  assignee: string | User;
+  metricKeys: {
+    key: string;
+    id?: string | null;
+  }[];
+  requestStatus?: ('not_sent' | 'sent' | 'opened' | 'submitted') | null;
+  dueDate?: string | null;
+  sentAt?: string | null;
+  openedAt?: string | null;
+  submittedAt?: string | null;
+  lastReminderAt?: string | null;
+  reminderCount?: number | null;
+  createdBy?: (string | null) | User;
   updatedAt: string;
   createdAt: string;
 }
@@ -676,6 +730,10 @@ export interface PayloadLockedDocument {
         value: string | Supplier;
       } | null)
     | ({
+        relationTo: 'internal-data-requests';
+        value: string | InternalDataRequest;
+      } | null)
+    | ({
         relationTo: 'materiality-assessments';
         value: string | MaterialityAssessment;
       } | null)
@@ -807,6 +865,8 @@ export interface OrganisationsSelect<T extends boolean = true> {
   plan?: T;
   subscriptionStatus?: T;
   onboardedAt?: T;
+  guideProgress?: T;
+  benchmarkOptOut?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -933,6 +993,11 @@ export interface DatapointsSelect<T extends boolean = true> {
   quality?: T;
   evidence?: T;
   source?: T;
+  approvalState?: T;
+  approvalReason?: T;
+  assignedTo?: T;
+  dueDate?: T;
+  taskStatus?: T;
   enteredBy?: T;
   enteredAt?: T;
   note?: T;
@@ -976,6 +1041,32 @@ export interface SuppliersSelect<T extends boolean = true> {
   lastReminderAt?: T;
   submittedData?: T;
   reminderCount?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "internal-data-requests_select".
+ */
+export interface InternalDataRequestsSelect<T extends boolean = true> {
+  organisation?: T;
+  period?: T;
+  title?: T;
+  assignee?: T;
+  metricKeys?:
+    | T
+    | {
+        key?: T;
+        id?: T;
+      };
+  requestStatus?: T;
+  dueDate?: T;
+  sentAt?: T;
+  openedAt?: T;
+  submittedAt?: T;
+  lastReminderAt?: T;
+  reminderCount?: T;
+  createdBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }

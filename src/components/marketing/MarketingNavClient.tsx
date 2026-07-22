@@ -2,9 +2,9 @@
 
 import Link from "next/link";
 
+import { MarketingAuthActions } from "@/components/marketing/MarketingAuthActions";
 import { Assemble, RuleDraw } from "@/components/motion";
 import { ThemeToggle } from "@/components/shell/ThemeToggle";
-import { Button } from "@/components/ui/button";
 
 export function MarketingNavClient() {
   return (
@@ -28,13 +28,8 @@ export function MarketingNavClient() {
             <Link href="/tools" className="hover:text-ink">
               Tools
             </Link>
-            <Link href="/sign-in" className="hover:text-ink">
-              Sign in
-            </Link>
             <ThemeToggle />
-            <Button asChild size="sm">
-              <Link href="/app">Open app</Link>
-            </Button>
+            <MarketingAuthActions variant="editorial" />
           </nav>
         </div>
       </div>

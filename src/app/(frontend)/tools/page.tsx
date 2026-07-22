@@ -22,6 +22,16 @@ const TOOLS = [
     name: "Scope 2 calculator",
     blurb: "kWh → tCO2e with a cited illustrative grid factor.",
   },
+  {
+    slug: "price-estimate",
+    name: "Price / readiness estimate",
+    blurb: "Sites + Scope 3 + framework → Free/Pro/Consultant vs Envizi footnote.",
+  },
+  {
+    slug: "brsr-readiness",
+    name: "BRSR readiness score",
+    blurb: "Value-chain / BRSR-readiness quiz — not a filing claim.",
+  },
 ];
 
 export default function ToolsIndexPage() {

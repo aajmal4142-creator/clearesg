@@ -67,6 +67,47 @@ export function LivingReportView({ snapshot }: { snapshot: ReportSnapshot }) {
         </p>
       </InkReveal>
 
+      <InkReveal className="mt-10" delay={0.18}>
+        <RuleDraw delay={0} duration={0.35} className="mb-4" />
+        <p className="label-caps mb-3">Auditor trail</p>
+        <p className="mb-4 text-xs text-ink-muted">
+          Evidence hashes and factors used for this published snapshot. Open a figure
+          below for sha256.
+        </p>
+        <ul className="space-y-2">
+          {snapshot.evidenceIndex.map((e) => (
+            <li key={e.sha256} className="border-b border-rule py-2 text-sm">
+              <details>
+                <summary className="cursor-pointer text-ink">
+                  {e.filename}
+                  {e.metricKey ? (
+                    <span className="font-data text-ink-muted"> · {e.metricKey}</span>
+                  ) : null}
+                </summary>
+                <p className="mt-2 font-data text-xs break-all text-ink-muted">
+                  sha256 {e.sha256}
+                </p>
+              </details>
+            </li>
+          ))}
+          {snapshot.evidenceIndex.length === 0 ? (
+            <li className="text-sm text-ink-muted">
+              No evidence attached on this version.
+            </li>
+          ) : null}
+        </ul>
+        <ul className="mt-6 space-y-2">
+          {snapshot.factorsUsed.map((f) => (
+            <li
+              key={`${f.key}-${f.source}-${f.year}`}
+              className="font-data text-xs text-ink-muted"
+            >
+              {f.key}: {f.source} {f.year}
+            </li>
+          ))}
+        </ul>
+      </InkReveal>
+
       <p className="mt-12 text-xs text-ink-muted">{snapshot.disclaimer}</p>
     </main>
   );

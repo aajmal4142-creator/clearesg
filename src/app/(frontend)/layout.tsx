@@ -2,6 +2,7 @@ import { ClerkProvider } from "@clerk/nextjs";
 import type { Metadata } from "next";
 import { cookies } from "next/headers";
 import { Fraunces, Inter_Tight, JetBrains_Mono, Space_Grotesk } from "next/font/google";
+import NextTopLoader from "nextjs-toploader";
 
 import { isTheme, type Theme } from "@/lib/theme";
 
@@ -103,6 +104,12 @@ export default async function RootLayout({
       suppressHydrationWarning
     >
       <body className="flex min-h-full flex-col" suppressHydrationWarning>
+        <NextTopLoader
+          color="var(--accent)"
+          height={2}
+          showSpinner={false}
+          shadow={false}
+        />
         <div className="noise-overlay" aria-hidden />
         {content}
       </body>

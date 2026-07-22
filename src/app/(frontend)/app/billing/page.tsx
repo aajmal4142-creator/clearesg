@@ -2,7 +2,6 @@ import { redirect } from "next/navigation";
 import { getPayload } from "payload";
 
 import { BillingClient } from "@/app/(frontend)/app/billing/BillingClient";
-import { AppShell } from "@/components/shell/AppShell";
 import { getCurrentContext } from "@/lib/auth";
 import { getUsageMeters, normalizePlan } from "@/lib/billing";
 import config from "@/payload.config";
@@ -23,20 +22,13 @@ export default async function BillingPage() {
   const usage = await getUsageMeters(org.id, org.plan);
 
   return (
-    <AppShell
-      orgs={ctx.memberships.map((m) => ({
-        id: m.organisationId,
-        name: m.organisationName,
-      }))}
-      activeOrgId={ctx.activeOrg.id}
-    >
-      <BillingClient
-        initial={{
-          plan: normalizePlan(org.plan),
-          subscriptionStatus: org.subscriptionStatus ?? "none",
-          usage,
-        }}
-      />
-    </AppShell>
+    <BillingClient
+      role={ctx.role}
+      initial={{
+        plan: normalizePlan(org.plan),
+        subscriptionStatus: org.subscriptionStatus ?? "none",
+        usage,
+      }}
+    />
   );
 }

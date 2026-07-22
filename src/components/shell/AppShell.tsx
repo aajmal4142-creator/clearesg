@@ -3,62 +3,46 @@
 import Link from "next/link";
 
 import { Assemble, RuleDraw } from "@/components/motion";
-import { ThemeToggle } from "@/components/shell/ThemeToggle";
+import { AppNav } from "@/components/shell/AppNav";
 import { OrgSwitcher } from "@/components/shell/OrgSwitcher";
+import { ThemeToggle } from "@/components/shell/ThemeToggle";
+import type { MembershipRole } from "@/lib/access/membership";
 
 type ShellOrg = { id: string; name: string };
+
+export type AppShellProps = {
+  children: React.ReactNode;
+  orgs: ShellOrg[];
+  activeOrgId: string | null;
+  role: MembershipRole | null;
+  orgType: "company" | "consultancy" | null;
+  onboarded: boolean;
+};
 
 export function AppShell({
   children,
   orgs,
   activeOrgId,
-}: {
-  children: React.ReactNode;
-  orgs: ShellOrg[];
-  activeOrgId: string | null;
-}) {
+  role,
+  orgType,
+  onboarded,
+}: AppShellProps) {
   return (
     <div className="flex min-h-full flex-col bg-canvas text-ink">
-      <Assemble layer="chrome" as="header">
+      <Assemble layer="chrome" as="header" className="relative z-40">
         <RuleDraw accent onMount duration={0.4} className="w-full" />
-        <div className="flex items-center justify-between border-b border-rule px-6 py-3">
-          <div className="flex items-center gap-8">
-            <Link href="/app" className="label-caps text-ink">
-              ClearESG
-            </Link>
-            <nav className="flex flex-wrap gap-4 text-sm text-ink-muted">
-              <Link href="/app" className="hover:text-accent">
-                Runway
+        <div className="border-b border-rule px-6 py-3">
+          <div className="mx-auto flex max-w-6xl items-center justify-between gap-4">
+            <div className="flex min-w-0 flex-1 items-center gap-6">
+              <Link href="/app" className="label-caps shrink-0 text-ink">
+                ClearESG
               </Link>
-              <Link href="/app/data" className="hover:text-accent">
-                Data
-              </Link>
-              <Link href="/app/suppliers" className="hover:text-accent">
-                Suppliers
-              </Link>
-              <Link href="/app/materiality" className="hover:text-accent">
-                Materiality
-              </Link>
-              <Link href="/app/reports" className="hover:text-accent">
-                Reports
-              </Link>
-              <Link href="/app/consultant" className="hover:text-accent">
-                Clients
-              </Link>
-              <Link href="/app/benchmarks" className="hover:text-accent">
-                Benchmarks
-              </Link>
-              <Link href="/app/billing" className="hover:text-accent">
-                Billing
-              </Link>
-              <Link href="/app/onboarding" className="hover:text-accent">
-                Baseline
-              </Link>
-            </nav>
-          </div>
-          <div className="flex items-center gap-3">
-            <ThemeToggle />
-            <OrgSwitcher orgs={orgs} activeOrgId={activeOrgId} />
+              <AppNav orgType={orgType} onboarded={onboarded} role={role} />
+            </div>
+            <div className="flex shrink-0 items-center gap-3">
+              <ThemeToggle />
+              <OrgSwitcher orgs={orgs} activeOrgId={activeOrgId} />
+            </div>
           </div>
         </div>
       </Assemble>

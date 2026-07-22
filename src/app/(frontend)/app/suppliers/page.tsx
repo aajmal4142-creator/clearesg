@@ -5,7 +5,6 @@ import {
   SuppliersClient,
   type SupplierRow,
 } from "@/app/(frontend)/app/suppliers/SuppliersClient";
-import { AppShell } from "@/components/shell/AppShell";
 import { getCurrentContext } from "@/lib/auth";
 import { responseRatePct, spendCoveragePct } from "@/lib/suppliers";
 import config from "@/payload.config";
@@ -36,18 +35,11 @@ export default async function SuppliersPage() {
   }));
 
   return (
-    <AppShell
-      orgs={ctx.memberships.map((m) => ({
-        id: m.organisationId,
-        name: m.organisationName,
-      }))}
-      activeOrgId={ctx.activeOrg.id}
-    >
-      <SuppliersClient
-        initialSuppliers={initialSuppliers}
-        initialCoveragePct={spendCoveragePct(initialSuppliers)}
-        initialResponseRatePct={responseRatePct(initialSuppliers)}
-      />
-    </AppShell>
+    <SuppliersClient
+      initialSuppliers={initialSuppliers}
+      initialCoveragePct={spendCoveragePct(initialSuppliers)}
+      initialResponseRatePct={responseRatePct(initialSuppliers)}
+      canWrite={ctx.role !== "viewer" && ctx.role !== null}
+    />
   );
 }

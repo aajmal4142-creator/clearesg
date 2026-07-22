@@ -99,15 +99,119 @@ export const COMPETITORS: CompetitorPage[] = [
     ],
     whereWeWin: [
       "Editorial report layout with monospaced measurement discipline",
-      "Framework-agnostic datapoints + derive registry",
-      "Benchmarking that never shows cohorts under n=8",
+      "Dual CSRD depth + BRSR-readiness / value-chain response",
+      "Consultant multi-tenant + evidence/factor defensibility",
     ],
     updatedAt: "2026-07-01",
+  },
+  {
+    slug: "envizi",
+    name: "IBM Envizi",
+    answer:
+      "IBM Envizi is an enterprise ESG data platform priced on facilities and account volume — Essential often quotes near USD 90k+/yr for a handful of sites. ClearESG targets the same collect → evidence → Scope 3 → publish job for SMEs and consultants at self-serve prices.",
+    whereTheyWin: [
+      "High data-volume / multi-facility enterprise ingestion",
+      "ERP-adjacent deployments and IBM sales channel",
+      "Assurance-oriented programmes at large-org scale",
+    ],
+    whereWeWin: [
+      "Time-to-report this quarter at €0/€49/€199",
+      "Supplier tokens + consultant white-label",
+      "Governance (evidence, factors, approval) built for teams without a sustainability department",
+    ],
+    updatedAt: "2026-07-21",
+  },
+  {
+    slug: "novisto",
+    name: "Novisto",
+    answer:
+      "Novisto is an enterprise sustainability data system with strong assignment and multi-framework breadth. ClearESG is the audit-ready-this-quarter alternative for single-entity SMEs and boutique consultants.",
+    whereTheyWin: [
+      "Enterprise multi-framework breadth and assignment workflows at scale",
+      "Global 2000-oriented implementations",
+    ],
+    whereWeWin: [
+      "SME price and guided runway",
+      "Consultant channel with pre-branded client invites",
+      "Deterministic evidence/factor traversal without enterprise implementation",
+    ],
+    updatedAt: "2026-07-21",
+  },
+  {
+    slug: "sweep",
+    name: "Sweep",
+    answer:
+      "Sweep serves multi-entity enterprise carbon and ESG programmes. ClearESG wins where the buyer is a single-entity SME or a consultant running many SME clients — not JV consolidation or financed emissions.",
+    whereTheyWin: [
+      "Multi-entity groups, JVs, carve-outs, financed emissions",
+      "Broad framework catalogue",
+    ],
+    whereWeWin: [
+      "Single-entity SME focus and price",
+      "Consultant command centre",
+      "Approval + anomaly + gap analysis sized for non-experts",
+    ],
+    updatedAt: "2026-07-21",
   },
 ];
 
 export function competitorBySlug(slug: string): CompetitorPage | undefined {
   return COMPETITORS.find((c) => c.slug === slug);
+}
+
+export type BrsrSectorPage = {
+  slug: string;
+  name: string;
+  answer: string;
+  focusTopics: string[];
+  updatedAt: string;
+};
+
+/** BRSR-readiness framing — not “file your BRSR” until XBRL tagging exists. */
+export const BRSR_SECTORS: BrsrSectorPage[] = [
+  {
+    slug: "manufacturing",
+    name: "Manufacturing",
+    answer:
+      "Most Indian manufacturers encounter BRSR as a value-chain request from a listed customer, not as a direct SEBI filer. ClearESG helps collect evidenced energy, waste, workforce, and supplier data so you can respond defensibly — BRSR-readiness and value-chain response, not a claim of filing-ready XBRL.",
+    focusTopics: [
+      "Principle 6 (environment)",
+      "Energy and GHG activity data",
+      "Value-chain supplier response",
+      "Evidence trail",
+    ],
+    updatedAt: "2026-07-21",
+  },
+  {
+    slug: "logistics",
+    name: "Logistics & transport",
+    answer:
+      "Logistics SMEs on listed-company supply chains are asked for fleet fuel, depot electricity, and safety metrics. Treat these as operational questionnaires first; use ClearESG to map answers to BRSR-readiness datapoints with evidence.",
+    focusTopics: [
+      "Fleet fuels",
+      "Depot electricity",
+      "Safety / workforce",
+      "Scope 3 requests",
+    ],
+    updatedAt: "2026-07-21",
+  },
+  {
+    slug: "professional-services",
+    name: "Professional services",
+    answer:
+      "Professional-services suppliers usually face lighter environmental asks but still need office electricity, travel, and governance answers for buyer questionnaires cascading from BRSR reporters.",
+    focusTopics: [
+      "Office energy",
+      "Business travel",
+      "Governance disclosures",
+      "Buyer questionnaires",
+    ],
+    updatedAt: "2026-07-21",
+  },
+];
+
+export function brsrSectorBySlug(slug: string): BrsrSectorPage | undefined {
+  return BRSR_SECTORS.find((s) => s.slug === slug);
 }
 
 export type DeadlinePage = {
@@ -149,10 +253,11 @@ export const DEADLINES: DeadlinePage[] = [
     country: "India",
     iso: "IN",
     answer:
-      "India's primary listed-company ESG format is BRSR (SEBI), not CSRD. Indian exporters and suppliers still face CSRD-shaped requests from EU customers. DPDP Act data-residency questions may affect hosting choices before shipping ClearESG commercially in India.",
+      "India's primary listed-company ESG format is BRSR (SEBI) for the top listed cohort, filed in machine-readable XBRL. Most ClearESG India buyers are value-chain suppliers receiving BRSR-shaped data requests — not direct filers. Market the product as BRSR-readiness + value-chain response until native XBRL tagging ships.",
     notes: [
-      "INR / Razorpay billing is an open decision before Phase 12 India launch.",
+      "INR / Razorpay billing remains a WS0 open decision before India paid launch.",
       "Treat buyer questionnaires as operational deadlines.",
+      "Decide Atlas region for DPDP before provisioning production Mongo.",
     ],
     updatedAt: "2026-07-01",
   },

@@ -2,7 +2,6 @@ import { redirect } from "next/navigation";
 import { getPayload } from "payload";
 
 import { MaterialityWorkshop } from "@/app/(frontend)/app/materiality/MaterialityWorkshop";
-import { AppShell } from "@/components/shell/AppShell";
 import { getCurrentContext } from "@/lib/auth";
 import { BillingDeniedError } from "@/lib/billing";
 import { ESRS_TOPICS } from "@/lib/materiality";
@@ -34,26 +33,21 @@ export default async function MaterialityPage() {
     overrideAccess: true,
   });
 
+  const canWrite = ctx.role === "owner" || ctx.role === "admin";
+
   return (
-    <AppShell
-      orgs={ctx.memberships.map((m) => ({
-        id: m.organisationId,
-        name: m.organisationName,
-      }))}
-      activeOrgId={ctx.activeOrg.id}
-    >
-      <MaterialityWorkshop
-        initialAssessment={
-          found.docs[0]
-            ? {
-                topics: found.docs[0].topics,
-                status: found.docs[0].status,
-                narrative: found.docs[0].narrative,
-              }
-            : null
-        }
-        topicsCatalog={ESRS_TOPICS}
-      />
-    </AppShell>
+    <MaterialityWorkshop
+      canWrite={canWrite}
+      initialAssessment={
+        found.docs[0]
+          ? {
+              topics: found.docs[0].topics,
+              status: found.docs[0].status,
+              narrative: found.docs[0].narrative,
+            }
+          : null
+      }
+      topicsCatalog={ESRS_TOPICS}
+    />
   );
 }

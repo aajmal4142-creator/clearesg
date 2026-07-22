@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-import { PageMasthead } from "@/components/motion";
+import { EmptyState, PageFrame, StatusLine } from "@/components/shell/PageFrame";
 import type { ClientRiskRow } from "@/lib/consultant";
 import type { SectorTemplate } from "@/lib/consultant/templates";
 
@@ -16,16 +16,28 @@ type Props = {
     brand: { primaryColor: string | null; domain: string | null };
   };
   templates: SectorTemplate[];
+  canWrite?: boolean;
 };
 
-export function ConsultantCentre({ initialClients, consultancy, templates }: Props) {
+export function ConsultantCentre({
+  initialClients,
+  consultancy,
+  templates,
+  canWrite = true,
+}: Props) {
   const [clients, setClients] = useState(initialClients);
   const [selected, setSelected] = useState<string[]>([]);
   const [status, setStatus] = useState<string | null>(null);
-  const [primaryColor, setPrimaryColor] = useState(
-    consultancy.brand.primaryColor ?? "#00E08A",
-  );
+  const [statusTone, setStatusTone] = useState<"neutral" | "error" | "ok">("neutral");
+  const [primaryColor, setPrimaryColor] = useState(consultancy.brand.primaryColor ?? "");
   const [domain, setDomain] = useState(consultancy.brand.domain ?? "");
+  const [inviteEmail, setInviteEmail] = useState("");
+  const [inviteName, setInviteName] = useState("");
+
+  function note(message: string, tone: "neutral" | "error" | "ok" = "neutral") {
+    setStatusTone(tone);
+    setStatus(message);
+  }
 
   function toggle(id: string) {
     setSelected((s) => (s.includes(id) ? s.filter((x) => x !== id) : [...s, id]));
@@ -39,7 +51,11 @@ export function ConsultantCentre({ initialClients, consultancy, templates }: Pro
   }
 
   async function nudge() {
-    setStatus("Sending nudges…");
+    if (!canWrite) {
+      note("Viewers cannot send nudges.", "error");
+      return;
+    }
+    note("Sending nudges…");
     const res = await fetch("/api/app/consultant/nudge", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -52,40 +68,86 @@ export function ConsultantCentre({ initialClients, consultancy, templates }: Pro
       nudgesSent?: number;
       error?: string;
     };
-    setStatus(
-      res.ok ? `Nudges sent: ${data.nudgesSent ?? 0}` : (data.error ?? "Nudge failed"),
-    );
+    if (!res.ok) {
+      const raw = data.error ?? "Nudge failed";
+      note(
+        raw === "Forbidden" ? "You do not have permission to nudge clients." : raw,
+        "error",
+      );
+      return;
+    }
+    note(`Nudges sent: ${data.nudgesSent ?? 0}`, "ok");
+  }
+
+  async function inviteClient() {
+    if (!canWrite) {
+      note("Viewers cannot invite clients.", "error");
+      return;
+    }
+    note("Inviting client…");
+    const res = await fetch("/api/app/consultant/clients/invite", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        email: inviteEmail,
+        clientName: inviteName,
+        country: "IN",
+        framework: "BRSR",
+      }),
+    });
+    const data = (await res.json().catch(() => ({}))) as {
+      error?: string;
+      slug?: string;
+    };
+    if (!res.ok) {
+      const raw = data.error ?? "Invite failed";
+      note(
+        raw === "Forbidden" ? "You do not have permission to invite clients." : raw,
+        "error",
+      );
+      return;
+    }
+    note(`Client invited (${data.slug ?? "ok"}) — pre-branded`, "ok");
+    void refresh();
   }
 
   async function saveBrand() {
-    setStatus("Saving brand…");
+    if (!canWrite) {
+      note("Viewers cannot change brand settings.", "error");
+      return;
+    }
+    note("Saving brand…");
     const res = await fetch("/api/app/consultant/brand", {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ primaryColor, domain }),
+      body: JSON.stringify({
+        primaryColor: primaryColor.trim() || undefined,
+        domain,
+      }),
     });
-    setStatus(
-      res.ok ? "Brand saved — refresh to see portal colours" : "Brand save failed",
-    );
+    if (!res.ok) {
+      note("Brand save failed. Check the colour format and try again.", "error");
+      return;
+    }
+    note("Brand saved — refresh to see portal colours", "ok");
   }
 
   return (
-    <div className="mx-auto max-w-6xl space-y-10 px-6 py-12">
-      <div className="flex flex-wrap items-end justify-between gap-6">
-        <PageMasthead
-          label="Consultant command centre"
-          title={consultancy.name}
-          description={`Clients sorted by deadline risk. Plan ${consultancy.plan} · ${consultancy.clientCount}/${consultancy.clientCap} clients.`}
-          className="flex-1"
-        />
+    <PageFrame
+      eyebrow="Consultant command centre"
+      title={consultancy.name}
+      help={`Clients sorted by deadline risk. Plan ${consultancy.plan} · ${consultancy.clientCount}/${consultancy.clientCap} clients.`}
+      actions={
         <div className="flex flex-wrap gap-2">
-          <button
-            type="button"
-            onClick={() => void nudge()}
-            className="border border-rule bg-surface-1 px-3 py-2 text-sm text-ink hover:border-rule-strong"
-          >
-            Nudge selected
-          </button>
+          {canWrite ? (
+            <button
+              type="button"
+              onClick={() => void nudge()}
+              className="border border-rule bg-surface-1 px-3 py-2 text-sm text-ink hover:border-rule-strong"
+            >
+              Nudge selected
+            </button>
+          ) : null}
           <button
             type="button"
             onClick={() => {
@@ -103,20 +165,34 @@ export function ConsultantCentre({ initialClients, consultancy, templates }: Pro
             Refresh
           </button>
         </div>
-      </div>
+      }
+      rail={
+        <div className="space-y-4 text-sm text-ink-muted">
+          <p className="label-caps text-ink">White-label</p>
+          <p>
+            Accent colour injects via BrandVars for client portals. Leave blank to keep
+            the ClearESG default accent.
+          </p>
+          <p className="label-caps text-ink">Billing</p>
+          <p>
+            Consultant €199/mo includes 10 clients; +€15/client after (Phase 12 Stripe).
+          </p>
+        </div>
+      }
+    >
+      {status ? <StatusLine tone={statusTone}>{status}</StatusLine> : null}
 
-      {status ? <p className="text-sm text-ink-muted">{status}</p> : null}
-
-      <section className="grid gap-6 border border-rule p-4 md:grid-cols-2">
+      <section className="mt-4 grid gap-8 border-t border-rule pt-4 md:grid-cols-2">
         <div>
-          <p className="label-caps mb-2">White-label</p>
+          <p className="label-caps mb-2">Brand</p>
           <label className="block text-sm text-ink-muted">
             Primary colour
             <input
               className="mt-1 w-full border border-rule bg-surface-1 px-2 py-2 font-data text-ink"
               value={primaryColor}
               onChange={(e) => setPrimaryColor(e.target.value)}
-              placeholder="#00E08A"
+              placeholder="Leave blank for default"
+              disabled={!canWrite}
             />
           </label>
           <label className="mt-3 block text-sm text-ink-muted">
@@ -126,42 +202,74 @@ export function ConsultantCentre({ initialClients, consultancy, templates }: Pro
               value={domain}
               onChange={(e) => setDomain(e.target.value)}
               placeholder="esg.yourfirm.com"
+              disabled={!canWrite}
             />
           </label>
-          <button
-            type="button"
-            onClick={() => void saveBrand()}
-            className="mt-3 border border-rule px-3 py-2 text-sm text-ink hover:border-rule-strong"
-          >
-            Save brand
-          </button>
+          {canWrite ? (
+            <button
+              type="button"
+              onClick={() => void saveBrand()}
+              className="mt-3 border border-rule px-3 py-2 text-sm text-ink hover:border-rule-strong"
+            >
+              Save brand
+            </button>
+          ) : null}
         </div>
         <div>
-          <p className="label-caps mb-2">Sector templates</p>
-          <ul className="space-y-2 text-sm text-ink-muted">
-            {templates.map((t) => (
-              <li key={t.id} className="border border-rule/60 p-2">
-                <span className="text-ink">{t.label}</span>
-                <span className="font-data mt-1 block text-xs">
-                  {t.metricKeys.length} metrics
-                </span>
-              </li>
-            ))}
-          </ul>
-          <p className="mt-3 text-xs text-ink-muted">
-            Billing: Consultant €199/mo includes 10 clients; +€15/client after (Phase 12
-            Stripe).
-          </p>
+          <p className="label-caps mb-2">Invite client (pre-branded)</p>
+          {canWrite ? (
+            <>
+              <label className="block text-sm text-ink-muted">
+                Client name
+                <input
+                  className="mt-1 w-full border border-rule bg-surface-1 px-2 py-2 text-ink"
+                  value={inviteName}
+                  onChange={(e) => setInviteName(e.target.value)}
+                />
+              </label>
+              <label className="mt-3 block text-sm text-ink-muted">
+                Owner email
+                <input
+                  className="mt-1 w-full border border-rule bg-surface-1 px-2 py-2 font-data text-ink"
+                  value={inviteEmail}
+                  onChange={(e) => setInviteEmail(e.target.value)}
+                />
+              </label>
+              <button
+                type="button"
+                onClick={() => void inviteClient()}
+                className="mt-3 border border-rule px-3 py-2 text-sm text-ink hover:border-rule-strong"
+              >
+                Invite client
+              </button>
+            </>
+          ) : (
+            <p className="text-sm text-ink-muted">View only — ask an admin to invite.</p>
+          )}
         </div>
       </section>
 
+      <section className="mt-8 border-t border-rule pt-4">
+        <p className="label-caps mb-2">Sector templates</p>
+        <ul className="space-y-2 text-sm text-ink-muted">
+          {templates.map((t) => (
+            <li key={t.id} className="border-b border-rule/60 py-2">
+              <span className="text-ink">{t.label}</span>
+              <span className="font-data mt-1 block text-xs">
+                {t.metricKeys.length} metrics
+              </span>
+            </li>
+          ))}
+        </ul>
+      </section>
+
       {clients.length === 0 ? (
-        <p className="text-ink-muted">
-          No client organisations linked. Set a company&apos;s parentOrg to this
-          consultancy in admin/seed.
-        </p>
+        <EmptyState
+          title="No linked clients"
+          body="Invite a client above, or link a company by setting its parent organisation to this consultancy."
+        />
       ) : (
-        <div className="overflow-x-auto border border-rule">
+        <div className="mt-8 overflow-x-auto border-t border-rule">
           <table className="w-full text-left text-sm">
             <thead className="border-b border-rule text-ink-muted">
               <tr>
@@ -181,6 +289,7 @@ export function ConsultantCentre({ initialClients, consultancy, templates }: Pro
                       type="checkbox"
                       checked={selected.includes(c.id)}
                       onChange={() => toggle(c.id)}
+                      disabled={!canWrite}
                     />
                   </td>
                   <td className="px-3 py-3">
@@ -217,6 +326,6 @@ export function ConsultantCentre({ initialClients, consultancy, templates }: Pro
           </table>
         </div>
       )}
-    </div>
+    </PageFrame>
   );
 }

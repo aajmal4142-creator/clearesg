@@ -2,7 +2,6 @@ import { redirect } from "next/navigation";
 import { getPayload } from "payload";
 
 import { ConsultantCentre } from "@/app/(frontend)/app/consultant/ConsultantCentre";
-import { AppShell } from "@/components/shell/AppShell";
 import { getCurrentContext } from "@/lib/auth";
 import { riskOf, sortByDeadlineRisk, type ClientRiskRow } from "@/lib/consultant";
 import { SECTOR_TEMPLATES } from "@/lib/consultant/templates";
@@ -97,24 +96,17 @@ export default async function ConsultantPage() {
   }
 
   return (
-    <AppShell
-      orgs={ctx.memberships.map((m) => ({
-        id: m.organisationId,
-        name: m.organisationName,
-      }))}
-      activeOrgId={ctx.activeOrg.id}
-    >
-      <ConsultantCentre
-        initialClients={sortByDeadlineRisk(rows)}
-        consultancy={{
-          name: ctx.activeOrg.name,
-          plan: ctx.activeOrg.plan,
-          clientCount: rows.length,
-          clientCap: ctx.activeOrg.plan === "consultant" ? 10 : 3,
-          brand: ctx.activeOrg.brand,
-        }}
-        templates={SECTOR_TEMPLATES}
-      />
-    </AppShell>
+    <ConsultantCentre
+      initialClients={sortByDeadlineRisk(rows)}
+      consultancy={{
+        name: ctx.activeOrg.name,
+        plan: ctx.activeOrg.plan,
+        clientCount: rows.length,
+        clientCap: ctx.activeOrg.plan === "consultant" ? 10 : 3,
+        brand: ctx.activeOrg.brand,
+      }}
+      templates={SECTOR_TEMPLATES}
+      canWrite={ctx.role !== "viewer" && ctx.role !== null}
+    />
   );
 }

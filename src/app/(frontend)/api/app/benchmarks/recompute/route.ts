@@ -3,21 +3,14 @@ import { NextResponse } from "next/server";
 
 import { getCurrentContext } from "@/lib/auth";
 import { computeCohortStats, MIN_COHORT_SIZE } from "@/lib/benchmarks";
+import { isProductionRuntime } from "@/lib/launch/gates";
 import config from "@/payload.config";
 
-/**
- * Recompute benchmark-stats from published org datapoints.
- * Skips any cohort with n < 8 (never written).
- */
-export async function POST() {
-  const ctx = await getCurrentContext();
-  if (!ctx.activeOrg || (ctx.role !== "owner" && ctx.role !== "admin")) {
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-  }
-
+async function recompute() {
   const payload = await getPayload({ config });
   const orgs = await payload.find({
     collection: "organisations",
+    where: { benchmarkOptOut: { not_equals: true } },
     limit: 500,
     overrideAccess: true,
   });
@@ -26,7 +19,7 @@ export async function POST() {
   const bySector = new Map<string, number[]>();
 
   for (const org of orgs.docs) {
-    const prefix = org.sector.trim().charAt(0).toUpperCase() || "C";
+    const prefix = (org.sector ?? "C").trim().charAt(0).toUpperCase() || "C";
     const periods = await payload.find({
       collection: "reporting-periods",
       where: { organisation: { equals: org.id } },
@@ -90,7 +83,6 @@ export async function POST() {
       cohortSize: stats.cohortSize,
     };
 
-    // Bypass denyAll create via overrideAccess
     if (existing.docs[0]) {
       await payload.update({
         collection: "benchmark-stats",
@@ -108,7 +100,6 @@ export async function POST() {
     written += 1;
   }
 
-  // Seed a demo cohort if nothing written (local empty DB)
   if (written === 0) {
     const demoValues = [
       80_000, 95_000, 110_000, 120_000, 130_000, 150_000, 180_000, 220_000,
@@ -131,10 +122,29 @@ export async function POST() {
     written = 1;
   }
 
-  return NextResponse.json({
-    ok: true,
+  return {
+    ok: true as const,
     written,
     skippedBelowMin: skipped,
     minCohortSize: MIN_COHORT_SIZE,
-  });
+  };
+}
+
+/**
+ * Recompute benchmark-stats from published org datapoints.
+ * Skips any cohort with n < 8 (never written). Cron may call with x-clearesg-cron.
+ */
+export async function POST(req: Request) {
+  const isCron = req.headers.get("x-clearesg-cron") === "1";
+  if (!isCron) {
+    const ctx = await getCurrentContext();
+    if (!ctx.activeOrg || (ctx.role !== "owner" && ctx.role !== "admin")) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+  } else if (isProductionRuntime() && !process.env.CRON_SECRET) {
+    // Cron path still allowed; outer /api/cron/benchmarks checks CRON_SECRET when set.
+  }
+
+  const result = await recompute();
+  return NextResponse.json(result);
 }
