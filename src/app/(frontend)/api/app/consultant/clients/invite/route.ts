@@ -2,7 +2,13 @@ import { getPayload } from "payload";
 import { NextResponse } from "next/server";
 
 import { getCurrentContext } from "@/lib/auth";
-import { assertCan, BillingDeniedError, billingDeniedResponse } from "@/lib/billing";
+import {
+  assertCan,
+  BillingDeniedError,
+  billingDeniedResponse,
+  limits,
+  resolveEffectivePlan,
+} from "@/lib/billing";
 import { writeAuditLog } from "@/lib/audit/write";
 import { deriveObligations } from "@/lib/obligations";
 import { sendTransactionalEmail } from "@/lib/email/send";
@@ -22,8 +28,13 @@ export async function POST(req: Request) {
       { status: 403 },
     );
   }
+
+  const effective = resolveEffectivePlan({
+    plan: ctx.activeOrg.plan,
+    subscriptionStatus: ctx.activeOrg.subscriptionStatus,
+  });
   try {
-    assertCan(ctx.activeOrg.plan, "consultant_cc");
+    assertCan(effective, "consultant_cc");
   } catch (err) {
     if (err instanceof BillingDeniedError) {
       return NextResponse.json(billingDeniedResponse(err), { status: 402 });
@@ -50,6 +61,29 @@ export async function POST(req: Request) {
     depth: 0,
     overrideAccess: true,
   });
+
+  const maxClients = limits(
+    resolveEffectivePlan({
+      plan: parent.plan,
+      subscriptionStatus: parent.subscriptionStatus,
+    }),
+  ).maxClients;
+  const children = await payload.find({
+    collection: "organisations",
+    where: { parentOrg: { equals: parent.id } },
+    limit: 1,
+    overrideAccess: true,
+  });
+  if (children.totalDocs >= maxClients) {
+    return NextResponse.json(
+      {
+        error: `Client seat limit reached (${maxClients}). Upgrade or archive a client.`,
+        code: "BILLING_DENIED",
+        upgradePath: "/dashboard/billing",
+      },
+      { status: 402 },
+    );
+  }
 
   const slugBase = body.clientName
     .trim()

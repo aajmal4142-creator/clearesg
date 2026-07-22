@@ -3,7 +3,7 @@ import { getPayload } from "payload";
 import { NextResponse } from "next/server";
 
 import { getCurrentContext } from "@/lib/auth";
-import { can } from "@/lib/billing";
+import { can, resolveEffectivePlan } from "@/lib/billing";
 import { ReportPdfDocument } from "@/lib/reports/ReportPdfDocument";
 import type { ReportSnapshot } from "@/lib/reports";
 import config from "@/payload.config";
@@ -43,7 +43,13 @@ export async function GET(_req: Request, ctx: Ctx) {
     return NextResponse.json({ error: "Report has no snapshot" }, { status: 409 });
   }
 
-  const watermarked = !can(auth.activeOrg.plan, "unwatermarked_pdf");
+  const watermarked = !can(
+    resolveEffectivePlan({
+      plan: auth.activeOrg.plan,
+      subscriptionStatus: auth.activeOrg.subscriptionStatus,
+    }),
+    "unwatermarked_pdf",
+  );
   const buffer = await renderToBuffer(
     <ReportPdfDocument snapshot={snapshot} watermarked={watermarked} />,
   );

@@ -1,11 +1,17 @@
 import { getPayload } from "payload";
 
-import { BillingDeniedError, limits, normalizePlan } from "@/lib/billing";
+import {
+  BillingDeniedError,
+  limits,
+  normalizePlan,
+  resolveEffectivePlan,
+} from "@/lib/billing";
 import config from "@/payload.config";
 
 export async function ensureOpenPeriod(
   organisationId: string,
   plan?: string | null,
+  subscriptionStatus?: string | null,
 ): Promise<string> {
   const payload = await getPayload({ config });
   const periods = await payload.find({
@@ -18,15 +24,16 @@ export async function ensureOpenPeriod(
   });
   if (periods.docs[0]) return periods.docs[0].id;
 
+  const effective = resolveEffectivePlan({ plan, subscriptionStatus });
   const all = await payload.find({
     collection: "reporting-periods",
     where: { organisation: { equals: organisationId } },
     limit: 1,
     overrideAccess: true,
   });
-  const max = limits(normalizePlan(plan)).maxPeriods;
+  const max = limits(effective).maxPeriods;
   if (all.totalDocs >= max) {
-    throw new BillingDeniedError(normalizePlan(plan), "unlimited_periods");
+    throw new BillingDeniedError(normalizePlan(effective), "unlimited_periods");
   }
 
   const year = new Date().getFullYear();

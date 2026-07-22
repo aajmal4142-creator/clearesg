@@ -3,9 +3,10 @@ import { NextResponse } from "next/server";
 
 import { getCurrentContext } from "@/lib/auth";
 import { appOrigin, getStripe, stripeConfigured } from "@/lib/billing";
+import { mayEnablePaidBilling, paidBillingDenial } from "@/lib/launch/gates";
 import config from "@/payload.config";
 
-/** Stripe Customer Billing Portal. */
+/** Stripe Customer Billing Portal — same WS0 gate as live Checkout. */
 export async function POST(req: Request) {
   const ctx = await getCurrentContext();
   if (!ctx.activeOrg) {
@@ -13,6 +14,10 @@ export async function POST(req: Request) {
   }
   if (ctx.role !== "owner" && ctx.role !== "admin") {
     return NextResponse.json({ error: "Admin required for billing" }, { status: 403 });
+  }
+
+  if (!mayEnablePaidBilling()) {
+    return NextResponse.json(paidBillingDenial(), { status: 403 });
   }
 
   if (!stripeConfigured()) {

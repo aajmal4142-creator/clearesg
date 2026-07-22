@@ -24,12 +24,21 @@ export function disclaimerReviewed(): boolean {
 }
 
 /**
- * In non-production, allow publish/checkout without sign-off so local demos work.
- * Production always requires the env flags.
+ * Live Stripe Checkout / Portal (real money) requires WS0 sign-off in every environment.
+ * Non-prod without sign-off must use stub / CLEARESG_DEV_BYPASS only — never charge.
  */
 export function mayEnablePaidBilling(): boolean {
-  if (!isProductionRuntime()) return true;
   return ws0SignedOff();
+}
+
+/** Real cohort publication — LAUNCH_DECISIONS #5 until CLEARESG_BENCHMARKS_LIVE=1. */
+export function mayPublishBenchmarkCohorts(): boolean {
+  return process.env.CLEARESG_BENCHMARKS_LIVE === "1";
+}
+
+/** Demo fabricated cohort — opt-in only, off by default. */
+export function maySeedBenchmarkDemo(): boolean {
+  return process.env.CLEARESG_BENCHMARK_DEMO === "1";
 }
 
 export function mayPublishReports(): boolean {

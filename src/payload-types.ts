@@ -698,6 +698,10 @@ export interface BenchmarkStat {
   p50: number;
   p75: number;
   cohortSize: number;
+  /**
+   * As-of timestamp for this cohort row.
+   */
+  computedAt?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1271,6 +1275,7 @@ export interface BenchmarkStatsSelect<T extends boolean = true> {
   p50?: T;
   p75?: T;
   cohortSize?: T;
+  computedAt?: T;
   updatedAt?: T;
   createdAt?: T;
 }

@@ -34,6 +34,7 @@ export type AuthContext = {
     onboardedAt: string | null;
     plan: string;
     subscriptionStatus: string;
+    benchmarkOptOut: boolean;
     brand: {
       primaryColor: string | null;
       domain: string | null;
@@ -110,6 +111,7 @@ async function resolveActiveOrg(
       onboardedAt: org.onboardedAt ? String(org.onboardedAt) : null,
       plan: org.plan ?? "free",
       subscriptionStatus: org.subscriptionStatus ?? "none",
+      benchmarkOptOut: Boolean(org.benchmarkOptOut),
       brand: {
         primaryColor: org.brand?.primaryColor ?? null,
         domain: org.brand?.domain ?? null,

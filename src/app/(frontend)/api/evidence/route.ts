@@ -5,7 +5,12 @@ import { NextResponse } from "next/server";
 
 import { writeAuditLog } from "@/lib/audit/write";
 import { getCurrentContext } from "@/lib/auth";
-import { BillingDeniedError, billingDeniedResponse, can } from "@/lib/billing";
+import {
+  BillingDeniedError,
+  billingDeniedResponse,
+  can,
+  resolveEffectivePlan,
+} from "@/lib/billing";
 import config from "@/payload.config";
 
 /**
@@ -23,11 +28,20 @@ export async function POST(req: Request) {
       { status: 403 },
     );
   }
-  if (!can(ctx.activeOrg.plan, "evidence_vault")) {
+  if (
+    !can(
+      resolveEffectivePlan({
+        plan: ctx.activeOrg.plan,
+        subscriptionStatus: ctx.activeOrg.subscriptionStatus,
+      }),
+      "evidence_vault",
+    )
+  ) {
     const err = new BillingDeniedError(
-      ctx.activeOrg.plan === "pro" || ctx.activeOrg.plan === "consultant"
-        ? ctx.activeOrg.plan
-        : "free",
+      resolveEffectivePlan({
+        plan: ctx.activeOrg.plan,
+        subscriptionStatus: ctx.activeOrg.subscriptionStatus,
+      }),
       "evidence_vault",
     );
     return NextResponse.json(billingDeniedResponse(err), { status: 402 });

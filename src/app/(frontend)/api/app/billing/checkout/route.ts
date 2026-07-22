@@ -1,6 +1,7 @@
 import { getPayload } from "payload";
 import { NextResponse } from "next/server";
 
+import { writeAuditLog } from "@/lib/audit/write";
 import { getCurrentContext } from "@/lib/auth";
 import {
   appOrigin,
@@ -19,7 +20,7 @@ import config from "@/payload.config";
 
 /**
  * Start Checkout for Pro or Consultant.
- * Paid LIVE requires WS0 sign-off (§17.2). Dev bypass only outside production.
+ * Live Stripe charge requires WS0. Without WS0: safe stub / DEV bypass only — never charges.
  */
 export async function POST(req: Request) {
   const ctx = await getCurrentContext();
@@ -38,95 +39,116 @@ export async function POST(req: Request) {
     );
   }
   const target = body.plan as Exclude<PlanId, "free">;
-
-  if (!mayEnablePaidBilling()) {
-    return NextResponse.json(paidBillingDenial(), { status: 403 });
-  }
-
   const origin = appOrigin(req);
   const payload = await getPayload({ config });
 
-  if (!stripeConfigured()) {
-    if (!devBypassAllowed()) {
+  // Live money path — gated
+  if (stripeConfigured() && mayEnablePaidBilling()) {
+    const stripe = getStripe();
+    const org = await payload.findByID({
+      collection: "organisations",
+      id: ctx.activeOrg.id,
+      depth: 0,
+      overrideAccess: true,
+    });
+
+    let customerId = org.stripeCustomerId ?? null;
+    if (!customerId) {
+      const customer = await stripe.customers.create({
+        email: ctx.user.email,
+        name: org.name,
+        metadata: {
+          organisationId: org.id,
+          organisationSlug: org.slug,
+        },
+      });
+      customerId = customer.id;
+      await payload.update({
+        collection: "organisations",
+        id: org.id,
+        data: { stripeCustomerId: customerId },
+        overrideAccess: true,
+      });
+    }
+
+    const priceId = stripePriceIdForPlan(target);
+    if (!priceId) {
       return NextResponse.json(
-        { error: "Stripe is not configured. Set STRIPE_SECRET_KEY." },
+        {
+          error: `Missing env ${target === "pro" ? "STRIPE_PRICE_PRO" : "STRIPE_PRICE_CONSULTANT"}`,
+        },
         { status: 503 },
       );
     }
-    await payload.update({
-      collection: "organisations",
-      id: ctx.activeOrg.id,
-      data: {
-        plan: target,
-        subscriptionStatus: "active",
-      },
-      overrideAccess: true,
-    });
-    return NextResponse.json({
-      ok: true,
-      mode: "dev_bypass",
-      url: `${origin}/dashboard/billing?upgraded=${target}`,
-    });
-  }
 
-  const stripe = getStripe();
-  const org = await payload.findByID({
-    collection: "organisations",
-    id: ctx.activeOrg.id,
-    depth: 0,
-    overrideAccess: true,
-  });
-
-  let customerId = org.stripeCustomerId ?? null;
-  if (!customerId) {
-    const customer = await stripe.customers.create({
-      email: ctx.user.email,
-      name: org.name,
+    const session = await stripe.checkout.sessions.create({
+      mode: "subscription",
+      customer: customerId,
+      line_items: [{ price: priceId, quantity: 1 }],
+      success_url: `${origin}/dashboard/billing?checkout=success`,
+      cancel_url: `${origin}/dashboard/billing?checkout=cancel`,
       metadata: {
         organisationId: org.id,
-        organisationSlug: org.slug,
+        plan: target,
+      },
+      subscription_data: {
+        metadata: {
+          organisationId: org.id,
+          plan: target,
+        },
       },
     });
-    customerId = customer.id;
-    await payload.update({
-      collection: "organisations",
-      id: org.id,
-      data: { stripeCustomerId: customerId },
-      overrideAccess: true,
-    });
+
+    if (!session.url) {
+      return NextResponse.json(
+        { error: "Checkout session missing URL" },
+        { status: 500 },
+      );
+    }
+
+    return NextResponse.json({ ok: true, mode: "stripe", url: session.url });
   }
 
-  const priceId = stripePriceIdForPlan(target);
-  if (!priceId) {
+  // Stripe keys present but WS0 unsigned → refuse charge path
+  if (stripeConfigured() && !mayEnablePaidBilling()) {
+    return NextResponse.json(paidBillingDenial(), { status: 403 });
+  }
+
+  // Safe stub / DEV bypass — never charges
+  if (!devBypassAllowed()) {
     return NextResponse.json(
       {
-        error: `Missing env ${target === "pro" ? "STRIPE_PRICE_PRO" : "STRIPE_PRICE_CONSULTANT"}`,
+        error:
+          "Live checkout is gated (docs/LAUNCH_DECISIONS.md). Set CLEARESG_DEV_BYPASS=1 for a non-charging local stub, or CLEARESG_WS0_SIGNED_OFF=1 for Stripe.",
+        code: "WS0_REQUIRED",
+        docs: "/docs/LAUNCH_DECISIONS.md",
       },
-      { status: 503 },
+      { status: 403 },
     );
   }
 
-  const session = await stripe.checkout.sessions.create({
-    mode: "subscription",
-    customer: customerId,
-    line_items: [{ price: priceId, quantity: 1 }],
-    success_url: `${origin}/dashboard/billing?checkout=success`,
-    cancel_url: `${origin}/dashboard/billing?checkout=cancel`,
-    metadata: {
-      organisationId: org.id,
+  const beforePlan = ctx.activeOrg.plan;
+  await payload.update({
+    collection: "organisations",
+    id: ctx.activeOrg.id,
+    data: {
       plan: target,
+      subscriptionStatus: "active",
     },
-    subscription_data: {
-      metadata: {
-        organisationId: org.id,
-        plan: target,
-      },
-    },
+    overrideAccess: true,
   });
-
-  if (!session.url) {
-    return NextResponse.json({ error: "Checkout session missing URL" }, { status: 500 });
-  }
-
-  return NextResponse.json({ ok: true, mode: "stripe", url: session.url });
+  await writeAuditLog(payload, {
+    organisationId: ctx.activeOrg.id,
+    actorId: ctx.user.id,
+    action: "billing.plan_changed",
+    entityType: "organisations",
+    entityId: ctx.activeOrg.id,
+    before: { plan: beforePlan },
+    after: { plan: target, mode: "dev_bypass" },
+  });
+  return NextResponse.json({
+    ok: true,
+    mode: "dev_bypass",
+    url: `${origin}/dashboard/billing?upgraded=${target}`,
+  });
 }

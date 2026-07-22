@@ -265,33 +265,22 @@ export async function reaggregateSupplierReported(
   await reaggregateScope3Contributions(payload, organisationId, periodId);
 }
 
+/**
+ * @deprecated Use billing-aware `ensureOpenPeriod` from `@/lib/org/period`.
+ * Kept as a thin wrapper that loads org plan/status so Free caps cannot be bypassed.
+ */
 export async function ensureOpenPeriod(
   payload: Payload,
   organisationId: string,
 ): Promise<string> {
-  const periods = await payload.find({
-    collection: "reporting-periods",
-    where: {
-      and: [{ organisation: { equals: organisationId } }, { status: { equals: "open" } }],
-    },
-    limit: 1,
+  const { ensureOpenPeriod: capped } = await import("@/lib/org/period");
+  const org = await payload.findByID({
+    collection: "organisations",
+    id: organisationId,
+    depth: 0,
     overrideAccess: true,
   });
-  if (periods.docs[0]) return periods.docs[0].id;
-
-  const year = new Date().getFullYear();
-  const period = await payload.create({
-    collection: "reporting-periods",
-    data: {
-      organisation: organisationId,
-      label: `FY${year}`,
-      startDate: `${year - 1}-04-01`,
-      endDate: `${year}-03-31`,
-      status: "open",
-    },
-    overrideAccess: true,
-  });
-  return period.id;
+  return capped(organisationId, org.plan, org.subscriptionStatus);
 }
 
 /** Ensure legacy org-level writes still set supplierKey sentinel. */

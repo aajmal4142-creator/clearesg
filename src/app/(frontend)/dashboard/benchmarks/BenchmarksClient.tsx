@@ -9,8 +9,10 @@ import { sectorLabel } from "@/lib/ui/displayLabels";
 type BenchmarkPayload =
   | {
       available: false;
-      reason: string;
+      reason?: string;
+      message?: string;
       minCohortSize: number;
+      benchmarkOptOut?: boolean;
     }
   | {
       available: true;
@@ -20,18 +22,29 @@ type BenchmarkPayload =
       p50: number;
       p75: number;
       cohortSize: number;
+      computedAt?: string | null;
       userValue: number | null;
       percentileRank: number | null;
       improve: Array<{ label: string; href: string }>;
+      benchmarkOptOut?: boolean;
     };
 
 function emptyBenchmarkBody(
   data: Extract<BenchmarkPayload, { available: false }>,
 ): string {
+  if (data.reason === "cohorts_not_published") {
+    return (
+      data.message ??
+      "Sector cohorts are not published yet. Mechanism is ready; live publication awaits consent sign-off."
+    );
+  }
   if (data.reason === "Forbidden") {
     return "This cohort is not available for your organisation yet.";
   }
-  return `Not enough organisations in your sector yet for a private comparison. We need at least ${data.minCohortSize} peers before percentiles appear.`;
+  return (
+    data.message ??
+    `Not enough peers yet. We need at least ${data.minCohortSize} organisations before percentiles appear.`
+  );
 }
 
 export function BenchmarksClient({
@@ -46,6 +59,31 @@ export function BenchmarksClient({
   const [statusTone, setStatusTone] = useState<"neutral" | "error" | "ok">("neutral");
   const canRecompute = role === "owner" || role === "admin";
   const showRecompute = canRecompute || role === null;
+
+  const [optOut, setOptOut] = useState(
+    "benchmarkOptOut" in initial ? Boolean(initial.benchmarkOptOut) : false,
+  );
+
+  async function toggleOptOut() {
+    const next = !optOut;
+    setStatusTone("neutral");
+    setStatus(next ? "Opting out…" : "Opting in…");
+    const res = await fetch("/api/app/benchmarks/opt-out", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ optOut: next }),
+    });
+    if (!res.ok) {
+      setStatusTone("error");
+      setStatus("Could not update benchmark preference");
+      return;
+    }
+    setOptOut(next);
+    setStatusTone("ok");
+    setStatus(
+      next ? "Opted out of cohort contribution" : "Opted in to cohort contribution",
+    );
+  }
 
   async function recompute() {
     setStatusTone("neutral");
@@ -102,8 +140,18 @@ export function BenchmarksClient({
         <div className="space-y-3 text-sm text-ink-muted">
           <p className="label-caps text-ink">Privacy</p>
           <p>
-            Opted-out organisations are excluded. Small cohorts never surface percentiles.
+            Opted-out organisations neither contribute nor appear. Small cohorts never
+            surface percentiles. No min/max peer values are shown.
           </p>
+          {canRecompute ? (
+            <button
+              type="button"
+              onClick={() => void toggleOptOut()}
+              className="border border-rule px-2 py-1 text-xs text-ink hover:border-rule-strong"
+            >
+              {optOut ? "Opt back in" : "Opt out of contribution"}
+            </button>
+          ) : null}
         </div>
       }
     >
@@ -118,6 +166,11 @@ export function BenchmarksClient({
               {data.metricKey} · {sectorLabel(data.sector)} · {data.cohortSize}{" "}
               organisations
             </p>
+            {data.computedAt ? (
+              <p className="label-caps mt-1 text-ink-muted">
+                As of {new Date(data.computedAt).toISOString().slice(0, 10)}
+              </p>
+            ) : null}
             <div className="mt-6 flex items-end gap-2">
               {(
                 [

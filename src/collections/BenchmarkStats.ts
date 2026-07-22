@@ -31,5 +31,10 @@ export const BenchmarkStats: CollectionConfig = {
     { name: "p50", type: "number", required: true },
     { name: "p75", type: "number", required: true },
     { name: "cohortSize", type: "number", required: true, min: 0 },
+    {
+      name: "computedAt",
+      type: "date",
+      admin: { description: "As-of timestamp for this cohort row." },
+    },
   ],
 };

@@ -1,5 +1,10 @@
 export { assertCan, BillingDeniedError, billingDeniedResponse, can, limits } from "./can";
 export {
+  isPlanFrozen,
+  resolveEffectivePlan,
+  type SubscriptionStatus,
+} from "./effectivePlan";
+export {
   isPlanId,
   normalizePlan,
   PLAN_LIMITS,

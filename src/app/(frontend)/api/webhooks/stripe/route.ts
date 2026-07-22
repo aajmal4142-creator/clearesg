@@ -2,6 +2,7 @@ import { getPayload } from "payload";
 import type { Stripe } from "stripe";
 import { NextResponse } from "next/server";
 
+import { writeAuditLog } from "@/lib/audit/write";
 import {
   getStripe,
   normalizePlan,
@@ -22,12 +23,32 @@ async function setOrgPlan(
   },
 ) {
   const payload = await getPayload({ config });
+  const before = await payload.findByID({
+    collection: "organisations",
+    id: organisationId,
+    depth: 0,
+    overrideAccess: true,
+  });
   await payload.update({
     collection: "organisations",
     id: organisationId,
     data,
     overrideAccess: true,
   });
+  if (data.plan && data.plan !== before.plan) {
+    await writeAuditLog(payload, {
+      organisationId,
+      action: "billing.plan_changed",
+      entityType: "organisations",
+      entityId: organisationId,
+      before: { plan: before.plan, subscriptionStatus: before.subscriptionStatus },
+      after: {
+        plan: data.plan,
+        subscriptionStatus: data.subscriptionStatus ?? before.subscriptionStatus,
+        source: "stripe_webhook",
+      },
+    });
+  }
 }
 
 async function orgIdFromCustomer(customerId: string): Promise<string | null> {

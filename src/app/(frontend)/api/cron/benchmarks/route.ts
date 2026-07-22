@@ -1,12 +1,25 @@
 import { NextResponse } from "next/server";
 
+import { isProductionRuntime } from "@/lib/launch/gates";
+
 /**
  * Vercel cron → benchmarks recompute.
- * Protect with CRON_SECRET Authorization: Bearer …
+ * CRON_SECRET required in production.
  */
 export async function GET(req: Request) {
   const secret = process.env.CRON_SECRET?.trim();
-  if (secret) {
+  if (isProductionRuntime()) {
+    if (!secret) {
+      return NextResponse.json(
+        { error: "CRON_SECRET required in production" },
+        { status: 503 },
+      );
+    }
+    const auth = req.headers.get("authorization");
+    if (auth !== `Bearer ${secret}`) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+  } else if (secret) {
     const auth = req.headers.get("authorization");
     if (auth !== `Bearer ${secret}`) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
