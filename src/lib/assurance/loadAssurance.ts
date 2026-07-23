@@ -7,6 +7,7 @@ import {
   type FreshnessResult,
 } from "@/lib/assurance";
 import type { FactorUsage } from "@/lib/calc/types";
+import { DATA_METRICS } from "@/lib/data";
 import type { ReportSnapshot } from "@/lib/reports";
 
 export type AssurancePayload = {
@@ -87,6 +88,9 @@ export async function loadAssurancePayload(
       });
     }
 
+    const factorRegistryKey =
+      DATA_METRICS.find((m) => m.key === dp.metricKey)?.emissionFactorKey ?? null;
+
     const lineage = buildFigureLineage({
       datapointId: dp.id,
       metricKey: dp.metricKey,
@@ -99,6 +103,7 @@ export async function loadAssurancePayload(
           ? dp.provenance
           : null,
       datapointFactorId: dp.factorId ?? null,
+      factorRegistryKey,
       datapointEvidenceIds: evidenceIds,
       evidenceDocs,
       factorsUsed,

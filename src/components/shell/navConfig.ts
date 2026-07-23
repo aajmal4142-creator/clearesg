@@ -2,6 +2,7 @@ import type { LucideIcon } from "lucide-react";
 import {
   BarChart3,
   BookOpen,
+  ClipboardCheck,
   ClipboardList,
   CreditCard,
   Database,
@@ -61,7 +62,7 @@ export function buildNavGroups(opts: {
 
   const assure: NavItem[] = [
     { href: "/dashboard/guide", label: "Guide", icon: BookOpen },
-    { href: "/dashboard/assurance", label: "Assurance", icon: ClipboardList },
+    { href: "/dashboard/assurance", label: "Assurance", icon: ClipboardCheck },
     { href: "/dashboard/audit", label: "Audit", icon: ShieldCheck },
     { href: "/dashboard/benchmarks", label: "Benchmarks", icon: BarChart3 },
   ];

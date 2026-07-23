@@ -218,14 +218,34 @@
 
   html {
     @apply antialiased;
+    height: 100%;
   }
 
   body {
+    min-height: 100%;
     background-color: var(--canvas);
     color: var(--ink);
     font-family: var(--font-inter-tight), system-ui, sans-serif;
     font-size: 1.0625rem;
     line-height: 1.65;
+  }
+
+  /*
+   * Dashboard shell owns the viewport. Tall overflow-y-auto content must not
+   * expand document scrollHeight / leave empty cream below the shell.
+   * overflow: clip (not hidden) — hidden still allows root scrolling in Chromium.
+   */
+  html:has([data-app-shell]) {
+    overflow: clip;
+    height: 100%;
+    overscroll-behavior: none;
+  }
+
+  html:has([data-app-shell]) body {
+    overflow: clip;
+    height: 100%;
+    min-height: 0;
+    overscroll-behavior: none;
   }
 
   .font-data {

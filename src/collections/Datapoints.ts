@@ -164,7 +164,8 @@ export const Datapoints: CollectionConfig = {
     {
       name: "supplierKey",
       type: "text",
-      required: true,
+      // Empty string is the no-supplier sentinel (Mongo unique index). Do not mark
+      // required — Payload treats "" as missing on required text fields.
       defaultValue: NO_SUPPLIER_KEY,
       index: true,
       admin: {

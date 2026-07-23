@@ -39,7 +39,11 @@ export async function GET() {
   const payload = await getPayload({ config });
   let periodId: string;
   try {
-    periodId = await ensureOpenPeriod(ctx.activeOrg.id, ctx.activeOrg.plan);
+    periodId = await ensureOpenPeriod(
+      ctx.activeOrg.id,
+      ctx.activeOrg.plan,
+      ctx.activeOrg.subscriptionStatus,
+    );
   } catch (err) {
     if (err instanceof BillingDeniedError) {
       return NextResponse.json(billingDeniedResponse(err), { status: 402 });
@@ -86,7 +90,11 @@ export async function PUT(req: Request) {
   const payload = await getPayload({ config });
   let periodId: string;
   try {
-    periodId = await ensureOpenPeriod(ctx.activeOrg.id, ctx.activeOrg.plan);
+    periodId = await ensureOpenPeriod(
+      ctx.activeOrg.id,
+      ctx.activeOrg.plan,
+      ctx.activeOrg.subscriptionStatus,
+    );
   } catch (err) {
     if (err instanceof BillingDeniedError) {
       return NextResponse.json(billingDeniedResponse(err), { status: 402 });

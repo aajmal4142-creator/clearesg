@@ -4,6 +4,7 @@ import { NextResponse } from "next/server";
 import { buildFigureLineage, evidenceFreshness } from "@/lib/assurance";
 import { getCurrentContext } from "@/lib/auth";
 import type { FactorUsage } from "@/lib/calc/types";
+import { DATA_METRICS } from "@/lib/data";
 import type { ReportSnapshot } from "@/lib/reports";
 import config from "@/payload.config";
 
@@ -99,6 +100,8 @@ export async function GET(_req: Request, { params }: Props) {
         ? dp.provenance
         : null,
     datapointFactorId: dp.factorId ?? null,
+    factorRegistryKey:
+      DATA_METRICS.find((m) => m.key === dp.metricKey)?.emissionFactorKey ?? null,
     datapointEvidenceIds: evidenceIds,
     evidenceDocs,
     factorsUsed,

@@ -20,15 +20,23 @@ export function AssuranceRoomView({
   figures,
   versionLabel,
   readOnlyToken,
+  sharePath,
 }: {
   snapshot: ReportSnapshot;
   figures: AssuranceFigure[];
   versionLabel: string;
   /** When set, this is the public /a/[token] surface. */
   readOnlyToken?: boolean;
+  /** Internal dashboard: path to the public Assurance Room link. */
+  sharePath?: string | null;
 }) {
   const body = (
-    <AssuranceBody snapshot={snapshot} figures={figures} versionLabel={versionLabel} />
+    <AssuranceBody
+      snapshot={snapshot}
+      figures={figures}
+      versionLabel={versionLabel}
+      sharePath={sharePath}
+    />
   );
 
   if (readOnlyToken) {
@@ -64,10 +72,12 @@ function AssuranceBody({
   snapshot,
   figures,
   versionLabel,
+  sharePath,
 }: {
   snapshot: ReportSnapshot;
   figures: AssuranceFigure[];
   versionLabel: string;
+  sharePath?: string | null;
 }) {
   return (
     <div className="space-y-8">
@@ -75,6 +85,20 @@ function AssuranceBody({
         Published snapshot {versionLabel}. Overall{" "}
         <Metric value={snapshot.scores.overall} size="sm" animate={false} /> ·{" "}
         <span className="font-data">{snapshot.factorsUsed.length}</span> pinned factors.
+        {sharePath ? (
+          <>
+            {" "}
+            ·{" "}
+            <a
+              className="text-ink underline-offset-2 hover:underline"
+              href={sharePath}
+              target="_blank"
+              rel="noreferrer"
+            >
+              Open auditor link
+            </a>
+          </>
+        ) : null}
       </p>
 
       <section>

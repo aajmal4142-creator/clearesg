@@ -103,7 +103,10 @@ export default async function RootLayout({
       className={`${interTight.variable} ${jetbrainsMono.variable} ${fraunces.variable} ${spaceGrotesk.variable} h-full`}
       suppressHydrationWarning
     >
-      <body className="flex min-h-full flex-col" suppressHydrationWarning>
+      <body
+        className="flex min-h-full flex-col overflow-x-hidden"
+        suppressHydrationWarning
+      >
         <NextTopLoader
           color="var(--accent)"
           height={2}

@@ -30,6 +30,8 @@ const ENTITY_TYPE_OPTIONS = [
   { value: "datapoints", label: "Datapoints" },
   { value: "reports", label: "Reports" },
   { value: "internal-data-requests", label: "Internal requests" },
+  { value: "evidence", label: "Evidence" },
+  { value: "materiality-assessments", label: "Materiality" },
   { value: "organisations", label: "Organisations" },
 ] as const;
 

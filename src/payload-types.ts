@@ -432,7 +432,7 @@ export interface Datapoint {
   /**
    * Sentinel unique-index key. Empty string = no supplier. Never null.
    */
-  supplierKey: string;
+  supplierKey?: string | null;
   /**
    * Pinned EmissionFactor id used when this value was derived
    */

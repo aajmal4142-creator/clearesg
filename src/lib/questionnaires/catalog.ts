@@ -28,7 +28,7 @@ export const ECOVADIS_LITE: QuestionnaireDef = {
     {
       id: "headcount",
       label: "Employees (FTE)",
-      metricKey: "headcount",
+      metricKey: "employees_total",
     },
     {
       id: "scope3_suppliers",

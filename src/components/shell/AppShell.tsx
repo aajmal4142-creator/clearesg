@@ -183,7 +183,10 @@ export function AppShell({
 
   if (focused) {
     return (
-      <div className="flex h-dvh flex-col overflow-hidden bg-canvas text-ink">
+      <div
+        data-app-shell
+        className="fixed inset-0 flex min-h-0 flex-col overflow-hidden bg-canvas text-ink"
+      >
         <header className="flex shrink-0 items-center justify-between border-b border-rule px-4 py-3">
           <Link href="/dashboard" className="label-caps text-ink">
             ClearESG
@@ -198,18 +201,23 @@ export function AppShell({
             <ThemeToggle />
           </div>
         </header>
-        <div className="min-h-0 flex-1 overflow-y-auto">{children}</div>
+        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
+          {children}
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="flex h-dvh overflow-hidden bg-canvas text-ink">
+    <div
+      data-app-shell
+      className="fixed inset-0 flex min-h-0 overflow-hidden bg-canvas text-ink"
+    >
       {/* Desktop sidebar — fixed height, nav scrolls inside */}
       <Assemble
         layer="chrome"
         as="aside"
-        className="relative z-30 hidden h-full shrink-0 flex-col overflow-hidden border-r border-rule bg-canvas lg:flex"
+        className="relative z-30 hidden h-full min-h-0 shrink-0 flex-col overflow-hidden border-r border-rule bg-canvas lg:flex"
         style={{ width }}
       >
         <RuleDraw accent onMount duration={0.35} className="w-full shrink-0" />
@@ -269,7 +277,9 @@ export function AppShell({
           </div>
         ) : null}
 
-        <div className="min-h-0 flex-1 overflow-y-auto">{children}</div>
+        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
+          {children}
+        </div>
       </div>
 
       <CommandPalette

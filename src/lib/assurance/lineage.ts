@@ -61,10 +61,15 @@ export function resolvePinnedFactor(input: {
   datapointFactorId?: string | null;
   /** Snapshot factorsUsed / report factorVersionsUsed pins. */
   factorsUsed: FactorUsage[];
-  /** Optional metricKey fallback only among pins (not registry). */
+  /** Datapoint metricKey (e.g. diesel_litres). */
   metricKey?: string;
+  /**
+   * Emission-factor registry key for this metric (e.g. diesel).
+   * Snapshot factorsUsed[].key is the registry key, not the metricKey.
+   */
+  factorRegistryKey?: string | null;
 }): { factor: PinnedFactor | null; reason: string | null } {
-  const { datapointFactorId, factorsUsed, metricKey } = input;
+  const { datapointFactorId, factorsUsed, metricKey, factorRegistryKey } = input;
   if (datapointFactorId) {
     const hit = factorsUsed.find((f) => f.factorId === datapointFactorId);
     if (hit) {
@@ -84,8 +89,9 @@ export function resolvePinnedFactor(input: {
       reason: "Pinned factorId not found in this report snapshot",
     };
   }
-  if (metricKey) {
-    const hit = factorsUsed.find((f) => f.key === metricKey);
+  const keysToTry = [factorRegistryKey, metricKey].filter((k): k is string => Boolean(k));
+  for (const key of keysToTry) {
+    const hit = factorsUsed.find((f) => f.key === key);
     if (hit) {
       return {
         factor: {
@@ -112,6 +118,8 @@ export function buildFigureLineage(input: {
   quality: string;
   provenance?: DatapointProvenance | null;
   datapointFactorId?: string | null;
+  /** Registry key used in snapshot.factorsUsed (e.g. diesel for diesel_litres). */
+  factorRegistryKey?: string | null;
   datapointEvidenceIds: string[];
   evidenceDocs: Array<{
     id: string;
@@ -133,6 +141,7 @@ export function buildFigureLineage(input: {
     datapointFactorId: input.datapointFactorId,
     factorsUsed: input.factorsUsed,
     metricKey: input.metricKey,
+    factorRegistryKey: input.factorRegistryKey,
   });
   const evidence: LineageEvidence[] = input.evidenceDocs.map((e) => ({
     id: e.id,

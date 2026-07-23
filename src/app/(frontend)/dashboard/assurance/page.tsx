@@ -5,6 +5,7 @@ import { AssuranceRoomView } from "@/components/assurance/AssuranceRoomView";
 import { PageFrame } from "@/components/shell/PageFrame";
 import { getCurrentContext } from "@/lib/auth";
 import { loadAssurancePayload } from "@/lib/assurance/loadAssurance";
+import { ensureAssuranceToken } from "@/lib/reports/ensureAssuranceToken";
 import config from "@/payload.config";
 
 export default async function AssuranceDashboardPage() {
@@ -49,11 +50,14 @@ export default async function AssuranceDashboardPage() {
     );
   }
 
+  const assuranceToken = await ensureAssuranceToken(payload, report);
+
   return (
     <AssuranceRoomView
       snapshot={data.snapshot}
       figures={data.figures}
       versionLabel={data.versionLabel}
+      sharePath={assuranceToken ? `/a/${assuranceToken}` : null}
     />
   );
 }

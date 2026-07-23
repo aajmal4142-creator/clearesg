@@ -78,6 +78,15 @@ describe("resolvePinnedFactor", () => {
     expect(r.reason).toBeNull();
   });
 
+  it("resolves by factor registry key when metricKey differs", () => {
+    const r = resolvePinnedFactor({
+      factorsUsed: pins,
+      metricKey: "diesel_litres",
+      factorRegistryKey: "grid_electricity",
+    });
+    expect(r.factor?.key).toBe("grid_electricity");
+  });
+
   it("never invents a factor when pin missing", () => {
     const r = resolvePinnedFactor({
       datapointFactorId: "missing",

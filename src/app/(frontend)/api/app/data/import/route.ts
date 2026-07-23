@@ -95,7 +95,11 @@ export async function GET(req: Request) {
 
   let periodLabel = "";
   try {
-    const periodId = await ensureOpenPeriod(ctx.activeOrg!.id, ctx.activeOrg!.plan);
+    const periodId = await ensureOpenPeriod(
+      ctx.activeOrg!.id,
+      ctx.activeOrg!.plan,
+      ctx.activeOrg!.subscriptionStatus,
+    );
     const payload = await getPayload({ config });
     const period = await payload.findByID({
       collection: "reporting-periods",
@@ -158,7 +162,11 @@ export async function POST(req: Request) {
 
   let periodId: string;
   try {
-    periodId = await ensureOpenPeriod(ctx.activeOrg!.id, ctx.activeOrg!.plan);
+    periodId = await ensureOpenPeriod(
+      ctx.activeOrg!.id,
+      ctx.activeOrg!.plan,
+      ctx.activeOrg!.subscriptionStatus,
+    );
   } catch (err) {
     if (err instanceof BillingDeniedError) {
       return NextResponse.json(billingDeniedResponse(err), { status: 402 });

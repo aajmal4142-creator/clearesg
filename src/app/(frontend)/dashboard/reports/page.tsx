@@ -5,6 +5,7 @@ import { ReportsClient } from "@/app/(frontend)/dashboard/reports/ReportsClient"
 import { getCurrentContext } from "@/lib/auth";
 import { BillingDeniedError } from "@/lib/billing";
 import { ensureOpenPeriod } from "@/lib/org/period";
+import { ensureAssuranceToken } from "@/lib/reports/ensureAssuranceToken";
 import config from "@/payload.config";
 
 export default async function ReportsPage() {
@@ -15,7 +16,11 @@ export default async function ReportsPage() {
   const payload = await getPayload({ config });
   let periodId: string;
   try {
-    periodId = await ensureOpenPeriod(ctx.activeOrg.id, ctx.activeOrg.plan);
+    periodId = await ensureOpenPeriod(
+      ctx.activeOrg.id,
+      ctx.activeOrg.plan,
+      ctx.activeOrg.subscriptionStatus,
+    );
   } catch (err) {
     if (err instanceof BillingDeniedError) redirect("/dashboard/billing");
     throw err;
@@ -35,19 +40,19 @@ export default async function ReportsPage() {
 
   const canPublish = ctx.role === "owner" || ctx.role === "admin";
 
-  return (
-    <ReportsClient
-      canPublish={canPublish}
-      initial={reports.docs.map((r) => ({
-        id: r.id,
-        version: r.version,
-        status: r.status,
-        framework: r.framework,
-        shareToken: r.shareToken ?? null,
-        publishedAt: r.publishedAt ? String(r.publishedAt) : null,
-        scores: r.scores,
-        viewCount: r.viewCount ?? 0,
-      }))}
-    />
+  const initial = await Promise.all(
+    reports.docs.map(async (r) => ({
+      id: r.id,
+      version: r.version,
+      status: r.status,
+      framework: r.framework,
+      shareToken: r.shareToken ?? null,
+      assuranceToken: await ensureAssuranceToken(payload, r),
+      publishedAt: r.publishedAt ? String(r.publishedAt) : null,
+      scores: r.scores,
+      viewCount: r.viewCount ?? 0,
+    })),
   );
+
+  return <ReportsClient canPublish={canPublish} initial={initial} />;
 }

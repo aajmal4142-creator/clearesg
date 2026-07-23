@@ -28,7 +28,11 @@ export async function POST(req: Request) {
   }
 
   const payload = await getPayload({ config });
-  const periodId = await ensureOpenPeriod(ctx.activeOrg.id, ctx.activeOrg.plan);
+  const periodId = await ensureOpenPeriod(
+    ctx.activeOrg.id,
+    ctx.activeOrg.plan,
+    ctx.activeOrg.subscriptionStatus,
+  );
 
   const responses = [];
   for (const field of def.fields) {

@@ -12,6 +12,7 @@ type ReportRow = {
   status: string;
   framework: string;
   shareToken: string | null;
+  assuranceToken: string | null;
   publishedAt: string | null;
   scores?: { overall?: number | null } | null;
   viewCount: number;
@@ -70,6 +71,7 @@ export function ReportsClient({
       const data = (await res.json().catch(() => ({}))) as {
         error?: string;
         shareUrl?: string;
+        assuranceUrl?: string;
         version?: number;
         diff?: Array<{ path: string; from: string; to: string }>;
       };
@@ -93,7 +95,9 @@ export function ReportsClient({
           /* ignore */
         }
         setStatus(
-          `Published v${data.version}. Living report link copied. Next: share it with your buyer or bank.`,
+          data.assuranceUrl
+            ? `Published v${data.version}. Living report link copied. Assurance Room: ${data.assuranceUrl}`
+            : `Published v${data.version}. Living report link copied. Next: share it with your buyer or bank.`,
         );
         try {
           window.localStorage.setItem("clearesg-first-share", "1");
@@ -266,6 +270,16 @@ export function ReportsClient({
                           rel="noreferrer"
                         >
                           Open live report
+                        </a>
+                      ) : null}
+                      {r.assuranceToken ? (
+                        <a
+                          className="text-ink underline-offset-2 hover:underline"
+                          href={`/a/${r.assuranceToken}`}
+                          target="_blank"
+                          rel="noreferrer"
+                        >
+                          Assurance Room
                         </a>
                       ) : null}
                       <a

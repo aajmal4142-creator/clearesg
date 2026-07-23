@@ -5,8 +5,8 @@ const PLAIN: Record<string, { need: string; action: string }> = {
     need: "Need last period’s electricity bill (kWh).",
     action: "Enter electricity",
   },
-  natural_gas_kwh: {
-    need: "Need natural gas use for the period.",
+  natural_gas_m3: {
+    need: "Need natural gas use (m³) for the period.",
     action: "Enter gas",
   },
   diesel_litres: {
@@ -17,25 +17,17 @@ const PLAIN: Record<string, { need: string; action: string }> = {
     need: "Need petrol litres used in the period.",
     action: "Enter petrol",
   },
-  headcount: {
+  employees_total: {
     need: "Need headcount (FTE) for the period.",
     action: "Confirm headcount",
-  },
-  revenue: {
-    need: "Need revenue for intensity metrics.",
-    action: "Enter revenue",
-  },
-  water_m3: {
-    need: "Need water use in cubic metres.",
-    action: "Enter water",
-  },
-  waste_tonnes: {
-    need: "Need waste tonnage for the period.",
-    action: "Enter waste",
   },
   business_travel_km: {
     need: "Need business travel kilometres.",
     action: "Enter travel",
+  },
+  supplier_spend_total: {
+    need: "Need total supplier spend for the period.",
+    action: "Enter supplier spend",
   },
   supplier_reported_tco2e: {
     need: "Need supplier emissions (or send requests).",

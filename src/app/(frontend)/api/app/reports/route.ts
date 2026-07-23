@@ -9,6 +9,7 @@ import { BillingDeniedError, billingDeniedResponse } from "@/lib/billing";
 import { mayPublishReports, publishDenial } from "@/lib/launch/gates";
 import { ensureOpenPeriod } from "@/lib/org/period";
 import { buildReportSnapshot, diffSnapshots, type ReportSnapshot } from "@/lib/reports";
+import { ensureAssuranceToken } from "@/lib/reports/ensureAssuranceToken";
 import { recordJourneyEvent } from "@/lib/telemetry/journey";
 import config from "@/payload.config";
 
@@ -30,7 +31,11 @@ export async function GET() {
   }
   return withPeriod(async () => {
     const payload = await getPayload({ config });
-    const periodId = await ensureOpenPeriod(ctx.activeOrg!.id, ctx.activeOrg!.plan);
+    const periodId = await ensureOpenPeriod(
+      ctx.activeOrg!.id,
+      ctx.activeOrg!.plan,
+      ctx.activeOrg!.subscriptionStatus,
+    );
     const reports = await payload.find({
       collection: "reports",
       where: {
@@ -46,16 +51,19 @@ export async function GET() {
 
     return NextResponse.json({
       periodId,
-      reports: reports.docs.map((r) => ({
-        id: r.id,
-        version: r.version,
-        status: r.status,
-        framework: r.framework,
-        shareToken: r.shareToken ?? null,
-        publishedAt: r.publishedAt ?? null,
-        scores: r.scores,
-        viewCount: r.viewCount ?? 0,
-      })),
+      reports: await Promise.all(
+        reports.docs.map(async (r) => ({
+          id: r.id,
+          version: r.version,
+          status: r.status,
+          framework: r.framework,
+          shareToken: r.shareToken ?? null,
+          assuranceToken: await ensureAssuranceToken(payload, r),
+          publishedAt: r.publishedAt ?? null,
+          scores: r.scores,
+          viewCount: r.viewCount ?? 0,
+        })),
+      ),
     });
   });
 }
@@ -85,7 +93,11 @@ export async function POST(req: Request) {
 
   return withPeriod(async () => {
     const payload = await getPayload({ config });
-    const periodId = await ensureOpenPeriod(ctx.activeOrg!.id, ctx.activeOrg!.plan);
+    const periodId = await ensureOpenPeriod(
+      ctx.activeOrg!.id,
+      ctx.activeOrg!.plan,
+      ctx.activeOrg!.subscriptionStatus,
+    );
 
     const requireApproved = body.requireApproved === true;
     if (requireApproved) {

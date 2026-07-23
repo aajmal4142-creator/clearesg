@@ -84,7 +84,11 @@ export async function POST(req: Request) {
   }
 
   const payload = await getPayload({ config });
-  const periodId = await ensureOpenPeriod(ctx.activeOrg.id, ctx.activeOrg.plan);
+  const periodId = await ensureOpenPeriod(
+    ctx.activeOrg.id,
+    ctx.activeOrg.plan,
+    ctx.activeOrg.subscriptionStatus,
+  );
 
   const created = await payload.create({
     collection: "internal-data-requests",
