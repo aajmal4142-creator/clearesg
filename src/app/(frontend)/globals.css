@@ -18,6 +18,8 @@
   --accent: #7a2e2e;
   --accent-hover: #8f3838;
   --accent-quiet: color-mix(in srgb, #7a2e2e 8%, transparent);
+  --on-accent: #fbf9f5;
+  --brand-secondary: #6b635a;
 
   /* Data — louder than chrome; light theme values (4.5:1 on --canvas) */
   --signal: #0e7c4a;
@@ -146,6 +148,8 @@
   --color-accent: var(--accent);
   --color-accent-hover: var(--accent-hover);
   --color-accent-quiet: var(--accent-quiet);
+  --color-on-accent: var(--on-accent);
+  --color-brand-secondary: var(--brand-secondary);
   --color-signal: var(--signal);
   --color-amber: var(--amber);
   --color-rust: var(--rust);
@@ -225,7 +229,7 @@
     min-height: 100%;
     background-color: var(--canvas);
     color: var(--ink);
-    font-family: var(--font-inter-tight), system-ui, sans-serif;
+    font-family: var(--font-sans), system-ui, sans-serif;
     font-size: 1.0625rem;
     line-height: 1.65;
   }
@@ -263,11 +267,11 @@
   }
 
   .font-display {
-    font-family: var(--font-fraunces), Georgia, serif;
+    font-family: var(--font-display), Georgia, serif;
   }
 
   .display-40 {
-    font-family: var(--font-fraunces), Georgia, serif;
+    font-family: var(--font-display), Georgia, serif;
     font-size: 40px;
     line-height: 1.1;
     letter-spacing: -0.01em;
@@ -278,7 +282,7 @@
   }
 
   .display-56 {
-    font-family: var(--font-fraunces), Georgia, serif;
+    font-family: var(--font-display), Georgia, serif;
     font-size: 56px;
     line-height: 1.05;
     letter-spacing: -0.02em;
@@ -289,7 +293,7 @@
   }
 
   .display-80 {
-    font-family: var(--font-fraunces), Georgia, serif;
+    font-family: var(--font-display), Georgia, serif;
     font-size: clamp(2.75rem, 6vw, 5rem);
     line-height: 1.02;
     letter-spacing: -0.03em;

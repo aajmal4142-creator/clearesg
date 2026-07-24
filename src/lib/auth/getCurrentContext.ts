@@ -5,6 +5,14 @@ import { getPayload } from "payload";
 import { cache } from "react";
 
 import type { MembershipRole } from "@/lib/access/membership";
+import {
+  BRAND_COOKIE,
+  brandCookieOptions,
+  brandingToCookiePayload,
+  resolveOrgBranding,
+  serializeBrandCookie,
+  type OrgBranding,
+} from "@/lib/branding";
 import { devBypassAllowed } from "@/lib/launch/gates";
 import config from "@/payload.config";
 
@@ -38,6 +46,8 @@ export type AuthContext = {
     brand: {
       primaryColor: string | null;
       domain: string | null;
+      /** Full dashboard branding (settings + legacy fallback). */
+      branding: OrgBranding;
     };
   } | null;
   role: MembershipRole | null;
@@ -95,9 +105,21 @@ async function resolveActiveOrg(
   const org = await payload.findByID({
     collection: "organisations",
     id: activeOrgId,
-    depth: 0,
+    depth: 1,
     overrideAccess: true,
   });
+
+  const branding = resolveOrgBranding(org);
+
+  try {
+    jar.set(
+      BRAND_COOKIE,
+      serializeBrandCookie(brandingToCookiePayload(activeOrgId, branding)),
+      brandCookieOptions,
+    );
+  } catch {
+    /* cookies() may be read-only outside Server Actions / Route Handlers in some contexts */
+  }
 
   return {
     activeOrg: {
@@ -113,8 +135,9 @@ async function resolveActiveOrg(
       subscriptionStatus: org.subscriptionStatus ?? "none",
       benchmarkOptOut: Boolean(org.benchmarkOptOut),
       brand: {
-        primaryColor: org.brand?.primaryColor ?? null,
-        domain: org.brand?.domain ?? null,
+        primaryColor: branding.primaryColor,
+        domain: branding.domain,
+        branding,
       },
     },
     role: memberships.find((m) => m.organisationId === activeOrgId)?.role ?? null,

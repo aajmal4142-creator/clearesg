@@ -9,11 +9,11 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        default: "bg-accent text-canvas hover:bg-accent-hover",
+        default: "bg-accent text-on-accent hover:bg-accent-hover",
         secondary: "border border-rule bg-transparent text-ink hover:border-rule-strong",
         outline: "border border-rule bg-transparent text-ink hover:border-rule-strong",
         destructive:
-          "border border-rust bg-transparent text-rust hover:bg-rust hover:text-canvas",
+          "border border-rust bg-transparent text-rust hover:bg-rust hover:text-on-accent",
         ghost: "text-ink-muted hover:text-ink",
         link: "editorial-link text-accent",
       },

@@ -1,8 +1,17 @@
-/** Injects white-label CSS variables — overrides --accent only, never data colours. */
-export function BrandVars({ primaryColor }: { primaryColor: string | null }) {
-  if (!primaryColor || !/^#[0-9A-Fa-f]{6}$/.test(primaryColor)) {
-    return null;
-  }
-  const css = `:root, [data-theme] { --accent: ${primaryColor}; --accent-hover: ${primaryColor}; --accent-quiet: color-mix(in srgb, ${primaryColor} 8%, transparent); }`;
+import {
+  brandingToStyleSheet,
+  brandingToCssVars,
+  type OrgBranding,
+} from "@/lib/branding";
+
+/**
+ * Injects org dashboard branding CSS variables.
+ * Scoped via [data-app-shell] — never touches marketing frontend.
+ * Does not override data colours (--signal, --amber, --rust, --cobalt).
+ */
+export function BrandVars({ branding }: { branding: Partial<OrgBranding> | null }) {
+  const vars = brandingToCssVars(branding);
+  const css = brandingToStyleSheet(vars);
+  if (!css) return null;
   return <style dangerouslySetInnerHTML={{ __html: css }} />;
 }

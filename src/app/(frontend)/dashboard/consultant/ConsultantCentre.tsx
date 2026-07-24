@@ -129,7 +129,10 @@ export function ConsultantCentre({
       note("Brand save failed. Check the colour format and try again.", "error");
       return;
     }
-    note("Brand saved — refresh to see portal colours", "ok");
+    note(
+      "Brand saved — refresh to see colours, or open Settings for full branding",
+      "ok",
+    );
   }
 
   return (
@@ -170,9 +173,15 @@ export function ConsultantCentre({
         <div className="space-y-4 text-sm text-ink-muted">
           <p className="label-caps text-ink">White-label</p>
           <p>
-            Accent colour injects via BrandVars for client portals. Leave blank to keep
-            the ClearESG default accent.
+            Dashboard colours, font, and logo live under Account → Settings. Custom domain
+            still saves here for consultancies on the consultant plan.
           </p>
+          <a
+            href="/dashboard/settings"
+            className="inline-block text-sm text-accent underline-offset-2 hover:underline"
+          >
+            Open Settings
+          </a>
           <p className="label-caps text-ink">Billing</p>
           <p>
             Consultant €199/mo includes 10 clients; +€15/client after (Phase 12 Stripe).

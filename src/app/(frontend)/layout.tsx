@@ -1,7 +1,13 @@
 import { ClerkProvider } from "@clerk/nextjs";
 import type { Metadata } from "next";
 import { cookies } from "next/headers";
-import { Fraunces, Inter_Tight, JetBrains_Mono, Space_Grotesk } from "next/font/google";
+import {
+  Fraunces,
+  Inter_Tight,
+  JetBrains_Mono,
+  Plus_Jakarta_Sans,
+  Space_Grotesk,
+} from "next/font/google";
 import NextTopLoader from "nextjs-toploader";
 
 import { isTheme, type Theme } from "@/lib/theme";
@@ -10,6 +16,13 @@ import "./globals.css";
 
 const interTight = Inter_Tight({
   variable: "--font-inter-tight",
+  subsets: ["latin"],
+  display: "swap",
+  preload: true,
+});
+
+const plusJakarta = Plus_Jakarta_Sans({
+  variable: "--font-plus-jakarta",
   subsets: ["latin"],
   display: "swap",
   preload: true,
@@ -100,7 +113,7 @@ export default async function RootLayout({
       lang="en"
       data-theme={theme}
       style={{ colorScheme: theme === "dark" ? "dark" : "light" }}
-      className={`${interTight.variable} ${jetbrainsMono.variable} ${fraunces.variable} ${spaceGrotesk.variable} h-full`}
+      className={`${interTight.variable} ${plusJakarta.variable} ${jetbrainsMono.variable} ${fraunces.variable} ${spaceGrotesk.variable} h-full`}
       suppressHydrationWarning
     >
       <body

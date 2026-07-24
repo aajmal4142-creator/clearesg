@@ -226,9 +226,35 @@ export interface Organisation {
    * Consultancy parent — one level deep only
    */
   parentOrg?: (string | null) | Organisation;
+  /**
+   * Legacy white-label fields — prefer settings.branding. Kept for read fallback.
+   */
   brand?: {
     logo?: (string | null) | Media;
     primaryColor?: string | null;
+    domain?: string | null;
+  };
+  settings?: {
+    branding?: {
+      logo?: (string | null) | Media;
+      /**
+       * Dashboard primary #RRGGBB → --accent
+       */
+      primaryColor?: string | null;
+      /**
+       * Dashboard secondary #RRGGBB
+       */
+      secondaryColor?: string | null;
+      fontFamily?: ('inter_tight' | 'plus_jakarta' | 'fraunces' | 'space_grotesk') | null;
+      /**
+       * Org default when the user has no personal theme cookie
+       */
+      defaultMode?: ('light' | 'dark') | null;
+      radius?: ('sharp' | 'default' | 'soft') | null;
+    };
+    /**
+     * Custom white-label host (consultant entitlement)
+     */
     domain?: string | null;
   };
   stripeCustomerId?: string | null;
@@ -953,6 +979,21 @@ export interface OrganisationsSelect<T extends boolean = true> {
     | {
         logo?: T;
         primaryColor?: T;
+        domain?: T;
+      };
+  settings?:
+    | T
+    | {
+        branding?:
+          | T
+          | {
+              logo?: T;
+              primaryColor?: T;
+              secondaryColor?: T;
+              fontFamily?: T;
+              defaultMode?: T;
+              radius?: T;
+            };
         domain?: T;
       };
   stripeCustomerId?: T;

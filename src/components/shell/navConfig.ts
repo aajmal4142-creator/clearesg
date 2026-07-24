@@ -10,6 +10,7 @@ import {
   Gauge,
   Inbox,
   ListChecks,
+  Settings,
   ShieldCheck,
   Target,
   Truck,
@@ -68,6 +69,7 @@ export function buildNavGroups(opts: {
   ];
 
   const account: NavItem[] = [
+    { href: "/dashboard/settings", label: "Settings", icon: Settings },
     { href: "/dashboard/billing", label: "Billing", icon: CreditCard },
   ];
   if (!opts.onboarded) {

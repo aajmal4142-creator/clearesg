@@ -1,7 +1,16 @@
+import { getPayload } from "payload";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 
 import { ACTIVE_ORG_COOKIE, getCurrentContext } from "@/lib/auth";
+import {
+  BRAND_COOKIE,
+  brandCookieOptions,
+  brandingToCookiePayload,
+  resolveOrgBranding,
+  serializeBrandCookie,
+} from "@/lib/branding";
+import config from "@/payload.config";
 
 export async function POST(req: Request) {
   const body = (await req.json()) as { organisationId?: string };
@@ -25,6 +34,24 @@ export async function POST(req: Request) {
     secure: process.env.NODE_ENV === "production",
     path: "/",
   });
+
+  try {
+    const payload = await getPayload({ config });
+    const org = await payload.findByID({
+      collection: "organisations",
+      id: body.organisationId,
+      depth: 1,
+      overrideAccess: true,
+    });
+    const branding = resolveOrgBranding(org);
+    jar.set(
+      BRAND_COOKIE,
+      serializeBrandCookie(brandingToCookiePayload(body.organisationId, branding)),
+      brandCookieOptions,
+    );
+  } catch {
+    /* brand cookie is best-effort; active org still switched */
+  }
 
   return NextResponse.json({ ok: true });
 }

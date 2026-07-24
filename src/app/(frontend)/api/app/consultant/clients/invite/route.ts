@@ -58,7 +58,7 @@ export async function POST(req: Request) {
   const parent = await payload.findByID({
     collection: "organisations",
     id: ctx.activeOrg.id,
-    depth: 0,
+    depth: 1,
     overrideAccess: true,
   });
 
@@ -93,6 +93,15 @@ export async function POST(req: Request) {
     .slice(0, 40);
   const slug = `${slugBase}-${Date.now().toString(36)}`;
 
+  const parentBranding = parent.settings?.branding ?? parent.brand;
+  const parentDomain = parent.settings?.domain ?? parent.brand?.domain;
+  const parentLogo =
+    typeof parentBranding?.logo === "object" && parentBranding?.logo !== null
+      ? parentBranding.logo.id
+      : (parentBranding?.logo ?? undefined);
+  const parentPrimary =
+    parent.settings?.branding?.primaryColor ?? parent.brand?.primaryColor ?? undefined;
+
   const child = await payload.create({
     collection: "organisations",
     data: {
@@ -103,11 +112,24 @@ export async function POST(req: Request) {
       sector: body.sector ?? parent.sector,
       country: body.country ?? parent.country ?? "IN",
       plan: "free",
-      brand: parent.brand
+      brand: parentBranding
         ? {
-            primaryColor: parent.brand.primaryColor,
-            domain: parent.brand.domain,
-            logo: parent.brand.logo,
+            primaryColor: parentPrimary,
+            domain: parentDomain ?? undefined,
+            logo: parentLogo,
+          }
+        : undefined,
+      settings: parentBranding
+        ? {
+            branding: {
+              primaryColor: parentPrimary,
+              secondaryColor: parent.settings?.branding?.secondaryColor ?? undefined,
+              fontFamily: parent.settings?.branding?.fontFamily ?? undefined,
+              defaultMode: parent.settings?.branding?.defaultMode ?? undefined,
+              radius: parent.settings?.branding?.radius ?? undefined,
+              logo: parentLogo,
+            },
+            domain: parentDomain ?? undefined,
           }
         : undefined,
     },

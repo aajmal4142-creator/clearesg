@@ -85,10 +85,72 @@ export const Organisations: CollectionConfig = {
     {
       name: "brand",
       type: "group",
+      admin: {
+        description:
+          "Legacy white-label fields — prefer settings.branding. Kept for read fallback.",
+      },
       fields: [
         { name: "logo", type: "upload", relationTo: "media" },
         { name: "primaryColor", type: "text" },
         { name: "domain", type: "text" },
+      ],
+    },
+    {
+      name: "settings",
+      type: "group",
+      fields: [
+        {
+          name: "branding",
+          type: "group",
+          fields: [
+            { name: "logo", type: "upload", relationTo: "media" },
+            {
+              name: "primaryColor",
+              type: "text",
+              admin: { description: "Dashboard primary #RRGGBB → --accent" },
+            },
+            {
+              name: "secondaryColor",
+              type: "text",
+              admin: { description: "Dashboard secondary #RRGGBB" },
+            },
+            {
+              name: "fontFamily",
+              type: "select",
+              options: [
+                { label: "Modern sans", value: "inter_tight" },
+                { label: "Friendly sans", value: "plus_jakarta" },
+                { label: "Editorial serif", value: "fraunces" },
+                { label: "Geometric sans", value: "space_grotesk" },
+              ],
+            },
+            {
+              name: "defaultMode",
+              type: "select",
+              options: [
+                { label: "Light", value: "light" },
+                { label: "Dark", value: "dark" },
+              ],
+              admin: {
+                description: "Org default when the user has no personal theme cookie",
+              },
+            },
+            {
+              name: "radius",
+              type: "select",
+              options: [
+                { label: "Sharp", value: "sharp" },
+                { label: "Default", value: "default" },
+                { label: "Soft", value: "soft" },
+              ],
+            },
+          ],
+        },
+        {
+          name: "domain",
+          type: "text",
+          admin: { description: "Custom white-label host (consultant entitlement)" },
+        },
       ],
     },
     { name: "stripeCustomerId", type: "text", admin: { readOnly: true } },

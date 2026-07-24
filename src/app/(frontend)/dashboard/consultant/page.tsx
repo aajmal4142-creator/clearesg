@@ -103,7 +103,10 @@ export default async function ConsultantPage() {
         plan: ctx.activeOrg.plan,
         clientCount: rows.length,
         clientCap: ctx.activeOrg.plan === "consultant" ? 10 : 3,
-        brand: ctx.activeOrg.brand,
+        brand: {
+          primaryColor: ctx.activeOrg.brand.primaryColor,
+          domain: ctx.activeOrg.brand.domain,
+        },
       }}
       templates={SECTOR_TEMPLATES}
       canWrite={ctx.role !== "viewer" && ctx.role !== null}

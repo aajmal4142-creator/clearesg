@@ -26,6 +26,7 @@ export type AppShellProps = {
   onboarded: boolean;
   badges?: NavBadges;
   activeOrgName?: string | null;
+  logoUrl?: string | null;
 };
 
 function initials(name: string): string {
@@ -52,6 +53,7 @@ export function AppShell({
   onboarded,
   badges = { requests: 0, questionnaires: 0 },
   activeOrgName,
+  logoUrl = null,
 }: AppShellProps) {
   const { collapsed, width, dragging, toggle, onDragStart } = useSidebarChrome();
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -115,13 +117,23 @@ export function AppShell({
           )}
         >
           <div className={cn("flex items-center gap-2", railCollapsed && "flex-col")}>
-            <div
-              className="flex size-8 shrink-0 items-center justify-center rounded-[4px] bg-accent text-xs font-medium text-canvas"
-              title={orgName}
-              aria-hidden
-            >
-              {initials(orgName)}
-            </div>
+            {logoUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element -- org-uploaded logo URL
+              <img
+                src={logoUrl}
+                alt=""
+                className="size-8 shrink-0 rounded-[var(--radius-chip)] object-contain"
+                title={orgName}
+              />
+            ) : (
+              <div
+                className="flex size-8 shrink-0 items-center justify-center rounded-[var(--radius-chip)] bg-accent text-xs font-medium text-on-accent"
+                title={orgName}
+                aria-hidden
+              >
+                {initials(orgName)}
+              </div>
+            )}
             {!railCollapsed ? (
               <div className="min-w-0 flex-1">
                 <p className="label-caps text-[10px] text-ink-muted">{roleLabel(role)}</p>
