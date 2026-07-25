@@ -197,7 +197,7 @@ export function AppShell({
     return (
       <div
         data-app-shell
-        className="fixed inset-0 flex min-h-0 flex-col overflow-hidden bg-canvas text-ink"
+        className="fixed inset-0 flex min-h-0 flex-col overflow-hidden bg-surface-1 text-ink"
       >
         <header className="flex shrink-0 items-center justify-between border-b border-rule px-4 py-3">
           <Link href="/dashboard" className="label-caps text-ink">
@@ -213,7 +213,7 @@ export function AppShell({
             <ThemeToggle />
           </div>
         </header>
-        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
+        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain bg-surface-1">
           {children}
         </div>
       </div>
@@ -223,13 +223,13 @@ export function AppShell({
   return (
     <div
       data-app-shell
-      className="fixed inset-0 flex min-h-0 overflow-hidden bg-canvas text-ink"
+      className="fixed inset-0 flex min-h-0 overflow-hidden bg-surface-1 text-ink"
     >
       {/* Desktop sidebar — fixed height, nav scrolls inside */}
       <Assemble
         layer="chrome"
         as="aside"
-        className="relative z-30 hidden h-full min-h-0 shrink-0 flex-col overflow-hidden border-r border-rule bg-canvas lg:flex"
+        className="relative z-30 hidden h-full min-h-0 shrink-0 flex-col overflow-hidden border-r border-rule bg-surface-1 lg:flex"
         style={{ width }}
       >
         <RuleDraw accent onMount duration={0.35} className="w-full shrink-0" />
@@ -282,14 +282,14 @@ export function AppShell({
             />
             <div
               id={panelId}
-              className="absolute inset-y-0 left-0 flex w-[min(100%,280px)] flex-col overflow-hidden border-r border-rule bg-canvas shadow-[0_16px_40px_-20px_rgba(26,23,20,0.35)]"
+              className="absolute inset-y-0 left-0 flex w-[min(100%,280px)] flex-col overflow-hidden border-r border-rule bg-surface-1 shadow-[0_16px_40px_-20px_rgba(26,23,20,0.35)]"
             >
               {renderSidebar({ railCollapsed: false, showCollapseToggle: false })}
             </div>
           </div>
         ) : null}
 
-        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
+        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain bg-surface-1">
           {children}
         </div>
       </div>

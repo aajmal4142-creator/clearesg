@@ -1,41 +1,18 @@
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getPayload } from "payload";
 
-import { Gauge } from "@/components/gauge/Gauge";
-import { ApprovalChip } from "@/components/governance/ApprovalChip";
-import { Assemble, InkReveal, RuleDraw } from "@/components/motion";
-import { PageFrame } from "@/components/shell/PageFrame";
-import { Metric } from "@/components/ui/metric";
 import { getCurrentContext } from "@/lib/auth";
 import { calculate, type FactorRecord } from "@/lib/calc";
-import { calmStatus, readinessBreakdown } from "@/lib/governance/calmStatus";
 import { detectAnomalies } from "@/lib/governance/anomalies";
+import { calmStatus, readinessBreakdown } from "@/lib/governance/calmStatus";
 import { rankGaps } from "@/lib/governance/gaps";
 import { plainGapCopy } from "@/lib/governance/plainGaps";
 import { hasBaselineDrift, parseRevenueBand } from "@/lib/obligations";
 import { metricsAndCompositionFromDatapoints, spendCoveragePct } from "@/lib/suppliers";
 import config from "@/payload.config";
 
-import { ObligationControls } from "./ObligationControls";
-
-function daysUntil(iso: string): number {
-  const target = new Date(iso).getTime();
-  const now = Date.now();
-  return Math.ceil((target - now) / (1000 * 60 * 60 * 24));
-}
-
-function isPastDue(iso: string): boolean {
-  return Date.parse(String(iso)) < Date.now();
-}
-
-function formatDeadline(iso: string): string {
-  return new Date(iso).toLocaleDateString("en-GB", {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-  });
-}
+import { daysUntil, isPastDue } from "./runway/format";
+import { RunwayView } from "./runway/RunwayView";
 
 export default async function RunwayPage() {
   const ctx = await getCurrentContext();
@@ -176,9 +153,10 @@ export default async function RunwayPage() {
   });
   const overdue = assignedToMe.filter((d) => d.dueDate && isPastDue(String(d.dueDate)));
 
-  const approvalByMetric = new Map(
-    dps.docs.map((d) => [d.metricKey, d.approvalState ?? "pending"]),
-  );
+  const approvalByMetric: Record<string, string> = {};
+  for (const d of dps.docs) {
+    approvalByMetric[d.metricKey] = d.approvalState ?? "pending";
+  }
 
   const nextActions = [
     ...gaps.missing.slice(0, 5).map((g) => {
@@ -278,382 +256,63 @@ export default async function RunwayPage() {
   const s3Pct = totalEmissions > 0 ? (scope3 / totalEmissions) * 100 : 0;
 
   return (
-    <PageFrame
-      eyebrow="Compliance runway"
-      title="Compliance runway"
-      help="Countdown to filing — live scores from your datapoints, not placeholders."
-      context={
+    <RunwayView
+      periodLabel={
         period
-          ? {
-              period: `${String(period.startDate).slice(0, 10)} → ${String(period.endDate).slice(0, 10)}`,
-              status: `${period.status === "open" ? "Open" : period.status} · ${calm.label}`,
-            }
-          : { status: calm.label }
+          ? `${String(period.startDate).slice(0, 10)} → ${String(period.endDate).slice(0, 10)}`
+          : null
       }
-      rail={
-        <div className="flex flex-col">
-          {calcOk ? (
-            <Gauge score={overall} playOnView={false} size={280} />
-          ) : (
-            <p className="text-sm text-ink-muted">
-              Score unavailable — add emission factors and core activity data.
-            </p>
-          )}
-          <InkReveal className="mt-8 w-full" delay={0.16}>
-            <RuleDraw delay={0} duration={0.4} className="mb-3" />
-            <p className="label-caps mb-3">Emissions stack (tCO₂e)</p>
-            {totalEmissions > 0 ? (
-              <>
-                <div className="flex h-8 w-full overflow-hidden border border-rule bg-surface-2">
-                  <div
-                    className="bg-rust/80"
-                    style={{ width: `${s1Pct}%` }}
-                    title={`Scope 1: ${scope1.toFixed(2)}`}
-                  />
-                  <div
-                    className="bg-amber/80"
-                    style={{ width: `${s2Pct}%` }}
-                    title={`Scope 2: ${scope2.toFixed(2)}`}
-                  />
-                  <div
-                    className="bg-cobalt/80"
-                    style={{ width: `${s3Pct}%` }}
-                    title={`Scope 3: ${scope3.toFixed(2)}`}
-                  />
-                </div>
-                <div className="mt-2 flex justify-between text-xs font-semibold uppercase tracking-[0.08em] text-ink-muted">
-                  <span>
-                    Scope 1{" "}
-                    <Metric
-                      value={scope1}
-                      size="sm"
-                      decimals={1}
-                      className="inline"
-                      inView={false}
-                    />
-                  </span>
-                  <span>
-                    Scope 2{" "}
-                    <Metric
-                      value={scope2}
-                      size="sm"
-                      decimals={1}
-                      className="inline"
-                      inView={false}
-                    />
-                  </span>
-                  <span>
-                    Scope 3{" "}
-                    <Metric
-                      value={scope3}
-                      size="sm"
-                      decimals={1}
-                      className="inline"
-                      inView={false}
-                    />
-                  </span>
-                </div>
-                {scope3Composition.totalTco2e > 0 ? (
-                  <p className="mt-3 text-xs text-ink-muted">
-                    <span className="font-data text-signal">
-                      {scope3Composition.primarySharePct}%
-                    </span>{" "}
-                    supplier-verified
-                    {" · "}
-                    <span className="font-data text-amber">
-                      {(100 - scope3Composition.primarySharePct).toFixed(1)}%
-                    </span>{" "}
-                    spend estimate
-                  </p>
-                ) : null}
-              </>
-            ) : (
-              <p className="text-sm text-ink-muted">
-                No emissions yet. Enter electricity, fuel, or spend on Data.
-              </p>
-            )}
-            <div className="mt-8 rounded-[6px] border border-rule bg-surface-1 p-4">
-              <p className="label-caps mb-2">Living report</p>
-              <p className="text-sm text-ink-muted">
-                Share a link that stays current as you update figures.
-              </p>
-              <Link
-                href="/dashboard/reports"
-                className="mt-3 inline-block text-sm text-accent underline-offset-2 hover:underline"
-              >
-                Open reports
-              </Link>
-            </div>
-            <p className="mt-6 text-xs text-ink-muted">
-              <Link
-                href="/dashboard/guide"
-                className="text-accent underline-offset-2 hover:underline"
-              >
-                First-report guided mode
-              </Link>
-              {" · "}
-              <Link
-                href="/dashboard/audit"
-                className="text-accent underline-offset-2 hover:underline"
-              >
-                Change log
-              </Link>
-            </p>
-          </InkReveal>
-        </div>
-      }
-    >
-      <Assemble layer="data">
-        <div
-          className={
-            calm.level === "critical"
-              ? "rounded-[6px] border border-rust/40 bg-rust/5 px-4 py-3"
-              : calm.level === "at_risk"
-                ? "rounded-[6px] border border-amber/40 bg-amber/5 px-4 py-3"
-                : "rounded-[6px] border border-rule bg-surface-1 px-4 py-3"
-          }
-        >
-          <p className="label-caps text-ink">{calm.label}</p>
-          <p className="mt-1 text-sm text-ink-muted">{calm.hint}</p>
-          <Link
-            href={primaryAction.href}
-            className="mt-3 inline-flex text-sm font-medium text-accent underline-offset-2 hover:underline"
-          >
-            Next: {primaryAction.label}
-          </Link>
-          <p className="mt-1 text-xs text-ink-muted">{primaryAction.need}</p>
-        </div>
-      </Assemble>
-
-      {days === null ? (
-        <Assemble layer="data" className="mt-8">
-          {obligation && !deadlineIso ? (
-            <>
-              <h2
-                className="text-2xl font-medium tracking-tight text-ink"
-                style={{ fontFamily: "var(--font-display)" }}
-              >
-                Not in mandatory scope yet
-              </h2>
-              <p className="measure-body mt-3 text-ink-muted">
-                {obligation.derivationReason ??
-                  "Buyers may still ask — you can start voluntarily and keep evidence ready."}
-              </p>
-            </>
-          ) : !orgDoc.country || orgDoc.employeeCount == null || !orgDoc.revenueBand ? (
-            <p className="text-ink-muted">
-              Complete your baseline
-              {!orgDoc.country ? " (country)" : null}
-              {orgDoc.employeeCount == null ? " (headcount)" : null}
-              {!orgDoc.revenueBand ? " (revenue band)" : null}{" "}
-              <Link href="/dashboard/onboarding" className="editorial-link">
-                on onboarding
-              </Link>{" "}
-              so we can derive a filing deadline.
-            </p>
-          ) : (
-            <p className="text-ink-muted">
-              No filing deadline on file. Re-run derivation from your baseline, or set a
-              manual date.
-            </p>
-          )}
-          {obligation ? (
-            <ObligationControls
-              obligationId={obligation.id}
-              filingDeadline={null}
-              canManage={canManage}
-              needsConfirmation={obligation.confidence === "needs_confirmation"}
-              baselineDrift={drift && obligation.source === "manual"}
-              source={obligation.source ?? null}
-            />
-          ) : null}
-          {obligation?.derivationReason ? (
-            <details className="mt-4 max-w-[66ch] border-t border-rule pt-3">
-              <summary className="editorial-link cursor-pointer list-none text-sm [&::-webkit-details-marker]:hidden">
-                Why this scope?
-              </summary>
-              <p className="mt-3 text-sm leading-relaxed text-ink-muted">
-                {obligation.derivationReason}
-              </p>
-            </details>
-          ) : null}
-          <div className="mt-8 flex items-baseline gap-1">
-            <Metric value={readiness.pct} size="lg" decimals={0} inView={false} />
-            <span className="font-data text-xl text-ink-muted">%</span>
-          </div>
-          <p className="label-caps mt-1">{readiness.label}</p>
-        </Assemble>
-      ) : (
-        <Assemble layer="data" className="mt-8">
-          {filingOverdue ? (
-            <p className="mb-4 max-w-[66ch] text-sm text-rust">
-              This was due {formatDeadline(deadlineIso!)} — here is how to get audit-ready
-              now: finish the gaps below and publish a living report.
-            </p>
-          ) : null}
-          <Metric
-            value={days}
-            size="display"
-            decimals={0}
-            tone={filingOverdue ? "rust" : undefined}
-            inView={false}
-          />
-          <p className="label-caps mt-2">
-            {filingOverdue ? "Days past filing" : "Days to filing"}
-          </p>
-          {deadlineIso ? (
-            <p className="mt-1 text-sm text-ink-muted">
-              {formatDeadline(deadlineIso)}
-              {obligation?.standardVersion ? ` · ${obligation.standardVersion}` : null}
-              {obligation?.wave &&
-              !["other", "brsr_listed", "brsr_supply"].includes(obligation.wave)
-                ? ` Wave ${obligation.wave}`
-                : null}
-            </p>
-          ) : null}
-          {secondary.length > 0 ? (
-            <ul className="mt-3 space-y-1 text-xs text-ink-muted">
-              {secondary.map((o) => (
-                <li key={o.id}>
-                  Also: {o.standardVersion}
-                  {o.filingDeadline
-                    ? ` due ${formatDeadline(String(o.filingDeadline))}`
-                    : ""}
-                </li>
-              ))}
-            </ul>
-          ) : null}
-          {obligation ? (
-            <ObligationControls
-              obligationId={obligation.id}
-              filingDeadline={deadlineIso}
-              canManage={canManage}
-              needsConfirmation={
-                obligation.confidence === "needs_confirmation" &&
-                obligation.source !== "manual"
-              }
-              baselineDrift={drift && obligation.source === "manual"}
-              source={obligation.source ?? null}
-            />
-          ) : null}
-          {obligation?.derivationReason ? (
-            <details className="mt-4 max-w-[66ch] border-t border-rule pt-3">
-              <summary className="editorial-link cursor-pointer list-none text-sm [&::-webkit-details-marker]:hidden">
-                Why this date?
-              </summary>
-              <p className="mt-3 text-sm leading-relaxed text-ink-muted">
-                {obligation.derivationReason}
-              </p>
-            </details>
-          ) : null}
-          <div className="mt-8 flex items-baseline gap-1">
-            <Metric value={readiness.pct} size="lg" decimals={0} inView={false} />
-            <span className="font-data text-xl text-ink-muted">%</span>
-          </div>
-          <p className="label-caps mt-1">{readiness.label}</p>
-          <p className="mt-2 max-w-[66ch] text-xs text-ink-muted">{readiness.detail}</p>
-          <div className="mt-3 h-1.5 w-full max-w-xs overflow-hidden rounded-full bg-surface-2">
-            <div
-              className="h-full rounded-full bg-accent"
-              style={{ width: `${Math.min(100, readiness.pct)}%` }}
-            />
-          </div>
-          {coveragePct !== null ? (
-            <>
-              <div className="mt-6">
-                <Metric
-                  value={coveragePct}
-                  unit="%"
-                  size="lg"
-                  decimals={0}
-                  inView={false}
-                />
-              </div>
-              <p className="label-caps mt-1">Supplier spend covered</p>
-            </>
-          ) : null}
-          {projectedMiss > 0 && !filingOverdue ? (
-            <p className="mt-4 text-rust">
-              At your current rate you will miss the deadline by{" "}
-              <Metric
-                value={projectedMiss}
-                size="sm"
-                decimals={0}
-                tone="rust"
-                className="inline-flex"
-                inView={false}
-              />{" "}
-              days.
-            </p>
-          ) : calm.level === "on_track" && !filingOverdue ? (
-            <p className="mt-4 text-signal">On track at current collection rate.</p>
-          ) : (
-            <p className="mt-4 text-ink-muted">
-              Collection pace is fine — finish the missing metrics below to clear{" "}
-              {calm.label.toLowerCase()}.
-            </p>
-          )}
-          <p className="mt-4 text-sm text-ink-muted">
-            Assigned to you: {assignedToMe.length}
-            {overdue.length > 0 ? (
-              <span className="text-rust"> ({overdue.length} overdue)</span>
-            ) : null}
-            {" · "}
-            <Link
-              href="/dashboard/data"
-              className="text-accent underline-offset-2 hover:underline"
-            >
-              Pending approval: {pendingApproval}
-            </Link>
-          </p>
-        </Assemble>
+      calm={calm}
+      primaryAction={primaryAction}
+      days={days}
+      filingOverdue={filingOverdue}
+      deadlineIso={deadlineIso}
+      standardVersion={obligation?.standardVersion ?? null}
+      wave={obligation?.wave ?? null}
+      readiness={readiness}
+      coveragePct={coveragePct}
+      pendingApproval={pendingApproval}
+      assignedCount={assignedToMe.length}
+      overdueCount={overdue.length}
+      collected={collected}
+      required={required}
+      projectedMiss={projectedMiss}
+      calcOk={calcOk}
+      overall={overall}
+      scope1={scope1}
+      scope2={scope2}
+      scope3={scope3}
+      s1Pct={s1Pct}
+      s2Pct={s2Pct}
+      s3Pct={s3Pct}
+      totalEmissions={totalEmissions}
+      primarySharePct={scope3Composition.primarySharePct}
+      hasScope3Composition={scope3Composition.totalTco2e > 0}
+      nextActions={nextActions}
+      approvalByMetric={approvalByMetric}
+      anomalies={anomalies.map((a) => ({ metricKey: a.metricKey, reason: a.reason }))}
+      secondary={secondary.map((o) => ({
+        id: o.id,
+        standardVersion: o.standardVersion,
+        filingDeadline: o.filingDeadline ? String(o.filingDeadline) : null,
+      }))}
+      derivationReason={obligation?.derivationReason ?? null}
+      hasObligation={Boolean(obligation)}
+      obligationId={obligation?.id ?? null}
+      canManage={canManage}
+      needsConfirmation={Boolean(
+        obligation &&
+        obligation.confidence === "needs_confirmation" &&
+        obligation.source !== "manual",
       )}
-
-      {anomalies.length > 0 ? (
-        <InkReveal className="mt-8" delay={0.08}>
-          <p className="label-caps mb-2">Unusual figures</p>
-          <ul className="space-y-2 text-sm text-amber">
-            {anomalies.slice(0, 4).map((a) => (
-              <li key={a.metricKey + a.reason}>
-                <Link
-                  href={`/dashboard/data#${a.metricKey}`}
-                  className="underline-offset-2 hover:underline"
-                >
-                  {a.metricKey}
-                </Link>
-                <span className="text-ink-muted"> — {a.reason}</span>
-              </li>
-            ))}
-          </ul>
-        </InkReveal>
-      ) : null}
-
-      <InkReveal className="mt-12" delay={0.12}>
-        <RuleDraw delay={0} duration={0.4} className="mb-4" />
-        <p className="label-caps mb-4">What&apos;s missing — next three</p>
-        <ul className="space-y-0">
-          {nextActions.slice(0, 3).map((a) => (
-            <li key={a.href + a.label} className="border-b border-rule">
-              <Link
-                href={a.href}
-                className="panel-hover block px-1 py-3 text-sm text-ink"
-              >
-                <span className="flex items-center justify-between gap-3">
-                  <span>{a.label}</span>
-                  {a.metricKey ? (
-                    <ApprovalChip
-                      state={approvalByMetric.get(a.metricKey) ?? "pending"}
-                    />
-                  ) : (
-                    <ApprovalChip placeholder />
-                  )}
-                </span>
-                <span className="mt-1 block text-xs text-ink-muted">{a.need}</span>
-              </Link>
-            </li>
-          ))}
-        </ul>
-      </InkReveal>
-    </PageFrame>
+      baselineDrift={drift && obligation?.source === "manual"}
+      obligationSource={obligation?.source ?? null}
+      baselineIncomplete={
+        !orgDoc.country || orgDoc.employeeCount == null || !orgDoc.revenueBand
+      }
+      missingCountry={!orgDoc.country}
+      missingHeadcount={orgDoc.employeeCount == null}
+      missingRevenue={!orgDoc.revenueBand}
+    />
   );
 }

@@ -39,7 +39,7 @@ export function PageFrame({
     <Assemble layer="structure" className={cn("px-6 py-8", className)}>
       <div className="mx-auto max-w-6xl">
         {context ? (
-          <div className="sticky top-0 z-20 -mx-2 mb-4 border-b border-rule bg-canvas/95 px-2 py-2 backdrop-blur-sm lg:top-0">
+          <div className="sticky top-0 z-20 -mx-2 mb-4 border-b border-rule bg-surface-1/95 px-2 py-2 backdrop-blur-sm lg:top-0">
             <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-ink-muted">
               {context.period ? (
                 <span>

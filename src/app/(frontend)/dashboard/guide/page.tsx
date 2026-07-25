@@ -22,7 +22,7 @@ const STEPS = [
   },
   {
     id: "top3",
-    label: "Enter your top three figures",
+    label: "Enter your top three metrics",
     href: "/dashboard/data",
   },
   { id: "supplier", label: "Request one supplier", href: "/dashboard/suppliers" },

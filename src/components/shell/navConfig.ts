@@ -5,7 +5,6 @@ import {
   ClipboardCheck,
   ClipboardList,
   CreditCard,
-  Database,
   FileText,
   Gauge,
   Inbox,
@@ -16,6 +15,8 @@ import {
   Truck,
   Users,
 } from "lucide-react";
+
+import { METRICS_HREF, METRICS_LABEL } from "@/lib/metrics";
 
 export type NavItem = {
   href: string;
@@ -37,7 +38,7 @@ export function buildNavGroups(opts: {
 }): NavGroup[] {
   const work: NavItem[] = [
     { href: "/dashboard", label: "Runway", icon: Gauge, exact: true },
-    { href: "/dashboard/data", label: "Data", icon: Database },
+    { href: METRICS_HREF, label: METRICS_LABEL, icon: ClipboardList },
     { href: "/dashboard/suppliers", label: "Suppliers", icon: Truck },
     { href: "/dashboard/materiality", label: "Materiality", icon: Target },
     { href: "/dashboard/reports", label: "Reports", icon: FileText },

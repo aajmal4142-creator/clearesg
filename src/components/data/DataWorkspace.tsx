@@ -360,8 +360,8 @@ export function DataWorkspace({
 
   return (
     <PageFrame
-      eyebrow="Data collection"
-      title="Enter figures"
+      eyebrow="Metrics"
+      title="Enter metrics"
       help="Interactive entry is the product. Spreadsheet import is an on-ramp — never the spine."
       wide
       actions={

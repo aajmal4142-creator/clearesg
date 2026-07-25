@@ -307,7 +307,7 @@ export function ConsultantCentre({
                   <th className="px-3 py-2 font-normal" />
                   <th className="px-3 py-2 font-normal">Client</th>
                   <th className="px-3 py-2 font-normal">Days</th>
-                  <th className="px-3 py-2 font-normal">Data</th>
+                  <th className="px-3 py-2 font-normal">Metrics</th>
                   <th className="px-3 py-2 font-normal">Score</th>
                   <th className="px-3 py-2 font-normal">Health</th>
                 </tr>
