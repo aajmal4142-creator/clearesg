@@ -2,7 +2,13 @@
 
 import { useState } from "react";
 
-import { EmptyState, PageFrame, StatusLine } from "@/components/shell/PageFrame";
+import {
+  EmptyState,
+  PageCard,
+  PageFrame,
+  StatusLine,
+} from "@/components/shell/PageFrame";
+import { Button } from "@/components/ui/button";
 import type { MembershipRole } from "@/lib/access/membership";
 import { sectorLabel } from "@/lib/ui/displayLabels";
 
@@ -121,109 +127,110 @@ export function BenchmarksClient({
       help="Comparisons stay private until at least eight organisations share a sector cohort."
       actions={
         showRecompute ? (
-          <button
+          <Button
             type="button"
+            size="sm"
+            variant="outline"
             onClick={() => void recompute()}
-            className={`border border-rule px-3 py-2 text-sm ${
-              !data.available
-                ? "text-ink-muted/70 hover:border-rule hover:text-ink-muted"
-                : "text-ink-muted hover:border-rule-strong hover:text-ink"
-            }`}
           >
             {!data.available ? "Check for new peers" : "Refresh cohorts"}
-          </button>
+          </Button>
         ) : role !== null ? (
-          <p className="text-sm text-ink-muted">Cohort refresh is admin-only</p>
+          <p className="text-[13px] text-ink-muted">Cohort refresh is admin-only</p>
         ) : null
       }
       rail={
-        <div className="space-y-3 text-sm text-ink-muted">
-          <p className="label-caps text-ink">Privacy</p>
+        <div className="space-y-3 text-[13px] text-ink-muted">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-ink">
+            Privacy
+          </p>
           <p>
             Opted-out organisations neither contribute nor appear. Small cohorts never
             surface percentiles. No min/max peer values are shown.
           </p>
           {canRecompute ? (
-            <button
+            <Button
               type="button"
+              size="sm"
+              variant="outline"
               onClick={() => void toggleOptOut()}
-              className="border border-rule px-2 py-1 text-xs text-ink hover:border-rule-strong"
             >
               {optOut ? "Opt back in" : "Opt out of contribution"}
-            </button>
+            </Button>
           ) : null}
         </div>
       }
     >
-      {status ? <StatusLine tone={statusTone}>{status}</StatusLine> : null}
+      <div className="space-y-4">
+        {status ? <StatusLine tone={statusTone}>{status}</StatusLine> : null}
 
-      {!data.available ? (
-        <EmptyState title="No cohort available" body={emptyBenchmarkBody(data)} />
-      ) : (
-        <>
-          <div className="mt-4 border-t border-rule pt-4">
-            <p className="label-caps">
-              {data.metricKey} · {sectorLabel(data.sector)} · {data.cohortSize}{" "}
-              organisations
-            </p>
-            {data.computedAt ? (
-              <p className="label-caps mt-1 text-ink-muted">
-                As of {new Date(data.computedAt).toISOString().slice(0, 10)}
-              </p>
-            ) : null}
-            <div className="mt-6 flex items-end gap-2">
-              {(
-                [
-                  ["p25", data.p25],
-                  ["p50", data.p50],
-                  ["p75", data.p75],
-                ] as const
-              ).map(([label, value]) => (
-                <div key={label} className="flex-1">
-                  <div
-                    className="w-full bg-surface-2"
-                    style={{
-                      height: `${Math.max(8, (value / (data.p75 * 1.4)) * 120)}px`,
-                    }}
-                  />
-                  <p className="font-data mt-2 text-sm text-ink">
-                    {value.toLocaleString()}
-                  </p>
-                  <p className="label-caps">{label}</p>
-                </div>
-              ))}
-            </div>
-            {data.userValue !== null ? (
-              <p className="mt-6 font-data text-ink">
-                You: {data.userValue.toLocaleString()}
-                {data.percentileRank !== null
-                  ? ` · ~${data.percentileRank}th percentile`
-                  : ""}
-              </p>
-            ) : (
-              <p className="mt-6 text-sm text-ink-muted">
-                Enter {data.metricKey} to mark your position.
-              </p>
-            )}
-          </div>
+        {!data.available ? (
+          <EmptyState title="No cohort available" body={emptyBenchmarkBody(data)} />
+        ) : (
+          <>
+            <PageCard
+              title={`${data.metricKey} · ${sectorLabel(data.sector)} · ${data.cohortSize} organisations`}
+            >
+              {data.computedAt ? (
+                <p className="mb-4 text-[11px] text-ink-muted">
+                  As of {new Date(data.computedAt).toISOString().slice(0, 10)}
+                </p>
+              ) : null}
+              <div className="flex items-end gap-2">
+                {(
+                  [
+                    ["p25", data.p25],
+                    ["p50", data.p50],
+                    ["p75", data.p75],
+                  ] as const
+                ).map(([label, value]) => (
+                  <div key={label} className="flex-1">
+                    <div
+                      className="w-full rounded-[2px] bg-surface-2"
+                      style={{
+                        height: `${Math.max(8, (value / (data.p75 * 1.4)) * 120)}px`,
+                      }}
+                    />
+                    <p className="mt-2 font-data text-[13px] text-ink">
+                      {value.toLocaleString()}
+                    </p>
+                    <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-ink-muted">
+                      {label}
+                    </p>
+                  </div>
+                ))}
+              </div>
+              {data.userValue !== null ? (
+                <p className="mt-6 font-data text-[13px] text-ink">
+                  You: {data.userValue.toLocaleString()}
+                  {data.percentileRank !== null
+                    ? ` · ~${data.percentileRank}th percentile`
+                    : ""}
+                </p>
+              ) : (
+                <p className="mt-6 text-[13px] text-ink-muted">
+                  Enter {data.metricKey} to mark your position.
+                </p>
+              )}
+            </PageCard>
 
-          <div className="mt-8 border-t border-rule pt-4">
-            <p className="label-caps mb-3">How to improve</p>
-            <ul className="space-y-2">
-              {data.improve.map((a) => (
-                <li key={a.href}>
-                  <a
-                    href={a.href}
-                    className="block border-b border-rule px-0 py-2 text-sm text-ink hover:text-accent"
-                  >
-                    {a.label}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </div>
-        </>
-      )}
+            <PageCard title="How to improve">
+              <ul>
+                {data.improve.map((a) => (
+                  <li key={a.href}>
+                    <a
+                      href={a.href}
+                      className="block border-b border-rule py-2.5 text-[13px] text-ink transition-colors last:border-b-0 hover:bg-surface-2 hover:text-accent"
+                    >
+                      {a.label}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </PageCard>
+          </>
+        )}
+      </div>
     </PageFrame>
   );
 }

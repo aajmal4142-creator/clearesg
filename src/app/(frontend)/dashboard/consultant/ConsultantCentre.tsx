@@ -2,7 +2,13 @@
 
 import { useState } from "react";
 
-import { EmptyState, PageFrame, StatusLine } from "@/components/shell/PageFrame";
+import {
+  EmptyState,
+  PageCard,
+  PageFrame,
+  StatusLine,
+} from "@/components/shell/PageFrame";
+import { Button } from "@/components/ui/button";
 import type { ClientRiskRow } from "@/lib/consultant";
 import type { SectorTemplate } from "@/lib/consultant/templates";
 
@@ -143,227 +149,258 @@ export function ConsultantCentre({
       actions={
         <div className="flex flex-wrap gap-2">
           {canWrite ? (
-            <button
-              type="button"
-              onClick={() => void nudge()}
-              className="border border-rule bg-surface-1 px-3 py-2 text-sm text-ink hover:border-rule-strong"
-            >
+            <Button type="button" size="sm" onClick={() => void nudge()}>
               Nudge selected
-            </button>
+            </Button>
           ) : null}
-          <button
+          <Button
             type="button"
+            size="sm"
+            variant="outline"
             onClick={() => {
               window.location.assign("/api/app/consultant/export");
             }}
-            className="border border-rule px-3 py-2 text-sm text-ink-muted hover:border-rule-strong hover:text-ink"
           >
             Export all
-          </button>
-          <button
+          </Button>
+          <Button
             type="button"
+            size="sm"
+            variant="outline"
             onClick={() => void refresh()}
-            className="border border-rule px-3 py-2 text-sm text-ink-muted hover:border-rule-strong hover:text-ink"
           >
             Refresh
-          </button>
+          </Button>
         </div>
       }
       rail={
-        <div className="space-y-4 text-sm text-ink-muted">
-          <p className="label-caps text-ink">White-label</p>
-          <p>
-            Dashboard colours, font, and logo live under Account → Settings. Custom domain
-            still saves here for consultancies on the consultant plan.
-          </p>
-          <a
-            href="/dashboard/settings"
-            className="inline-block text-sm text-accent underline-offset-2 hover:underline"
-          >
-            Open Settings
-          </a>
-          <p className="label-caps text-ink">Billing</p>
-          <p>
-            Consultant €199/mo includes 10 clients; +€15/client after (Phase 12 Stripe).
-          </p>
+        <div className="space-y-4 text-[13px] text-ink-muted">
+          <div>
+            <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-ink">
+              White-label
+            </p>
+            <p className="mt-2">
+              Dashboard colours, font, and logo live under Account → Settings. Custom
+              domain still saves here for consultancies on the consultant plan.
+            </p>
+            <a
+              href="/dashboard/settings"
+              className="mt-2 inline-block font-medium text-accent underline-offset-2 hover:underline"
+            >
+              Open Settings
+            </a>
+          </div>
+          <div>
+            <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-ink">
+              Billing
+            </p>
+            <p className="mt-2">
+              Consultant €199/mo includes 10 clients; +€15/client after (Phase 12 Stripe).
+            </p>
+          </div>
         </div>
       }
     >
-      {status ? <StatusLine tone={statusTone}>{status}</StatusLine> : null}
+      <div className="space-y-4">
+        {status ? <StatusLine tone={statusTone}>{status}</StatusLine> : null}
 
-      <section className="mt-4 grid gap-8 border-t border-rule pt-4 md:grid-cols-2">
-        <div>
-          <p className="label-caps mb-2">Brand</p>
-          <label className="block text-sm text-ink-muted">
-            Primary colour
-            <input
-              className="mt-1 w-full border border-rule bg-surface-1 px-2 py-2 font-data text-ink"
-              value={primaryColor}
-              onChange={(e) => setPrimaryColor(e.target.value)}
-              placeholder="Leave blank for default"
-              disabled={!canWrite}
-            />
-          </label>
-          <label className="mt-3 block text-sm text-ink-muted">
-            Custom domain
-            <input
-              className="mt-1 w-full border border-rule bg-surface-1 px-2 py-2 text-ink"
-              value={domain}
-              onChange={(e) => setDomain(e.target.value)}
-              placeholder="esg.yourfirm.com"
-              disabled={!canWrite}
-            />
-          </label>
-          {canWrite ? (
-            <button
-              type="button"
-              onClick={() => void saveBrand()}
-              className="mt-3 border border-rule px-3 py-2 text-sm text-ink hover:border-rule-strong"
-            >
-              Save brand
-            </button>
-          ) : null}
-        </div>
-        <div>
-          <p className="label-caps mb-2">Invite client (pre-branded)</p>
-          {canWrite ? (
-            <>
-              <label className="block text-sm text-ink-muted">
-                Client name
-                <input
-                  className="mt-1 w-full border border-rule bg-surface-1 px-2 py-2 text-ink"
-                  value={inviteName}
-                  onChange={(e) => setInviteName(e.target.value)}
-                />
-              </label>
-              <label className="mt-3 block text-sm text-ink-muted">
-                Owner email
-                <input
-                  className="mt-1 w-full border border-rule bg-surface-1 px-2 py-2 font-data text-ink"
-                  value={inviteEmail}
-                  onChange={(e) => setInviteEmail(e.target.value)}
-                />
-              </label>
-              <button
+        <div className="grid gap-4 md:grid-cols-2">
+          <PageCard title="Brand">
+            <label className="block text-[13px] text-ink-muted">
+              Primary colour
+              <input
+                className="mt-1 w-full rounded-md border border-rule bg-surface-1 px-2 py-2 font-data text-ink"
+                value={primaryColor}
+                onChange={(e) => setPrimaryColor(e.target.value)}
+                placeholder="Leave blank for default"
+                disabled={!canWrite}
+              />
+            </label>
+            <label className="mt-3 block text-[13px] text-ink-muted">
+              Custom domain
+              <input
+                className="mt-1 w-full rounded-md border border-rule bg-surface-1 px-2 py-2 text-ink"
+                value={domain}
+                onChange={(e) => setDomain(e.target.value)}
+                placeholder="esg.yourfirm.com"
+                disabled={!canWrite}
+              />
+            </label>
+            {canWrite ? (
+              <Button
                 type="button"
-                onClick={() => void inviteClient()}
-                className="mt-3 border border-rule px-3 py-2 text-sm text-ink hover:border-rule-strong"
+                size="sm"
+                className="mt-3"
+                onClick={() => void saveBrand()}
               >
-                Invite client
-              </button>
-            </>
-          ) : (
-            <p className="text-sm text-ink-muted">View only — ask an admin to invite.</p>
-          )}
-        </div>
-      </section>
-
-      <section className="mt-8 border-t border-rule pt-4">
-        <p className="label-caps mb-2">Sector templates</p>
-        <ul className="space-y-2 text-sm text-ink-muted">
-          {templates.map((t) => (
-            <li key={t.id} className="border-b border-rule/60 py-2">
-              <span className="text-ink">{t.label}</span>
-              <span className="font-data mt-1 block text-xs">
-                {t.metricKeys.length} metrics
-              </span>
-            </li>
-          ))}
-        </ul>
-      </section>
-
-      {clients.length === 0 ? (
-        <EmptyState
-          title="No linked clients"
-          body="Invite a client above, or link a company by setting its parent organisation to this consultancy."
-        />
-      ) : (
-        <>
-          <section className="mt-8 grid gap-3 sm:grid-cols-3">
-            {(
-              [
-                ["on_track", "On track", "text-signal", "border-signal/30"],
-                ["at_risk", "At risk", "text-amber", "border-amber/30"],
-                ["critical", "Critical", "text-rust", "border-rust/30"],
-              ] as const
-            ).map(([key, label, tone, border]) => {
-              const n = clients.filter((c) => c.risk === key).length;
-              return (
-                <div
-                  key={key}
-                  className={`rounded-[6px] border bg-surface-1 px-4 py-3 ${border}`}
+                Save brand
+              </Button>
+            ) : null}
+          </PageCard>
+          <PageCard title="Invite client">
+            {canWrite ? (
+              <>
+                <label className="block text-[13px] text-ink-muted">
+                  Client name
+                  <input
+                    className="mt-1 w-full rounded-md border border-rule bg-surface-1 px-2 py-2 text-ink"
+                    value={inviteName}
+                    onChange={(e) => setInviteName(e.target.value)}
+                  />
+                </label>
+                <label className="mt-3 block text-[13px] text-ink-muted">
+                  Owner email
+                  <input
+                    className="mt-1 w-full rounded-md border border-rule bg-surface-1 px-2 py-2 font-data text-ink"
+                    value={inviteEmail}
+                    onChange={(e) => setInviteEmail(e.target.value)}
+                  />
+                </label>
+                <Button
+                  type="button"
+                  size="sm"
+                  className="mt-3"
+                  onClick={() => void inviteClient()}
                 >
-                  <p className={`label-caps ${tone}`}>{label}</p>
-                  <p className={`font-data mt-2 text-2xl ${tone}`}>{n}</p>
-                  <p className="mt-1 text-xs text-ink-muted">clients</p>
-                </div>
-              );
-            })}
-          </section>
-          <div className="mt-8 overflow-x-auto border-t border-rule">
-            <table className="w-full text-left text-sm">
-              <thead className="border-b border-rule text-ink-muted">
-                <tr>
-                  <th className="px-3 py-2 font-normal" />
-                  <th className="px-3 py-2 font-normal">Client</th>
-                  <th className="px-3 py-2 font-normal">Days</th>
-                  <th className="px-3 py-2 font-normal">Metrics</th>
-                  <th className="px-3 py-2 font-normal">Score</th>
-                  <th className="px-3 py-2 font-normal">Health</th>
-                </tr>
-              </thead>
-              <tbody>
-                {clients.map((c) => (
-                  <tr key={c.id} className="border-b border-rule/60">
-                    <td className="px-3 py-3">
-                      <input
-                        type="checkbox"
-                        checked={selected.includes(c.id)}
-                        onChange={() => toggle(c.id)}
-                        disabled={!canWrite}
-                      />
-                    </td>
-                    <td className="px-3 py-3">
-                      <div className="text-ink">{c.name}</div>
-                      <div className="font-data text-xs text-ink-muted">
-                        {c.sector} · {c.country}
-                      </div>
-                    </td>
-                    <td className="px-3 py-3 font-data text-ink">
-                      {c.daysToFiling === null ? "—" : c.daysToFiling}
-                    </td>
-                    <td className="px-3 py-3 font-data text-ink-muted">
-                      {c.datapointsCollected}/{c.datapointsRequired}
-                    </td>
-                    <td className="px-3 py-3 font-data text-ink">
-                      {c.overallScore === null ? "—" : c.overallScore}
-                    </td>
-                    <td
-                      className={`px-3 py-3 font-data ${
-                        c.risk === "critical"
-                          ? "text-rust"
-                          : c.risk === "at_risk"
-                            ? "text-amber"
-                            : c.risk === "on_track"
-                              ? "text-signal"
-                              : "text-ink-muted"
-                      }`}
+                  Invite client
+                </Button>
+              </>
+            ) : (
+              <p className="text-[13px] text-ink-muted">
+                View only — ask an admin to invite.
+              </p>
+            )}
+          </PageCard>
+        </div>
+
+        <PageCard title="Sector templates">
+          <ul>
+            {templates.map((t) => (
+              <li
+                key={t.id}
+                className="border-b border-rule py-2.5 transition-colors last:border-b-0 hover:bg-surface-2"
+              >
+                <span className="font-medium text-ink">{t.label}</span>
+                <span className="mt-0.5 block font-data text-[11px] text-ink-muted">
+                  {t.metricKeys.length} metrics
+                </span>
+              </li>
+            ))}
+          </ul>
+        </PageCard>
+
+        {clients.length === 0 ? (
+          <EmptyState
+            title="No linked clients"
+            body="Invite a client above, or link a company by setting its parent organisation to this consultancy."
+          />
+        ) : (
+          <>
+            <div className="grid gap-3 sm:grid-cols-3">
+              {(
+                [
+                  ["on_track", "On track", "text-signal"],
+                  ["at_risk", "At risk", "text-amber"],
+                  ["critical", "Critical", "text-rust"],
+                ] as const
+              ).map(([key, label, tone]) => {
+                const n = clients.filter((c) => c.risk === key).length;
+                return (
+                  <div
+                    key={key}
+                    className="rounded-[6px] border border-rule bg-surface-1 px-4 py-3"
+                  >
+                    <p
+                      className={`text-[10px] font-semibold uppercase tracking-[0.08em] ${tone}`}
                     >
-                      {c.risk === "on_track"
-                        ? "On track"
-                        : c.risk === "at_risk"
-                          ? "At risk"
-                          : c.risk === "critical"
-                            ? "Critical"
-                            : c.risk}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </>
-      )}
+                      {label}
+                    </p>
+                    <p className={`mt-2 font-data text-[28px] font-bold ${tone}`}>{n}</p>
+                    <p className="mt-1 text-[11px] text-ink-muted">clients</p>
+                  </div>
+                );
+              })}
+            </div>
+            <PageCard title="Clients">
+              <div className="overflow-x-auto">
+                <table className="w-full min-w-[640px] text-left text-[12px]">
+                  <thead>
+                    <tr className="border-b-2 border-rule-strong">
+                      <th className="py-2.5 pr-2" />
+                      <th className="py-2.5 pr-2 text-[10px] font-semibold uppercase tracking-[0.08em] text-ink-muted">
+                        Client
+                      </th>
+                      <th className="py-2.5 pr-2 text-[10px] font-semibold uppercase tracking-[0.08em] text-ink-muted">
+                        Days
+                      </th>
+                      <th className="py-2.5 pr-2 text-[10px] font-semibold uppercase tracking-[0.08em] text-ink-muted">
+                        Metrics
+                      </th>
+                      <th className="py-2.5 pr-2 text-[10px] font-semibold uppercase tracking-[0.08em] text-ink-muted">
+                        Score
+                      </th>
+                      <th className="py-2.5 text-[10px] font-semibold uppercase tracking-[0.08em] text-ink-muted">
+                        Health
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {clients.map((c) => (
+                      <tr
+                        key={c.id}
+                        className="border-b border-rule transition-colors last:border-b-0 hover:bg-surface-2"
+                      >
+                        <td className="py-2.5 pr-2">
+                          <input
+                            type="checkbox"
+                            checked={selected.includes(c.id)}
+                            onChange={() => toggle(c.id)}
+                            disabled={!canWrite}
+                          />
+                        </td>
+                        <td className="py-2.5 pr-2">
+                          <div className="font-medium text-ink">{c.name}</div>
+                          <div className="font-data text-[11px] text-ink-muted">
+                            {c.sector} · {c.country}
+                          </div>
+                        </td>
+                        <td className="py-2.5 pr-2 font-data text-ink">
+                          {c.daysToFiling === null ? "—" : c.daysToFiling}
+                        </td>
+                        <td className="py-2.5 pr-2 font-data text-ink-muted">
+                          {c.datapointsCollected}/{c.datapointsRequired}
+                        </td>
+                        <td className="py-2.5 pr-2 font-data text-ink">
+                          {c.overallScore === null ? "—" : c.overallScore}
+                        </td>
+                        <td
+                          className={`py-2.5 font-data ${
+                            c.risk === "critical"
+                              ? "text-rust"
+                              : c.risk === "at_risk"
+                                ? "text-amber"
+                                : c.risk === "on_track"
+                                  ? "text-signal"
+                                  : "text-ink-muted"
+                          }`}
+                        >
+                          {c.risk === "on_track"
+                            ? "On track"
+                            : c.risk === "at_risk"
+                              ? "At risk"
+                              : c.risk === "critical"
+                                ? "Critical"
+                                : c.risk}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </PageCard>
+          </>
+        )}
+      </div>
     </PageFrame>
   );
 }

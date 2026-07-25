@@ -1,38 +1,38 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
-/* ClearESG Editorial tokens — BUILD_PLAN §3. Hex lives only here. */
+/* ClearESG tokens — Variant 5 defaults (hex only here). Users can override via theme/branding. */
 
 :root {
-  /* Cream-primary fallback before [data-theme] resolves — the report */
-  --canvas: #fbf9f5;
+  /* Light-primary fallback before [data-theme] resolves */
+  --canvas: #f5f7fa;
   --surface-1: #ffffff;
-  --surface-2: #f5f2ec;
-  --ink: #1a1714;
-  --ink-muted: #6b635a;
-  --rule: #e0dad0;
-  --rule-strong: #c4bbae;
-  --dial-ring: #e4dfd4;
+  --surface-2: #eef1f5;
+  --ink: #2c3e50;
+  --ink-muted: #7f8a95;
+  --rule: #e8ecf1;
+  --rule-strong: #d0d7e0;
+  --dial-ring: #d0d7e0;
 
-  /* Brand — chrome, both themes */
-  --accent: #7a2e2e;
-  --accent-hover: #8f3838;
-  --accent-quiet: color-mix(in srgb, #7a2e2e 8%, transparent);
-  --on-accent: #fbf9f5;
-  --brand-secondary: #6b635a;
+  /* Brand — chrome, both themes (Variant 5 primary blue) */
+  --accent: #0066cc;
+  --accent-hover: #0052a3;
+  --accent-quiet: color-mix(in srgb, #0066cc 10%, transparent);
+  --on-accent: #ffffff;
+  --brand-secondary: #7f8a95;
 
-  /* Data — louder than chrome; light theme values (4.5:1 on --canvas) */
-  --signal: #0e7c4a;
-  --amber: #b87309;
-  --rust: #b03a2e;
-  --cobalt: #2c5aa0;
+  /* Data — louder than chrome */
+  --signal: #059669;
+  --amber: #f0ad4e;
+  --rust: #c92a2a;
+  --cobalt: #0066cc;
 
   --radius-panel: 0.375rem;
   --radius: 0.25rem;
   --radius-chip: 0.125rem;
 
-  --shadow-float: 0 12px 32px -8px rgba(26, 23, 20, 0.14);
-  --grain-opacity: 0.02;
+  --shadow-float: 0 12px 32px -8px rgba(44, 62, 80, 0.12);
+  --grain-opacity: 0;
   --grain-blend: multiply;
 
   --background: var(--canvas);
@@ -40,25 +40,25 @@
   --border: var(--rule);
 }
 
-/* LIGHT — the report (PRIMARY default) */
+/* LIGHT — Variant 5 default (PRIMARY) */
 [data-theme="light"] {
-  --canvas: #fbf9f5;
+  --canvas: #f5f7fa;
   --surface-1: #ffffff;
-  --surface-2: #f5f2ec;
-  --ink: #1a1714;
-  --ink-muted: #6b635a;
-  --rule: #e0dad0;
-  --rule-strong: #c4bbae;
-  --dial-ring: #e4dfd4;
+  --surface-2: #eef1f5;
+  --ink: #2c3e50;
+  --ink-muted: #7f8a95;
+  --rule: #e8ecf1;
+  --rule-strong: #d0d7e0;
+  --dial-ring: #d0d7e0;
 
-  --signal: #0e7c4a;
-  --amber: #b87309;
-  --rust: #b03a2e;
-  --cobalt: #2c5aa0;
+  --signal: #059669;
+  --amber: #f0ad4e;
+  --rust: #c92a2a;
+  --cobalt: #0066cc;
 
-  --accent-quiet: color-mix(in srgb, var(--accent) 8%, transparent);
-  --shadow-float: 0 12px 32px -8px rgba(26, 23, 20, 0.14);
-  --grain-opacity: 0.02;
+  --accent-quiet: color-mix(in srgb, var(--accent) 10%, transparent);
+  --shadow-float: 0 12px 32px -8px rgba(44, 62, 80, 0.12);
+  --grain-opacity: 0;
   --grain-blend: multiply;
 
   --background: var(--canvas);
@@ -68,7 +68,7 @@
   --popover: var(--surface-1);
   --popover-foreground: var(--ink);
   --primary: var(--accent);
-  --primary-foreground: var(--canvas);
+  --primary-foreground: var(--on-accent);
   --secondary: transparent;
   --secondary-foreground: var(--ink);
   --muted: var(--surface-2);
@@ -77,10 +77,10 @@
   --border: var(--rule);
   --input: var(--rule);
   --ring: var(--accent);
-  --sidebar: var(--canvas);
+  --sidebar: var(--surface-1);
   --sidebar-foreground: var(--ink);
   --sidebar-primary: var(--accent);
-  --sidebar-primary-foreground: var(--canvas);
+  --sidebar-primary-foreground: var(--on-accent);
   --sidebar-accent: var(--surface-2);
   --sidebar-accent-foreground: var(--ink);
   --sidebar-border: var(--rule);
@@ -234,6 +234,29 @@
     line-height: 1.65;
   }
 
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--rule-strong) transparent;
+  }
+
+  *::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  *::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  *::-webkit-scrollbar-thumb {
+    border-radius: 999px;
+    background-color: var(--rule-strong);
+  }
+
+  *::-webkit-scrollbar-thumb:hover {
+    background-color: var(--ink-muted);
+  }
+
   /*
    * Dashboard shell owns the viewport. Tall overflow-y-auto content must not
    * expand document scrollHeight / leave empty cream below the shell.
@@ -344,6 +367,48 @@
     color: var(--accent);
     text-decoration: underline;
     text-underline-offset: 0.15em;
+  }
+
+  /* Interactive affordance — Tailwind preflight no longer sets pointer on buttons */
+  button:not(:disabled):not([aria-disabled="true"]),
+  [role="button"]:not([aria-disabled="true"]):not([data-disabled]),
+  a[href],
+  summary,
+  label[for],
+  select:not(:disabled),
+  input[type="button"]:not(:disabled),
+  input[type="submit"]:not(:disabled),
+  input[type="reset"]:not(:disabled),
+  input[type="checkbox"]:not(:disabled),
+  input[type="radio"]:not(:disabled),
+  input[type="file"]:not(:disabled),
+  input[type="color"]:not(:disabled),
+  [data-slot="button"]:not(:disabled):not([aria-disabled="true"]),
+  [data-slot="select-trigger"]:not(:disabled),
+  [data-slot="select-item"]:not([data-disabled]),
+  [data-slot="dropdown-menu-item"]:not([data-disabled]),
+  [data-slot="command-item"]:not([data-disabled]) {
+    cursor: pointer;
+  }
+
+  button:disabled,
+  [role="button"][aria-disabled="true"],
+  select:disabled,
+  input:disabled,
+  [data-slot="button"]:disabled,
+  [data-slot="select-trigger"]:disabled,
+  [data-disabled] {
+    cursor: not-allowed;
+  }
+
+  button:not(:disabled):not([aria-disabled="true"]):hover,
+  [role="button"]:not([aria-disabled="true"]):hover,
+  a[href]:hover {
+    transition:
+      color 150ms ease,
+      background-color 150ms ease,
+      border-color 150ms ease,
+      opacity 150ms ease;
   }
 
   :focus-visible {

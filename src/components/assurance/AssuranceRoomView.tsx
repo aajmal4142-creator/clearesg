@@ -80,8 +80,8 @@ function AssuranceBody({
   sharePath?: string | null;
 }) {
   return (
-    <div className="space-y-8">
-      <p className="text-sm text-ink-muted">
+    <div className="space-y-4">
+      <p className="text-[13px] text-ink-muted">
         Published snapshot {versionLabel}. Overall{" "}
         <Metric value={snapshot.scores.overall} size="sm" animate={false} /> ·{" "}
         <span className="font-data">{snapshot.factorsUsed.length}</span> pinned factors.
@@ -90,7 +90,7 @@ function AssuranceBody({
             {" "}
             ·{" "}
             <a
-              className="text-ink underline-offset-2 hover:underline"
+              className="font-medium text-accent underline-offset-2 hover:underline"
               href={sharePath}
               target="_blank"
               rel="noreferrer"
@@ -101,14 +101,19 @@ function AssuranceBody({
         ) : null}
       </p>
 
-      <section>
-        <p className="label-caps mb-3">Factor registry (pinned)</p>
+      <section className="rounded-[6px] border border-rule bg-surface-1 p-4 md:p-5">
+        <p className="mb-3 text-[10px] font-semibold uppercase tracking-[0.08em] text-ink-muted">
+          Factor registry (pinned)
+        </p>
         {snapshot.factorsUsed.length === 0 ? (
-          <p className="text-sm text-ink-muted">No factors pinned on this version.</p>
+          <p className="text-[13px] text-ink-muted">No factors pinned on this version.</p>
         ) : (
-          <ul className="divide-y divide-rule border-t border-rule">
+          <ul>
             {snapshot.factorsUsed.map((f) => (
-              <li key={f.factorId} className="flex flex-wrap gap-3 py-2 text-sm">
+              <li
+                key={f.factorId}
+                className="flex flex-wrap gap-3 border-b border-rule py-2.5 text-[12px] last:border-b-0"
+              >
                 <span className="font-data text-ink">{f.key}</span>
                 <span className="text-ink-muted">
                   {f.source} {f.year}
@@ -121,32 +126,37 @@ function AssuranceBody({
         )}
       </section>
 
-      <section>
-        <p className="label-caps mb-3">Figures</p>
+      <section className="rounded-[6px] border border-rule bg-surface-1 p-4 md:p-5">
+        <p className="mb-3 text-[10px] font-semibold uppercase tracking-[0.08em] text-ink-muted">
+          Figures
+        </p>
         {figures.length === 0 ? (
-          <p className="text-sm text-ink-muted">
+          <p className="text-[13px] text-ink-muted">
             No datapoints in this period, or none linked for assurance.
           </p>
         ) : (
-          <ul className="space-y-4">
+          <ul>
             {figures.map((fig) => (
-              <li key={fig.datapointId} className="border-t border-rule pt-3">
+              <li
+                key={fig.datapointId}
+                className="border-b border-rule py-3 transition-colors last:border-b-0 hover:bg-surface-2"
+              >
                 <div className="flex flex-wrap items-baseline justify-between gap-2">
                   <p className="text-ink">
-                    <span className="font-data">{fig.metricKey}</span>
+                    <span className="font-data font-medium">{fig.metricKey}</span>
                     {fig.unit ? (
                       <span className="text-ink-muted"> · {fig.unit}</span>
                     ) : null}
                   </p>
-                  <p className="font-data text-sm text-ink">
+                  <p className="font-data text-[12px] text-ink">
                     {fig.value ?? "∅"} · {fig.quality}
                   </p>
                 </div>
                 <p
                   className={
                     fig.lineage.evidenceLink === "verified"
-                      ? "mt-1 text-xs text-signal"
-                      : "mt-1 text-xs text-rust"
+                      ? "mt-1 text-[11px] text-signal"
+                      : "mt-1 text-[11px] text-rust"
                   }
                 >
                   {fig.lineage.evidenceLink === "verified"
@@ -154,24 +164,24 @@ function AssuranceBody({
                     : "Evidence link unverified"}
                 </p>
                 {fig.lineage.factor ? (
-                  <p className="mt-1 text-xs text-ink-muted">
+                  <p className="mt-1 text-[11px] text-ink-muted">
                     Factor pinned: {fig.lineage.factor.source} {fig.lineage.factor.year} (
                     {fig.lineage.factor.key})
                   </p>
                 ) : (
-                  <p className="mt-1 text-xs text-amber">
+                  <p className="mt-1 text-[11px] text-amber">
                     {fig.lineage.factorUnresolvedReason ?? "No pinned factor"}
                   </p>
                 )}
                 {fig.freshness.map((f) => (
-                  <p key={f.evidenceId} className="text-xs text-amber">
+                  <p key={f.evidenceId} className="text-[11px] text-amber">
                     Freshness · {f.label}
                   </p>
                 ))}
                 {fig.lineage.evidence.length > 0 ? (
                   <ul className="mt-2 space-y-1">
                     {fig.lineage.evidence.map((e) => (
-                      <li key={e.id} className="text-xs text-ink-muted">
+                      <li key={e.id} className="text-[11px] text-ink-muted">
                         {e.filename} ·{" "}
                         <span className="font-data">{e.sha256.slice(0, 12)}…</span>
                         {!e.bidirectionallyLinked ? (

@@ -30,7 +30,7 @@ export async function loadAssurancePayload(
   report: {
     id: string;
     version: number;
-    snapshot: unknown;
+    snapshot?: unknown;
     organisation: string | { id: string };
     period: string | { id: string };
   },

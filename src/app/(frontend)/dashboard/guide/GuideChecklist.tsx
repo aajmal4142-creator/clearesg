@@ -35,11 +35,17 @@ export function GuideChecklist({
   }
 
   return (
-    <>
-      {error ? <p className="mt-3 text-sm text-rust">{error}</p> : null}
-      <ul className="mt-8 space-y-0 border-t border-rule">
+    <div className="rounded-[6px] border border-rule bg-surface-1 p-4 md:p-5">
+      <p className="mb-3 text-[10px] font-semibold uppercase tracking-[0.08em] text-ink-muted">
+        Checklist
+      </p>
+      {error ? <p className="mb-3 text-[13px] text-rust">{error}</p> : null}
+      <ul>
         {steps.map((s) => (
-          <li key={s.id} className="flex items-center gap-3 border-b border-rule py-3">
+          <li
+            key={s.id}
+            className="flex items-center gap-3 border-b border-rule py-3 transition-colors last:border-b-0 hover:bg-surface-2"
+          >
             <input
               type="checkbox"
               checked={Boolean(done[s.id])}
@@ -47,12 +53,15 @@ export function GuideChecklist({
               aria-label={s.label}
               className="size-4 accent-[var(--accent)]"
             />
-            <Link href={s.href} className="text-sm text-ink hover:text-accent">
+            <Link
+              href={s.href}
+              className="text-[13px] font-medium text-ink hover:text-accent"
+            >
               {s.label}
             </Link>
           </li>
         ))}
       </ul>
-    </>
+    </div>
   );
 }

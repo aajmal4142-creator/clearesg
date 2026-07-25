@@ -197,7 +197,7 @@ export function AppShell({
     return (
       <div
         data-app-shell
-        className="fixed inset-0 flex min-h-0 flex-col overflow-hidden bg-surface-1 text-ink"
+        className="fixed inset-0 flex min-h-0 flex-col overflow-hidden bg-canvas text-ink"
       >
         <header className="flex shrink-0 items-center justify-between border-b border-rule px-4 py-3">
           <Link href="/dashboard" className="label-caps text-ink">
@@ -213,7 +213,7 @@ export function AppShell({
             <ThemeToggle />
           </div>
         </header>
-        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain bg-surface-1">
+        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain bg-canvas">
           {children}
         </div>
       </div>
@@ -223,7 +223,7 @@ export function AppShell({
   return (
     <div
       data-app-shell
-      className="fixed inset-0 flex min-h-0 overflow-hidden bg-surface-1 text-ink"
+      className="fixed inset-0 flex min-h-0 overflow-hidden bg-canvas text-ink"
     >
       {/* Desktop sidebar — fixed height, nav scrolls inside */}
       <Assemble
@@ -289,7 +289,7 @@ export function AppShell({
           </div>
         ) : null}
 
-        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain bg-surface-1">
+        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain bg-canvas">
           {children}
         </div>
       </div>

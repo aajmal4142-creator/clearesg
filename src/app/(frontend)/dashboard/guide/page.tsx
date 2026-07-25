@@ -132,39 +132,43 @@ export default async function GuidePage() {
       title="First report — do this with me"
       help="Checklist from empty to published. Steps complete automatically when the work is done; you can also tick them manually."
       rail={
-        <div className="text-sm text-ink-muted">
-          <p className="label-caps text-ink">Progress</p>
-          <p className="mt-2 font-data text-2xl text-ink">
+        <div>
+          <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-ink-muted">
+            Progress
+          </p>
+          <p className="mt-2 font-data text-[28px] font-bold text-ink">
             {completed}/{STEPS.length}
           </p>
-          <div className="mt-3 h-1.5 w-full bg-surface-2">
+          <div className="mt-3 h-1.5 w-full rounded-[2px] bg-surface-2">
             <div
-              className="h-full bg-accent transition-[width]"
+              className="h-full rounded-[2px] bg-accent transition-[width]"
               style={{ width: `${(completed / STEPS.length) * 100}%` }}
             />
           </div>
         </div>
       }
     >
-      {next ? (
-        <p className="text-sm text-ink">
-          Next:{" "}
-          <Link
-            href={next.href}
-            className="text-accent underline-offset-2 hover:underline"
-          >
-            {next.label}
-          </Link>
-        </p>
-      ) : (
-        <p className="text-sm text-signal">Checklist complete.</p>
-      )}
-      <GuideChecklist steps={[...STEPS]} initialDone={done} />
-      {next ? (
-        <Button asChild className="mt-6" size="sm">
-          <Link href={next.href}>Continue — {next.label}</Link>
-        </Button>
-      ) : null}
+      <div className="space-y-4">
+        {next ? (
+          <p className="text-[13px] text-ink">
+            Next:{" "}
+            <Link
+              href={next.href}
+              className="font-medium text-accent underline-offset-2 hover:underline"
+            >
+              {next.label}
+            </Link>
+          </p>
+        ) : (
+          <p className="text-[13px] text-signal">Checklist complete.</p>
+        )}
+        <GuideChecklist steps={[...STEPS]} initialDone={done} />
+        {next ? (
+          <Button asChild size="sm">
+            <Link href={next.href}>Continue — {next.label}</Link>
+          </Button>
+        ) : null}
+      </div>
     </PageFrame>
   );
 }

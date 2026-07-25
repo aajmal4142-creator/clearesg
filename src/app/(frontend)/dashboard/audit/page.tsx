@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 
 import {
   EmptyState,
+  PageCard,
   PageFrame,
   PageSkeleton,
   StatusLine,
@@ -90,17 +91,21 @@ export default function AuditPage() {
       title="Immutable change log"
       help="Who changed what, when. Append-only. Visible to admin and owner."
       rail={
-        <div className="text-sm text-ink-muted">
-          <p className="label-caps text-ink">Export</p>
+        <div>
+          <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-ink-muted">
+            Export
+          </p>
           {!forbidden ? (
             <a
               href={exportHref}
-              className="mt-2 inline-block text-accent underline-offset-2 hover:underline"
+              className="mt-2 inline-block text-[13px] font-medium text-accent underline-offset-2 hover:underline"
             >
               Full-account export
             </a>
           ) : (
-            <p className="mt-2">Export requires admin access.</p>
+            <p className="mt-2 text-[13px] text-ink-muted">
+              Export requires admin access.
+            </p>
           )}
         </div>
       }
@@ -111,60 +116,69 @@ export default function AuditPage() {
           body="The audit log is available to organisation admins and owners. Ask an admin if you need a change history for assurance."
         />
       ) : (
-        <>
-          <label className="block text-sm">
-            <span className="label-caps">Filter entity type</span>
-            <select
-              className="mt-1 w-full appearance-none border border-rule bg-surface-1 px-3 py-2 text-sm text-ink"
-              value={entityType}
-              onChange={(e) => {
-                setLoading(true);
-                setEntityType(e.target.value);
-              }}
-            >
-              {ENTITY_TYPE_OPTIONS.map((opt) => (
-                <option key={opt.value || "all"} value={opt.value}>
-                  {opt.label}
-                </option>
-              ))}
-            </select>
-          </label>
-          {error ? <StatusLine tone="error">{error}</StatusLine> : null}
-          {loading ? (
-            <div className="mt-6">
-              <PageSkeleton />
-            </div>
-          ) : null}
+        <div className="space-y-4">
+          <PageCard title="Filter">
+            <label className="block text-[13px]">
+              <span className="text-[10px] font-semibold uppercase tracking-[0.08em] text-ink-muted">
+                Entity type
+              </span>
+              <select
+                className="mt-1 w-full appearance-none rounded-md border border-rule bg-surface-1 px-3 py-2 text-[13px] text-ink"
+                value={entityType}
+                onChange={(e) => {
+                  setLoading(true);
+                  setEntityType(e.target.value);
+                }}
+              >
+                {ENTITY_TYPE_OPTIONS.map((opt) => (
+                  <option key={opt.value || "all"} value={opt.value}>
+                    {opt.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+            {error ? <StatusLine tone="error">{error}</StatusLine> : null}
+          </PageCard>
+
+          {loading ? <PageSkeleton /> : null}
+
           {!loading ? (
-            <ul className="mt-8 space-y-0 border-t border-rule">
-              {logs.map((l) => (
-                <li key={l.id} className="border-b border-rule py-3 text-sm">
-                  <p
-                    className="font-data text-xs text-ink-muted"
-                    title={new Date(l.createdAt).toISOString()}
+            <PageCard title="Events">
+              <ul>
+                {logs.map((l) => (
+                  <li
+                    key={l.id}
+                    className="border-b border-rule py-3 transition-colors last:border-b-0 hover:bg-surface-2"
                   >
-                    {shortRelativeTime(l.createdAt)}
-                  </p>
-                  <p className="text-ink">
-                    {auditActionLabel(l.action)} · {l.entityType}/{l.entityId}
-                  </p>
-                  <p className="text-xs text-ink-muted">{l.actor?.email ?? "system"}</p>
-                </li>
-              ))}
-              {logs.length === 0 && !error ? (
-                <li className="py-6 text-sm text-ink-muted">
-                  {entityType
-                    ? "No matching events"
-                    : "No audit events yet. Approvals, publishes, and assignments write here."}
-                </li>
-              ) : null}
-            </ul>
+                    <p
+                      className="font-data text-[11px] text-ink-muted"
+                      title={new Date(l.createdAt).toISOString()}
+                    >
+                      {shortRelativeTime(l.createdAt)}
+                    </p>
+                    <p className="mt-0.5 text-[13px] font-medium text-ink">
+                      {auditActionLabel(l.action)} · {l.entityType}/{l.entityId}
+                    </p>
+                    <p className="text-[11px] text-ink-muted">
+                      {l.actor?.email ?? "system"}
+                    </p>
+                  </li>
+                ))}
+                {logs.length === 0 && !error ? (
+                  <li className="py-6 text-[13px] text-ink-muted">
+                    {entityType
+                      ? "No matching events"
+                      : "No audit events yet. Approvals, publishes, and assignments write here."}
+                  </li>
+                ) : null}
+              </ul>
+            </PageCard>
           ) : null}
+
           <Button
             type="button"
             size="sm"
             variant="outline"
-            className="mt-4"
             onClick={() => {
               setLoading(true);
               setReloadKey((k) => k + 1);
@@ -172,7 +186,7 @@ export default function AuditPage() {
           >
             Refresh
           </Button>
-        </>
+        </div>
       )}
     </PageFrame>
   );

@@ -16,7 +16,7 @@ export function GoLink({
     <Link
       href={href}
       className={cn(
-        "inline-flex items-center gap-1 text-sm font-medium text-accent underline-offset-2 hover:underline",
+        "inline-flex cursor-pointer items-center gap-1 text-sm font-medium text-accent underline-offset-2 hover:underline",
         className,
       )}
     >

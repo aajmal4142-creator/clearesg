@@ -1,11 +1,11 @@
 "use client";
 
-import { FRAMEWORK_DISPLAY, type FrameworkCoverageSummary } from "@/lib/frameworks";
 import { Metric } from "@/components/ui/metric";
+import { FRAMEWORK_DISPLAY, type FrameworkCoverageSummary } from "@/lib/frameworks";
 
 /**
- * Quiet Runway-like framework coverage proportions.
- * Never paints “satisfied” green for partial / contribute-only states.
+ * Framework coverage strip above the Metrics table.
+ * Satisfied never paints green for partial / contribute-only states.
  */
 export function FrameworkCoveragePanel({
   summaries,
@@ -14,45 +14,56 @@ export function FrameworkCoveragePanel({
 }) {
   if (summaries.length === 0) {
     return (
-      <div className="border-b border-rule px-0 py-3">
-        <p className="label-caps text-ink-muted">Framework coverage</p>
-        <p className="mt-1 text-sm text-ink-muted">
+      <section className="w-full border-b border-rule pb-4">
+        <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-accent">
+          Framework coverage
+        </p>
+        <p className="mt-1 text-[13px] text-ink-muted">
           No applicable frameworks for this organisation yet.
         </p>
-      </div>
+      </section>
     );
   }
 
   return (
-    <div className="border-b border-rule py-3">
-      <p className="label-caps text-ink-muted">Framework coverage</p>
-      <p className="mt-1 max-w-2xl text-sm text-ink-muted">
-        Satisfied requires honest measured or calculated data on a required disclosure.
-        Estimates and spend-based figures count as partial — never complete.
-      </p>
-      <ul className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+    <section className="w-full border-b border-rule pb-4">
+      <div className="flex flex-wrap items-end justify-between gap-3">
+        <div className="min-w-0">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-accent">
+            Framework coverage
+          </p>
+          <p className="mt-1 max-w-[72ch] text-[12px] text-ink-muted">
+            Satisfied requires honest measured or calculated data. Estimates count as
+            partial — never complete.
+          </p>
+        </div>
+      </div>
+
+      <ul className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {summaries.map((s) => (
-          <li key={s.framework} className="border-t border-rule pt-2">
-            <p className="text-sm text-ink">{FRAMEWORK_DISPLAY[s.framework]}</p>
-            <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs">
-              <span className="text-signal">
+          <li key={s.framework} className="min-w-0">
+            <p className="text-[13px] font-semibold text-ink">
+              {FRAMEWORK_DISPLAY[s.framework]}
+            </p>
+            <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-[12px]">
+              <p className="text-signal">
                 Satisfied{" "}
                 <Metric value={s.pctSatisfied} unit="%" size="sm" animate={false} />
-              </span>
-              <span className="text-amber">
+              </p>
+              <p className="text-amber">
                 Partial <Metric value={s.pctPartial} unit="%" size="sm" animate={false} />
-              </span>
-              <span className="text-rust">
+              </p>
+              <p className="text-rust">
                 Gap <Metric value={s.pctGap} unit="%" size="sm" animate={false} />
-              </span>
+              </p>
             </div>
-            <p className="mt-1 text-[10px] text-ink-muted">
-              {s.satisfied} satisfied · {s.partial} partial · {s.contributes} contributes
-              · {s.gap} gap · {s.total} disclosures
+            <p className="mt-1 text-[11px] text-ink-muted">
+              {s.satisfied} satisfied · {s.partial} partial · {s.gap} gap · {s.total}{" "}
+              disclosures
             </p>
           </li>
         ))}
       </ul>
-    </div>
+    </section>
   );
 }

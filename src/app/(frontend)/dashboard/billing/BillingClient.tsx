@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 
-import { PageFrame, StatusLine } from "@/components/shell/PageFrame";
+import { PageCard, PageFrame, StatusLine } from "@/components/shell/PageFrame";
+import { Button } from "@/components/ui/button";
 import type { MembershipRole } from "@/lib/access/membership";
 import { PLAN_LIMITS, type PlanId } from "@/lib/billing/plans";
 import type { UsageMeters } from "@/lib/billing/usage";
@@ -27,17 +28,17 @@ function Meter({
     max === null || max === 0 ? 0 : Math.min(100, Math.round((used / max) * 100));
   const near = max !== null && used / max >= 0.8;
   return (
-    <div className="border-t border-rule py-3">
-      <div className="mb-2 flex justify-between text-sm">
+    <div className="border-t border-rule py-3 first:border-t-0 first:pt-0">
+      <div className="mb-2 flex justify-between text-[13px]">
         <span className="text-ink-muted">{label}</span>
         <span className="font-data text-ink">
           {used}
           {max === null ? " / ∞" : ` / ${max}`}
         </span>
       </div>
-      <div className="h-1 bg-surface-2">
+      <div className="h-1.5 rounded-[2px] bg-surface-2">
         <div
-          className={`h-1 ${near ? "bg-amber" : "bg-signal"}`}
+          className={`h-1.5 rounded-[2px] ${near ? "bg-amber" : "bg-signal"}`}
           style={{ width: max === null ? "8%" : `${pct}%` }}
         />
       </div>
@@ -131,19 +132,23 @@ export function BillingClient({
       help="Free includes full calculation. Paid plans unlock clean PDF export, extra periods, evidence storage, and consultant tools."
       actions={
         readOnlyNonOwner ? (
-          <p className="text-sm text-ink-muted">Read-only — ask an owner to upgrade</p>
+          <p className="text-[13px] text-ink-muted">
+            Read-only — ask an owner to upgrade
+          </p>
         ) : undefined
       }
       rail={
-        <div className="space-y-3 text-sm text-ink-muted">
-          <p className="label-caps text-ink">Current</p>
-          <p className="font-data text-xl text-ink">
+        <div className="space-y-3 text-[13px] text-ink-muted">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-ink">
+            Current
+          </p>
+          <p className="font-data text-[22px] font-bold text-ink">
             {PLAN_LIMITS[state.plan].label}
             {PLAN_LIMITS[state.plan].priceEur > 0
               ? ` · €${PLAN_LIMITS[state.plan].priceEur}/mo`
               : ""}
           </p>
-          <p className="font-data text-xs">
+          <p className="font-data text-[11px]">
             {subscriptionStatusLabel(state.subscriptionStatus)}
           </p>
           {state.usage.watermarkedPdf ? (
@@ -154,92 +159,96 @@ export function BillingClient({
         </div>
       }
     >
-      {status ? <StatusLine tone={statusTone}>{status}</StatusLine> : null}
+      <div className="space-y-4">
+        {status ? <StatusLine tone={statusTone}>{status}</StatusLine> : null}
 
-      {readOnlyNonOwner ? (
-        <StatusLine tone="neutral">
-          Plan changes and the Stripe portal are limited to owners and admins. You can
-          still review usage below.
-        </StatusLine>
-      ) : null}
+        {readOnlyNonOwner ? (
+          <StatusLine tone="neutral">
+            Plan changes and the Stripe portal are limited to owners and admins. You can
+            still review usage below.
+          </StatusLine>
+        ) : null}
 
-      <div className="mt-4 flex flex-wrap gap-2">
-        <button
-          type="button"
-          disabled={busy}
-          onClick={() => void refresh()}
-          className="border border-rule px-3 py-2 text-sm text-ink-muted hover:border-rule-strong hover:text-ink"
-        >
-          Refresh
-        </button>
-        {canManage ? (
-          <button
+        <div className="flex flex-wrap gap-2">
+          <Button
             type="button"
+            size="sm"
+            variant="outline"
             disabled={busy}
-            onClick={() => void portal()}
-            className="border border-rule px-3 py-2 text-sm text-ink-muted hover:border-rule-strong hover:text-ink"
+            onClick={() => void refresh()}
           >
-            Manage billing
-          </button>
-        ) : null}
-      </div>
+            Refresh
+          </Button>
+          {canManage ? (
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
+              disabled={busy}
+              onClick={() => void portal()}
+            >
+              Manage billing
+            </Button>
+          ) : null}
+        </div>
 
-      <section className="mt-6 space-y-1 border-t border-rule pt-2">
-        <Meter
-          label="Reporting periods"
-          used={state.usage.periods.used}
-          max={state.usage.periods.max}
-        />
-        <Meter
-          label="Suppliers"
-          used={state.usage.suppliers.used}
-          max={state.usage.suppliers.max}
-        />
-        {state.plan !== "free" &&
-        (state.usage.clients.max === null || state.usage.clients.max > 0) ? (
+        <PageCard title="Usage">
           <Meter
-            label="Clients"
-            used={state.usage.clients.used}
-            max={state.usage.clients.max}
+            label="Reporting periods"
+            used={state.usage.periods.used}
+            max={state.usage.periods.max}
           />
-        ) : null}
-      </section>
+          <Meter
+            label="Suppliers"
+            used={state.usage.suppliers.used}
+            max={state.usage.suppliers.max}
+          />
+          {state.plan !== "free" &&
+          (state.usage.clients.max === null || state.usage.clients.max > 0) ? (
+            <Meter
+              label="Clients"
+              used={state.usage.clients.used}
+              max={state.usage.clients.max}
+            />
+          ) : null}
+        </PageCard>
 
-      <section className="mt-8 grid gap-6 border-t border-rule pt-4 md:grid-cols-2">
-        {(
-          [
-            ["pro", "Unlimited periods, clean PDF, evidence vault, 10 suppliers"],
+        <div className="grid gap-4 md:grid-cols-2">
+          {(
             [
-              "consultant",
-              "Everything in Pro + white-label, bulk nudge, 10 clients (+€15/client after)",
-            ],
-          ] as const
-        ).map(([plan, blurb]) => (
-          <div key={plan} className="border-b border-rule pb-4 md:border-b-0 md:pr-4">
-            <p className="label-caps text-ink-muted">{PLAN_LIMITS[plan].label}</p>
-            <p className="mt-1 font-data text-xl text-ink">
-              €{PLAN_LIMITS[plan].priceEur}/mo
-            </p>
-            <p className="mt-2 text-sm text-ink-muted">{blurb}</p>
-            {canManage ? (
-              <button
-                type="button"
-                disabled={busy || state.plan === plan}
-                onClick={() => void checkout(plan)}
-                className="mt-4 border border-rule bg-surface-1 px-3 py-2 text-sm text-ink hover:border-rule-strong disabled:opacity-40"
-              >
-                {state.plan === plan
-                  ? "Current"
-                  : `Upgrade to ${PLAN_LIMITS[plan].label}`}
-              </button>
-            ) : (
-              <p className="mt-4 text-sm text-ink-muted">
-                {state.plan === plan ? "Current plan" : "Ask an owner to upgrade"}
+              ["pro", "Unlimited periods, clean PDF, evidence vault, 10 suppliers"],
+              [
+                "consultant",
+                "Everything in Pro + white-label, bulk nudge, 10 clients (+€15/client after)",
+              ],
+            ] as const
+          ).map(([plan, blurb]) => (
+            <PageCard key={plan} title={PLAN_LIMITS[plan].label}>
+              <p className="font-data text-[22px] font-bold text-ink">
+                €{PLAN_LIMITS[plan].priceEur}/mo
               </p>
-            )}
-          </div>
-        ))}
-      </section>
+              <p className="mt-2 text-[13px] text-ink-muted">{blurb}</p>
+              {canManage ? (
+                <Button
+                  type="button"
+                  size="sm"
+                  className="mt-4"
+                  disabled={busy || state.plan === plan}
+                  onClick={() => void checkout(plan)}
+                >
+                  {state.plan === plan
+                    ? "Current"
+                    : `Upgrade to ${PLAN_LIMITS[plan].label}`}
+                </Button>
+              ) : (
+                <p className="mt-4 text-[13px] text-ink-muted">
+                  {state.plan === plan ? "Current plan" : "Ask an owner to upgrade"}
+                </p>
+              )}
+            </PageCard>
+          ))}
+        </div>
+      </div>
     </PageFrame>
   );
 }

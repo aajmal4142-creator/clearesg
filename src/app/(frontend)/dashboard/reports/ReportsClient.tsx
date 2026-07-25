@@ -2,7 +2,13 @@
 
 import { useState } from "react";
 
-import { EmptyState, PageFrame, StatusLine } from "@/components/shell/PageFrame";
+import {
+  EmptyState,
+  PageCard,
+  PageFrame,
+  StatusLine,
+} from "@/components/shell/PageFrame";
+import { Button } from "@/components/ui/button";
 import { BUYER_FAQ } from "@/lib/reports/buyerFaq";
 import { frameworkLabel } from "@/lib/ui/displayLabels";
 
@@ -121,47 +127,46 @@ export function ReportsClient({
       actions={
         canPublish ? (
           <div className="flex flex-wrap gap-2">
-            <button
+            <Button
               type="button"
+              size="sm"
               disabled={busy}
               onClick={() => requestPublish("CSRD_SIMPLIFIED")}
-              className="border border-rule bg-surface-1 px-3 py-2 text-sm text-ink hover:border-rule-strong disabled:opacity-40"
             >
               Publish CSRD (simplified)
-            </button>
-            <button
+            </Button>
+            <Button
               type="button"
+              size="sm"
+              variant="outline"
               disabled={busy}
               onClick={() => requestPublish("BRSR")}
-              className="border border-rule px-3 py-2 text-sm text-ink-muted hover:border-rule-strong hover:text-ink disabled:opacity-40"
             >
               Publish BRSR-readiness
-            </button>
+            </Button>
           </div>
         ) : (
-          <p className="text-sm text-ink-muted">View only — ask an admin to publish</p>
+          <p className="text-[13px] text-ink-muted">
+            View only — ask an admin to publish
+          </p>
         )
       }
       rail={
-        <div className="space-y-6 text-sm text-ink-muted">
+        <div className="space-y-5 text-[13px] text-ink-muted">
           <div>
-            <p className="label-caps text-ink">Narrative starter</p>
+            <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-ink">
+              Narrative starter
+            </p>
             <p className="mt-2">
               In this period we measured our material emissions and linked source evidence
               where available. Scope totals update when datapoints change. Replace this
               with your board wording before external use.
             </p>
-            <p className="mt-2">
-              Electricity and fuels drive most of our operational footprint; supplier data
-              closes Scope 3 gaps as responses arrive.
-            </p>
-            <p className="mt-2">
-              This living report is the source of truth for buyers and lenders until the
-              next publish.
-            </p>
           </div>
           <div>
-            <p className="label-caps text-ink">Frameworks</p>
+            <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-ink">
+              Frameworks
+            </p>
             <p className="mt-2">
               CSRD (simplified) is the primary publish path. BRSR-readiness labels the
               same snapshot for India beachhead prep — principle-level BRSR mappings are
@@ -169,154 +174,177 @@ export function ReportsClient({
             </p>
           </div>
           <div>
-            <p className="label-caps text-ink">For banks &amp; buyers</p>
+            <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-ink">
+              For banks &amp; buyers
+            </p>
             <ul className="mt-2 space-y-2">
               {BUYER_FAQ.slice(0, 2).map((f) => (
                 <li key={f.q}>
                   <span className="text-ink">{f.q}</span>
-                  <span className="mt-0.5 block text-xs">{f.a}</span>
+                  <span className="mt-0.5 block text-[12px]">{f.a}</span>
                 </li>
               ))}
             </ul>
           </div>
           <div>
-            <p className="label-caps text-ink">Assurance</p>
+            <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-ink">
+              Assurance
+            </p>
             <p className="mt-2">ClearESG does not provide assurance or audit opinions.</p>
           </div>
         </div>
       }
     >
-      {status ? <StatusLine tone={statusTone}>{status}</StatusLine> : null}
+      <div className="space-y-4">
+        {status ? <StatusLine tone={statusTone}>{status}</StatusLine> : null}
 
-      {pending ? (
-        <div className="mt-4 border-t border-rule py-4">
-          <p className="text-sm text-ink">
-            {pending === "BRSR"
-              ? "Publish BRSR-readiness snapshot?"
-              : "Publish CSRD (simplified) snapshot?"}
-          </p>
-          <div className="mt-3 flex flex-wrap gap-2">
-            <button
-              type="button"
-              disabled={busy}
-              onClick={() => void confirmPublish()}
-              className="border border-rule bg-surface-1 px-3 py-2 text-sm text-ink hover:border-rule-strong disabled:opacity-40"
-            >
-              Confirm publish
-            </button>
-            <button
-              type="button"
-              disabled={busy}
-              onClick={() => {
-                setPending(null);
-                setStatus(null);
-              }}
-              className="border border-rule px-3 py-2 text-sm text-ink-muted hover:border-rule-strong hover:text-ink"
-            >
-              Cancel
-            </button>
-          </div>
-        </div>
-      ) : null}
+        {pending ? (
+          <PageCard title="Confirm publish">
+            <p className="text-[13px] text-ink">
+              {pending === "BRSR"
+                ? "Publish BRSR-readiness snapshot?"
+                : "Publish CSRD (simplified) snapshot?"}
+            </p>
+            <div className="mt-3 flex flex-wrap gap-2">
+              <Button
+                type="button"
+                size="sm"
+                disabled={busy}
+                onClick={() => void confirmPublish()}
+              >
+                Confirm publish
+              </Button>
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                disabled={busy}
+                onClick={() => {
+                  setPending(null);
+                  setStatus(null);
+                }}
+              >
+                Cancel
+              </Button>
+            </div>
+          </PageCard>
+        ) : null}
 
-      {diff.length > 0 ? (
-        <div className="mt-6 border-t border-rule pt-4">
-          <p className="label-caps mb-2">Diff vs previous version</p>
-          <ul className="space-y-1 font-data text-sm text-ink-muted">
-            {diff.map((d) => (
-              <li key={d.path}>
-                {d.path}: {d.from} → {d.to}
-              </li>
-            ))}
-          </ul>
-        </div>
-      ) : null}
-
-      {rows.length === 0 ? (
-        <EmptyState
-          title="No published reports yet"
-          body="Publish a CSRD (simplified) or BRSR-readiness snapshot when your period data is ready."
-        />
-      ) : (
-        <div className="mt-6 overflow-x-auto border-t border-rule">
-          <table className="w-full text-left text-sm">
-            <thead className="border-b border-rule text-ink-muted">
-              <tr>
-                <th className="px-3 py-2 font-normal">Version</th>
-                <th className="px-3 py-2 font-normal">Framework</th>
-                <th className="px-3 py-2 font-normal">Score</th>
-                <th className="px-3 py-2 font-normal">Views</th>
-                <th className="px-3 py-2 font-normal">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {rows.map((r) => (
-                <tr key={r.id} className="border-b border-rule/60">
-                  <td className="px-3 py-3 font-data text-ink">v{r.version}</td>
-                  <td className="px-3 py-3 text-ink-muted">
-                    {frameworkLabel(r.framework)}
-                  </td>
-                  <td className="px-3 py-3 font-data text-ink">
-                    {r.scores?.overall ?? "—"}
-                  </td>
-                  <td className="px-3 py-3 font-data text-ink-muted">{r.viewCount}</td>
-                  <td className="px-3 py-3">
-                    <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-                      {r.shareToken ? (
-                        <a
-                          className="text-signal underline-offset-2 hover:underline"
-                          href={`/r/${r.shareToken}`}
-                          target="_blank"
-                          rel="noreferrer"
-                        >
-                          Open live report
-                        </a>
-                      ) : null}
-                      {r.assuranceToken ? (
-                        <a
-                          className="text-ink underline-offset-2 hover:underline"
-                          href={`/a/${r.assuranceToken}`}
-                          target="_blank"
-                          rel="noreferrer"
-                        >
-                          Assurance Room
-                        </a>
-                      ) : null}
-                      <a
-                        className="text-ink underline-offset-2 hover:underline"
-                        href={`/api/app/reports/${r.id}/pdf`}
-                        target="_blank"
-                        rel="noreferrer"
-                      >
-                        PDF
-                      </a>
-                      <span className="text-xs text-ink-muted">
-                        <a
-                          className="underline-offset-2 hover:underline"
-                          href={`/api/app/reports/${r.id}/export?format=json`}
-                          target="_blank"
-                          rel="noreferrer"
-                        >
-                          JSON
-                        </a>
-                        <span aria-hidden="true"> · </span>
-                        <a
-                          className="underline-offset-2 hover:underline"
-                          href={`/api/app/reports/${r.id}/export?format=csv`}
-                          target="_blank"
-                          rel="noreferrer"
-                        >
-                          CSV
-                        </a>
-                      </span>
-                    </div>
-                  </td>
-                </tr>
+        {diff.length > 0 ? (
+          <PageCard title="Diff vs previous version">
+            <ul className="space-y-1 font-data text-[12px] text-ink-muted">
+              {diff.map((d) => (
+                <li key={d.path}>
+                  {d.path}: {d.from} → {d.to}
+                </li>
               ))}
-            </tbody>
-          </table>
-        </div>
-      )}
+            </ul>
+          </PageCard>
+        ) : null}
+
+        {rows.length === 0 ? (
+          <EmptyState
+            title="No published reports yet"
+            body="Publish a CSRD (simplified) or BRSR-readiness snapshot when your period data is ready."
+          />
+        ) : (
+          <PageCard title="Published versions">
+            <div className="overflow-x-auto">
+              <table className="w-full min-w-[640px] text-left text-[12px]">
+                <thead>
+                  <tr className="border-b-2 border-rule-strong">
+                    <th className="py-2.5 pr-2 text-[10px] font-semibold uppercase tracking-[0.08em] text-ink-muted">
+                      Version
+                    </th>
+                    <th className="py-2.5 pr-2 text-[10px] font-semibold uppercase tracking-[0.08em] text-ink-muted">
+                      Framework
+                    </th>
+                    <th className="py-2.5 pr-2 text-[10px] font-semibold uppercase tracking-[0.08em] text-ink-muted">
+                      Score
+                    </th>
+                    <th className="py-2.5 pr-2 text-[10px] font-semibold uppercase tracking-[0.08em] text-ink-muted">
+                      Views
+                    </th>
+                    <th className="py-2.5 text-[10px] font-semibold uppercase tracking-[0.08em] text-ink-muted">
+                      Actions
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {rows.map((r) => (
+                    <tr
+                      key={r.id}
+                      className="border-b border-rule transition-colors last:border-b-0 hover:bg-surface-2"
+                    >
+                      <td className="py-2.5 pr-2 font-data text-ink">v{r.version}</td>
+                      <td className="py-2.5 pr-2 text-ink-muted">
+                        {frameworkLabel(r.framework)}
+                      </td>
+                      <td className="py-2.5 pr-2 font-data text-ink">
+                        {r.scores?.overall ?? "—"}
+                      </td>
+                      <td className="py-2.5 pr-2 font-data text-ink-muted">
+                        {r.viewCount}
+                      </td>
+                      <td className="py-2.5">
+                        <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+                          {r.shareToken ? (
+                            <a
+                              className="font-medium text-accent underline-offset-2 hover:underline"
+                              href={`/r/${r.shareToken}`}
+                              target="_blank"
+                              rel="noreferrer"
+                            >
+                              Open live report
+                            </a>
+                          ) : null}
+                          {r.assuranceToken ? (
+                            <a
+                              className="text-ink underline-offset-2 hover:underline"
+                              href={`/a/${r.assuranceToken}`}
+                              target="_blank"
+                              rel="noreferrer"
+                            >
+                              Assurance Room
+                            </a>
+                          ) : null}
+                          <a
+                            className="text-ink underline-offset-2 hover:underline"
+                            href={`/api/app/reports/${r.id}/pdf`}
+                            target="_blank"
+                            rel="noreferrer"
+                          >
+                            PDF
+                          </a>
+                          <span className="text-[11px] text-ink-muted">
+                            <a
+                              className="underline-offset-2 hover:underline"
+                              href={`/api/app/reports/${r.id}/export?format=json`}
+                              target="_blank"
+                              rel="noreferrer"
+                            >
+                              JSON
+                            </a>
+                            <span aria-hidden="true"> · </span>
+                            <a
+                              className="underline-offset-2 hover:underline"
+                              href={`/api/app/reports/${r.id}/export?format=csv`}
+                              target="_blank"
+                              rel="noreferrer"
+                            >
+                              CSV
+                            </a>
+                          </span>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </PageCard>
+        )}
+      </div>
     </PageFrame>
   );
 }

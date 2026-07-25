@@ -28,7 +28,7 @@ export function RunwayEmissions({
   primarySharePct,
 }: RunwayEmissionsProps) {
   return (
-    <InkReveal delay={0.08} className="border-b border-rule py-7">
+    <InkReveal delay={0.08}>
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <p className="label-caps">Emissions</p>

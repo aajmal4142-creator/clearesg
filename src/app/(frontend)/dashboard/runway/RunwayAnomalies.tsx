@@ -13,7 +13,7 @@ export function RunwayAnomalies({ anomalies }: RunwayAnomaliesProps) {
   if (anomalies.length === 0) return null;
 
   return (
-    <InkReveal delay={0.2} className="border-b border-rule py-7">
+    <InkReveal delay={0.2} className="mt-6">
       <p className="label-caps text-amber">Review unusual metrics</p>
       <div className="mt-4 overflow-hidden rounded-[6px] border border-rule bg-surface-1">
         <div className="overflow-x-auto">

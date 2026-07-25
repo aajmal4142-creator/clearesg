@@ -35,7 +35,11 @@ export function AppSelectNative({
   return (
     <label className="flex flex-col gap-1 text-xs text-ink-muted">
       {label ? <span className="label-caps">{label}</span> : null}
-      <select id={selectId} className={cn(fieldClass, className)} {...props}>
+      <select
+        id={selectId}
+        className={cn(fieldClass, "cursor-pointer", className)}
+        {...props}
+      >
         {children}
       </select>
     </label>

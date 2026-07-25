@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 
 import {
   EmptyState,
+  PageCard,
   PageFrame,
   PageSkeleton,
   StatusLine,
@@ -141,9 +142,11 @@ export default function RequestsPage() {
       title="Internal data requests"
       help="Assign a metric checklist to a teammate with a due date. They sign in to respond."
       rail={
-        <div className="text-sm text-ink-muted">
-          <p className="label-caps text-ink">Open</p>
-          <p className="mt-2 font-data text-2xl text-ink">{rows.length}</p>
+        <div>
+          <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-ink-muted">
+            Open
+          </p>
+          <p className="mt-2 font-data text-[28px] font-bold text-ink">{rows.length}</p>
         </div>
       }
     >
@@ -151,50 +154,54 @@ export default function RequestsPage() {
       {loadError ? <EmptyState title="Requests unavailable" body={loadError} /> : null}
 
       {!loading && !loadError ? (
-        <>
-          <div className="space-y-3 border-b border-rule pb-8">
-            <AppField
-              label="Title"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder="Q1 energy pack"
-            />
-            <AppSelectNative
-              label="Assignee"
-              value={assigneeId}
-              onChange={(e) => setAssigneeId(e.target.value)}
-            >
-              <option value="">Select teammate</option>
-              {teammates.map((t) => (
-                <option key={t.id} value={t.id}>
-                  {t.name || t.email || t.id}
-                </option>
-              ))}
-            </AppSelectNative>
-            {teammates.length === 0 ? (
-              <p className="text-xs text-ink-muted">
-                No teammates found. Invite members before assigning requests.
-              </p>
-            ) : null}
-            <AppField
-              label="Metrics"
-              className="font-data"
-              value={metricKeys}
-              onChange={(e) => setMetricKeys(e.target.value)}
-              placeholder="e.g. electricity_kwh, diesel_litres"
-            />
-            <AppField
-              type="date"
-              label="Due date"
-              className="font-data"
-              value={dueDate}
-              onChange={(e) => setDueDate(e.target.value)}
-            />
-            <Button type="button" size="sm" onClick={() => void create()}>
-              Send request
-            </Button>
-            {status ? <StatusLine tone={statusTone}>{status}</StatusLine> : null}
-          </div>
+        <div className="space-y-4">
+          <PageCard title="New request">
+            <div className="grid gap-3 md:grid-cols-2">
+              <AppField
+                label="Title"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                placeholder="Q1 energy pack"
+              />
+              <AppSelectNative
+                label="Assignee"
+                value={assigneeId}
+                onChange={(e) => setAssigneeId(e.target.value)}
+              >
+                <option value="">Select teammate</option>
+                {teammates.map((t) => (
+                  <option key={t.id} value={t.id}>
+                    {t.name || t.email || t.id}
+                  </option>
+                ))}
+              </AppSelectNative>
+              {teammates.length === 0 ? (
+                <p className="text-[12px] text-ink-muted md:col-span-2">
+                  No teammates found. Invite members before assigning requests.
+                </p>
+              ) : null}
+              <AppField
+                label="Metrics"
+                className="font-data"
+                value={metricKeys}
+                onChange={(e) => setMetricKeys(e.target.value)}
+                placeholder="e.g. electricity_kwh, diesel_litres"
+              />
+              <AppField
+                type="date"
+                label="Due date"
+                className="font-data"
+                value={dueDate}
+                onChange={(e) => setDueDate(e.target.value)}
+              />
+              <div className="md:col-span-2">
+                <Button type="button" size="sm" onClick={() => void create()}>
+                  Send request
+                </Button>
+                {status ? <StatusLine tone={statusTone}>{status}</StatusLine> : null}
+              </div>
+            </div>
+          </PageCard>
 
           {rows.length === 0 ? (
             <EmptyState
@@ -202,39 +209,46 @@ export default function RequestsPage() {
               body="Create one to assign energy or social metrics to a teammate with a due date."
             />
           ) : (
-            <ul className="mt-2 border-t border-rule">
-              {rows.map((r) => (
-                <li key={r.id} className="border-b border-rule py-3 text-sm">
-                  <div className="flex flex-wrap items-start justify-between gap-3">
-                    <div>
-                      <p className="text-ink">{r.title}</p>
-                      <p className="font-data text-xs text-ink-muted">
-                        {requestStatusLabel(r.requestStatus)}
-                        {r.dueDate ? ` · due ${String(r.dueDate).slice(0, 10)}` : ""}
-                        {" · "}
-                        {r.metricKeys.join(", ")}
-                      </p>
+            <PageCard title="Open requests">
+              <ul>
+                {rows.map((r) => (
+                  <li
+                    key={r.id}
+                    className="border-b border-rule py-3 transition-colors last:border-b-0 hover:bg-surface-2"
+                  >
+                    <div className="flex flex-wrap items-start justify-between gap-3 px-1">
+                      <div>
+                        <p className="font-medium text-ink">{r.title}</p>
+                        <p className="mt-0.5 font-data text-[11px] text-ink-muted">
+                          {requestStatusLabel(r.requestStatus)}
+                          {r.dueDate ? ` · due ${String(r.dueDate).slice(0, 10)}` : ""}
+                          {" · "}
+                          {r.metricKeys.join(", ")}
+                        </p>
+                      </div>
+                      <select
+                        className={cn(
+                          appFieldClass,
+                          "w-auto appearance-none px-2 py-1 text-[11px]",
+                        )}
+                        value={r.requestStatus}
+                        onChange={(e) => void patchStatus(r.id, e.target.value)}
+                        aria-label={`Status for ${r.title}`}
+                      >
+                        <option value="not_sent">{requestStatusLabel("not_sent")}</option>
+                        <option value="sent">{requestStatusLabel("sent")}</option>
+                        <option value="opened">{requestStatusLabel("opened")}</option>
+                        <option value="submitted">
+                          {requestStatusLabel("submitted")}
+                        </option>
+                      </select>
                     </div>
-                    <select
-                      className={cn(
-                        appFieldClass,
-                        "w-auto appearance-none px-2 py-1 text-xs",
-                      )}
-                      value={r.requestStatus}
-                      onChange={(e) => void patchStatus(r.id, e.target.value)}
-                      aria-label={`Status for ${r.title}`}
-                    >
-                      <option value="not_sent">{requestStatusLabel("not_sent")}</option>
-                      <option value="sent">{requestStatusLabel("sent")}</option>
-                      <option value="opened">{requestStatusLabel("opened")}</option>
-                      <option value="submitted">{requestStatusLabel("submitted")}</option>
-                    </select>
-                  </div>
-                </li>
-              ))}
-            </ul>
+                  </li>
+                ))}
+              </ul>
+            </PageCard>
           )}
-        </>
+        </div>
       ) : null}
     </PageFrame>
   );

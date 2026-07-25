@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 import { getPayload } from "payload";
 
 import { AssuranceRoomView } from "@/components/assurance/AssuranceRoomView";
-import { PageFrame } from "@/components/shell/PageFrame";
+import { EmptyState, PageFrame } from "@/components/shell/PageFrame";
 import { getCurrentContext } from "@/lib/auth";
 import { loadAssurancePayload } from "@/lib/assurance/loadAssurance";
 import { ensureAssuranceToken } from "@/lib/reports/ensureAssuranceToken";
@@ -33,10 +33,10 @@ export default async function AssuranceDashboardPage() {
         title="Assurance Room"
         help="Publish a report version first. The Assurance Room is read-only against frozen snapshots."
       >
-        <p className="text-sm text-ink-muted">
-          No published report yet. Publish from Reports, then return here for figure
-          lineage.
-        </p>
+        <EmptyState
+          title="No published report yet"
+          body="Publish from Reports, then return here for figure lineage."
+        />
       </PageFrame>
     );
   }
@@ -45,7 +45,10 @@ export default async function AssuranceDashboardPage() {
   if (!data) {
     return (
       <PageFrame eyebrow="Assurance" title="Assurance Room">
-        <p className="text-sm text-ink-muted">Published report has no snapshot.</p>
+        <EmptyState
+          title="Snapshot missing"
+          body="Published report has no snapshot. Re-publish from Reports."
+        />
       </PageFrame>
     );
   }

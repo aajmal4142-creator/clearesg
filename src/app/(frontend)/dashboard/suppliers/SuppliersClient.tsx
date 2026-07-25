@@ -2,7 +2,12 @@
 
 import { useState } from "react";
 
-import { EmptyState, PageFrame, StatusLine } from "@/components/shell/PageFrame";
+import {
+  EmptyState,
+  PageCard,
+  PageFrame,
+  StatusLine,
+} from "@/components/shell/PageFrame";
 import { AppField, AppSelectNative } from "@/components/ui/AppField";
 import { Button } from "@/components/ui/button";
 import { Metric } from "@/components/ui/metric";
@@ -214,24 +219,32 @@ export function SuppliersClient({
         !canWrite ? <p className="text-sm text-ink-muted">View only</p> : undefined
       }
       rail={
-        <div className="space-y-6">
+        <div className="space-y-5">
           <div>
-            {coveragePct === null ? (
-              <span className="font-data text-3xl text-ink-muted">—</span>
-            ) : (
-              <Metric value={coveragePct} unit="%" size="xl" decimals={0} />
-            )}
-            <p className="label-caps mt-1">Spend covered</p>
+            <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-ink-muted">
+              Spend covered
+            </p>
+            <div className="mt-2">
+              {coveragePct === null ? (
+                <span className="font-data text-[28px] font-bold text-ink-muted">—</span>
+              ) : (
+                <Metric value={coveragePct} unit="%" size="xl" decimals={0} />
+              )}
+            </div>
           </div>
           <div>
-            {responseRate === null ? (
-              <span className="font-data text-3xl text-ink-muted">—</span>
-            ) : (
-              <Metric value={responseRate} unit="%" size="xl" decimals={0} />
-            )}
-            <p className="label-caps mt-1">Response rate</p>
+            <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-ink-muted">
+              Response rate
+            </p>
+            <div className="mt-2">
+              {responseRate === null ? (
+                <span className="font-data text-[28px] font-bold text-ink-muted">—</span>
+              ) : (
+                <Metric value={responseRate} unit="%" size="xl" decimals={0} />
+              )}
+            </div>
           </div>
-          <p className="text-xs text-ink-muted">
+          <p className="text-[12px] text-ink-muted">
             Coverage uses annual spend on suppliers you have listed. Response rate counts
             submitted forms.
           </p>
@@ -240,132 +253,156 @@ export function SuppliersClient({
     >
       {status ? <StatusLine tone={statusTone}>{status}</StatusLine> : null}
 
-      {canWrite ? (
-        <form
-          onSubmit={(e) => void addSupplier(e)}
-          className="mt-4 grid gap-3 border-t border-rule pt-4 md:grid-cols-2"
-        >
-          <AppField
-            required
-            label="Supplier name"
-            placeholder="Acme Supplies Ltd"
-            value={form.name}
-            onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
-          />
-          <AppField
-            required
-            type="email"
-            label="Contact email"
-            placeholder="contact@supplier.com"
-            value={form.contactEmail}
-            onChange={(e) => setForm((f) => ({ ...f, contactEmail: e.target.value }))}
-          />
-          <AppSelectNative
-            label="Category"
-            value={form.category}
-            onChange={(e) => setForm((f) => ({ ...f, category: e.target.value }))}
-          >
-            {CATEGORIES.map((c) => (
-              <option key={c.value} value={c.value}>
-                {c.label}
-              </option>
-            ))}
-          </AppSelectNative>
-          <AppField
-            type="number"
-            min={0}
-            label="Annual spend"
-            placeholder="0"
-            className="font-data"
-            value={form.annualSpend}
-            onChange={(e) => setForm((f) => ({ ...f, annualSpend: e.target.value }))}
-          />
-          <Button type="submit" className="md:col-span-2" size="sm">
-            Add supplier
-          </Button>
-        </form>
-      ) : null}
+      <div className="space-y-4">
+        {canWrite ? (
+          <PageCard title="Add supplier">
+            <form
+              onSubmit={(e) => void addSupplier(e)}
+              className="grid gap-3 md:grid-cols-2"
+            >
+              <AppField
+                required
+                label="Supplier name"
+                placeholder="Acme Supplies Ltd"
+                value={form.name}
+                onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
+              />
+              <AppField
+                required
+                type="email"
+                label="Contact email"
+                placeholder="contact@supplier.com"
+                value={form.contactEmail}
+                onChange={(e) => setForm((f) => ({ ...f, contactEmail: e.target.value }))}
+              />
+              <AppSelectNative
+                label="Category"
+                value={form.category}
+                onChange={(e) => setForm((f) => ({ ...f, category: e.target.value }))}
+              >
+                {CATEGORIES.map((c) => (
+                  <option key={c.value} value={c.value}>
+                    {c.label}
+                  </option>
+                ))}
+              </AppSelectNative>
+              <AppField
+                type="number"
+                min={0}
+                label="Annual spend"
+                placeholder="0"
+                className="font-data"
+                value={form.annualSpend}
+                onChange={(e) => setForm((f) => ({ ...f, annualSpend: e.target.value }))}
+              />
+              <Button type="submit" className="md:col-span-2" size="sm">
+                Add supplier
+              </Button>
+            </form>
+          </PageCard>
+        ) : null}
 
-      {canWrite && rows.length > 0 ? (
-        <div className="mt-4">
-          <button
-            type="button"
-            onClick={() => void chaseReminders()}
-            className="border border-rule px-3 py-2 text-sm text-ink-muted hover:border-rule-strong hover:text-ink"
-          >
-            Send due reminders (day 7 / 14)
-          </button>
-        </div>
-      ) : null}
+        {canWrite && rows.length > 0 ? (
+          <div>
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
+              onClick={() => void chaseReminders()}
+            >
+              Send due reminders (day 7 / 14)
+            </Button>
+          </div>
+        ) : null}
 
-      {rows.length === 0 ? (
-        <EmptyState
-          title="No suppliers yet"
-          body="Add a supplier with a contact email, then send them a one-link request. Their reply lands in Scope 3 — they do not need an account."
-        />
-      ) : (
-        <div className="mt-6 overflow-x-auto border-t border-rule">
-          <table className="w-full text-left text-sm">
-            <thead className="border-b border-rule text-ink-muted">
-              <tr>
-                <th className="px-3 py-2 font-normal">Name</th>
-                <th className="px-3 py-2 font-normal">Category</th>
-                <th className="px-3 py-2 font-normal">Spend</th>
-                <th className="px-3 py-2 font-normal">Status</th>
-                <th className="px-3 py-2 font-normal">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {rows.map((r) => (
-                <tr key={r.id} className="border-b border-rule/60">
-                  <td className="px-3 py-3">
-                    <div className="text-ink">{r.name}</div>
-                    <div className="text-xs text-ink-muted">{r.contactEmail}</div>
-                  </td>
-                  <td className="px-3 py-3 text-ink-muted">{r.category}</td>
-                  <td className="px-3 py-3 font-data text-ink">
-                    {r.annualSpend === null ? "—" : r.annualSpend.toLocaleString()}
-                  </td>
-                  <td className="px-3 py-3 text-ink-muted">
-                    {requestStatusLabel(r.requestStatus)}
-                  </td>
-                  <td className="px-3 py-3">
-                    {canWrite ? (
-                      <div className="flex flex-wrap gap-2">
-                        {r.requestStatus !== "submitted" ? (
-                          <button
-                            type="button"
-                            className="text-sm text-ink underline-offset-2 hover:underline"
-                            onClick={() => void sendRequest(r.id)}
-                          >
-                            {r.requestStatus === "not_sent" ? "Send request" : "Resend"}
-                          </button>
-                        ) : null}
-                        <button
-                          type="button"
-                          className="text-sm text-ink underline-offset-2 hover:underline"
-                          onClick={() => copyChase(r)}
-                        >
-                          Copy chase
-                        </button>
-                        <button
-                          type="button"
-                          className="text-sm text-ink-muted hover:text-rust"
-                          onClick={() => void remove(r.id)}
-                        >
-                          Remove
-                        </button>
-                      </div>
-                    ) : (
-                      <span className="text-ink-muted">—</span>
-                    )}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
+        {rows.length === 0 ? (
+          <EmptyState
+            title="No suppliers yet"
+            body="Add a supplier with a contact email, then send them a one-link request. Their reply lands in Scope 3 — they do not need an account."
+          />
+        ) : (
+          <PageCard title="Suppliers">
+            <div className="overflow-x-auto">
+              <table className="w-full min-w-[640px] text-left text-[12px]">
+                <thead>
+                  <tr className="border-b-2 border-rule-strong">
+                    <th className="py-2.5 pr-2 text-[10px] font-semibold uppercase tracking-[0.08em] text-ink-muted">
+                      Name
+                    </th>
+                    <th className="py-2.5 pr-2 text-[10px] font-semibold uppercase tracking-[0.08em] text-ink-muted">
+                      Category
+                    </th>
+                    <th className="py-2.5 pr-2 text-[10px] font-semibold uppercase tracking-[0.08em] text-ink-muted">
+                      Spend
+                    </th>
+                    <th className="py-2.5 pr-2 text-[10px] font-semibold uppercase tracking-[0.08em] text-ink-muted">
+                      Status
+                    </th>
+                    <th className="py-2.5 text-[10px] font-semibold uppercase tracking-[0.08em] text-ink-muted">
+                      Actions
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {rows.map((r) => (
+                    <tr
+                      key={r.id}
+                      className="border-b border-rule transition-colors last:border-b-0 hover:bg-surface-2"
+                    >
+                      <td className="py-2.5 pr-2 align-top">
+                        <div className="font-medium text-ink">{r.name}</div>
+                        <div className="text-[11px] text-ink-muted">{r.contactEmail}</div>
+                      </td>
+                      <td className="py-2.5 pr-2 align-top text-ink-muted">
+                        {r.category}
+                      </td>
+                      <td className="py-2.5 pr-2 align-top font-data text-ink">
+                        {r.annualSpend === null ? "—" : r.annualSpend.toLocaleString()}
+                      </td>
+                      <td className="py-2.5 pr-2 align-top text-ink-muted">
+                        {requestStatusLabel(r.requestStatus)}
+                      </td>
+                      <td className="py-2.5 align-top">
+                        {canWrite ? (
+                          <div className="flex flex-wrap gap-2">
+                            {r.requestStatus !== "submitted" ? (
+                              <button
+                                type="button"
+                                className="text-[12px] font-medium text-accent underline-offset-2 hover:underline"
+                                onClick={() => void sendRequest(r.id)}
+                              >
+                                {r.requestStatus === "not_sent"
+                                  ? "Send request"
+                                  : "Resend"}
+                              </button>
+                            ) : null}
+                            <button
+                              type="button"
+                              className="text-[12px] text-ink underline-offset-2 hover:underline"
+                              onClick={() => copyChase(r)}
+                            >
+                              Copy chase
+                            </button>
+                            <button
+                              type="button"
+                              className="text-[12px] text-ink-muted hover:text-rust"
+                              onClick={() => void remove(r.id)}
+                            >
+                              Remove
+                            </button>
+                          </div>
+                        ) : (
+                          <span className="text-ink-muted">—</span>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </PageCard>
+        )}
+      </div>
     </PageFrame>
   );
 }
