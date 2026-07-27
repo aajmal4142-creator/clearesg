@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ls -la /c/Ajmal/startups/clearesg/src/app/\\\\\\(frontend\\\\\\)/dashboard/)",
+      "Bash(ls -la /c/Ajmal/startups/clearesg/src/app/\\\\\\(frontend\\\\\\)/dashboard/runway/)",
+      "Bash(pnpm build:*)",
+      "WebSearch",
+      "mcp__visualize__read_me",
+      "mcp__visualize__show_widget"
+    ]
+  }
+}
