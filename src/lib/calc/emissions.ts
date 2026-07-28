@@ -5,8 +5,13 @@
  *   Scope 2 = electricity_kWh × factor(grid, region, year) / 1000                    → tCO2e
  *   Scope 1 = (diesel_L × factor(diesel) + gas_m3 × factor(gas)) / 1000              → tCO2e
  *             (+ petrol_L × factor(petrol) / 1000 when present)
- *   Scope 3 = supplier_spend_total × factor(spend) / 1000
+ *   Scope 3 = (prefer) supplier_spend_estimate_tco2e
+ *             else supplier_spend_total × factor(spend) / 1000
  *             + business_travel_km × factor(travel) / 1000
+ *             + supplier_reported_tco2e (primary submissions; already tCO2e)
+ *
+ * When provenance-aware reaggregation feeds both estimate and primary totals,
+ * spend_total is omitted so the same supplier is never double-counted.
  *
  * A component is only added when its metric is present (value !== null). Absent
  * components are never treated as zero — they are simply left out of the sum, and
@@ -30,6 +35,8 @@ export const METRIC_KEYS = {
   naturalGas: "natural_gas_m3",
   petrol: "petrol_litres",
   supplierSpend: "supplier_spend_total",
+  /** Pre-rolled spend×factor tCO2e (provenance spend_estimate). Prefer over raw spend. */
+  supplierSpendEstimate: "supplier_spend_estimate_tco2e",
   businessTravel: "business_travel_km",
   supplierReported: "supplier_reported_tco2e",
 } as const;
@@ -155,17 +162,36 @@ export function computeScope3(
   const components: EmissionComponent[] = [];
   const missingInputs: string[] = [];
 
-  const spend = metric(metrics, METRIC_KEYS.supplierSpend);
-  if (spend && spend.value !== null) {
-    const factor = resolveFactor(factors, FACTOR_KEYS.spend, region, year);
+  const spendEstimate = metric(metrics, METRIC_KEYS.supplierSpendEstimate);
+  if (spendEstimate && spendEstimate.value !== null) {
+    // Already tCO2e from provenance-aware reaggregation — do not also apply spend×factor.
     components.push({
-      key: "supplier_spend",
-      label: "Supplier spend",
-      valueTco2e: tco2eFrom(spend.value, factor),
-      factor,
+      key: "supplier_spend_estimate",
+      label: "Supplier spend (estimate)",
+      valueTco2e: spendEstimate.value,
+      factor: {
+        id: "spend-estimate-rolled",
+        key: METRIC_KEYS.supplierSpendEstimate,
+        value: 1,
+        unit: "tCO2e",
+        source: "spend_estimate",
+        publicationYear: year,
+        region: "GLOBAL",
+      },
     });
   } else {
-    missingInputs.push(METRIC_KEYS.supplierSpend);
+    const spend = metric(metrics, METRIC_KEYS.supplierSpend);
+    if (spend && spend.value !== null) {
+      const factor = resolveFactor(factors, FACTOR_KEYS.spend, region, year);
+      components.push({
+        key: "supplier_spend",
+        label: "Supplier spend",
+        valueTco2e: tco2eFrom(spend.value, factor),
+        factor,
+      });
+    } else {
+      missingInputs.push(METRIC_KEYS.supplierSpend);
+    }
   }
 
   const travel = metric(metrics, METRIC_KEYS.businessTravel);
@@ -182,6 +208,7 @@ export function computeScope3(
   }
 
   // Σ(direct supplier-reported) — already tCO2e; no emission factor applied.
+  // When fed from composeScope3, this is primary-only (estimates excluded).
   const reported = metric(metrics, METRIC_KEYS.supplierReported);
   if (reported && reported.value !== null) {
     components.push({

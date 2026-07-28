@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { dashboardUrl } from "@/lib/marketing/site";
 import Link from "next/link";
 
 import { MarketingLayout } from "@/components/marketing/MarketingLayout";
@@ -82,7 +83,7 @@ export default function BrsrReadinessToolPage() {
               ? "You can start a BRSR-readiness workspace and attach evidence now."
               : "Start with the 60-second baseline and replace estimates one field at a time."}
           </p>
-          <Link href="/sign-up" className="acid-link mt-4 inline-block">
+          <Link href={dashboardUrl("/sign-up")} className="acid-link mt-4 inline-block">
             Save this and track it over time
           </Link>
         </div>

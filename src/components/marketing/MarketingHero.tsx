@@ -6,6 +6,7 @@ import { LiveHeroGauge } from "@/components/marketing/LiveHeroGauge";
 import { InkReveal, RuleDraw } from "@/components/motion";
 import { Button } from "@/components/ui/button";
 import { heroStage } from "@/lib/motion";
+import { dashboardUrl } from "@/lib/marketing/site";
 
 /**
  * Option A — gauge leads above the fold.
@@ -35,7 +36,7 @@ export function MarketingHero() {
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
             <Button asChild>
-              <Link href="/sign-up">Start free</Link>
+              <Link href={dashboardUrl("/sign-up")}>Start free</Link>
             </Button>
             <Button
               variant="outline"

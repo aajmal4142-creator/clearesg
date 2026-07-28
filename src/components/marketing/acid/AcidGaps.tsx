@@ -7,6 +7,7 @@ import { motion, useReducedMotion } from "motion/react";
 import { ScrollReveal } from "@/components/marketing/acid/scroll";
 import { Button } from "@/components/ui/button";
 import { Metric } from "@/components/ui/metric";
+import { dashboardUrl } from "@/lib/marketing/site";
 
 const GAPS: Array<{
   gap: string;
@@ -121,7 +122,7 @@ export function AcidGaps() {
               <p className="acid-display-sm text-ink">Start free this quarter.</p>
             </div>
             <Button asChild size="lg" className="rounded-full px-7">
-              <Link href="/sign-up">Start free</Link>
+              <Link href={dashboardUrl("/sign-up")}>Start free</Link>
             </Button>
           </div>
         </motion.div>

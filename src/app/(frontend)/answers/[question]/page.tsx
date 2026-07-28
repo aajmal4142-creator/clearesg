@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 
 import { MarketingLayout } from "@/components/marketing/MarketingLayout";
 import { ANSWERS, answerBySlug } from "@/lib/marketing/answers";
-import { absoluteUrl, SITE_NAME } from "@/lib/marketing/site";
+import { absoluteUrl, SITE_NAME, dashboardUrl } from "@/lib/marketing/site";
 
 type Props = { params: Promise<{ question: string }> };
 
@@ -73,7 +73,7 @@ export default async function AnswerPage({ params }: Props) {
             </Link>
           </li>
           <li>
-            <Link href="/dashboard" className="sand-link">
+            <Link href={dashboardUrl("/")} className="sand-link">
               Open ClearESG
             </Link>
           </li>

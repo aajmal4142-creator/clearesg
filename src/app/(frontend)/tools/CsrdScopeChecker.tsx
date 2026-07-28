@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { dashboardUrl } from "@/lib/marketing/site";
 import Link from "next/link";
 
 type Result = { inScope: boolean; detail: string };
@@ -76,7 +77,7 @@ export function CsrdScopeChecker() {
           <p className="mt-2 text-ink-muted">{result.detail}</p>
           <p className="mt-4 text-ink-muted">
             Save this and track it over time →{" "}
-            <Link href="/sign-up" className="text-ink underline">
+            <Link href={dashboardUrl("/sign-up")} className="text-ink underline">
               Start free
             </Link>
           </p>
