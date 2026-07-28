@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 
 import { MarketingLayout } from "@/components/marketing/MarketingLayout";
 import { CSRD_SECTORS, sectorBySlug } from "@/lib/marketing/programmatic";
-import { absoluteUrl, SITE_NAME } from "@/lib/marketing/site";
+import { absoluteUrl, SITE_NAME, dashboardUrl } from "@/lib/marketing/site";
 
 type Props = { params: Promise<{ sector: string }> };
 
@@ -57,7 +57,7 @@ export default async function CsrdSectorPage({ params }: Props) {
           <Link href="/glossary/esrs-e1" className="acid-link">
             ESRS E1
           </Link>
-          <Link href="/sign-up" className="acid-link">
+          <Link href={dashboardUrl("/sign-up")} className="acid-link">
             Start free
           </Link>
         </p>

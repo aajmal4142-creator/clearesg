@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 
 import { ClearESGLogo } from "@/components/brand/ClearESGLogo";
 import { MarketingAuthActions } from "@/components/marketing/MarketingAuthActions";
-import { ThemeToggle } from "@/components/shell/ThemeToggle";
+import { ThemeToggle } from "@/components/marketing/ThemeToggle";
 import { cn } from "@/lib/utils";
 
 const HOME_SECTIONS = [

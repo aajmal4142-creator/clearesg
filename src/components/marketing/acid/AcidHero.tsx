@@ -5,6 +5,7 @@ import Link from "next/link";
 import { motion, useReducedMotion } from "motion/react";
 
 import { Button } from "@/components/ui/button";
+import { dashboardUrl } from "@/lib/marketing/site";
 
 export function AcidHero() {
   const reduce = useReducedMotion();
@@ -60,7 +61,7 @@ export function AcidHero() {
           transition={{ duration: 0.5, delay: 0.22 }}
         >
           <Button asChild size="lg" className="rounded-full px-7">
-            <Link href="/sign-up">Start free</Link>
+            <Link href={dashboardUrl("/sign-up")}>Start free</Link>
           </Button>
           <Button asChild size="lg" variant="outline" className="rounded-full px-7">
             <Link href="#how">See how it works</Link>

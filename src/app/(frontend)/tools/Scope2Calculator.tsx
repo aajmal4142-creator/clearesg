@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { dashboardUrl } from "@/lib/marketing/site";
 import Link from "next/link";
 
 import { Input } from "@/components/ui/input";
@@ -66,7 +67,7 @@ export function Scope2Calculator() {
         <p className="mt-1 text-xs text-ink-muted">{f.source}</p>
         <p className="mt-4 text-sm text-ink-muted">
           Save this and track it over time →{" "}
-          <Link href="/sign-up" className="text-ink underline">
+          <Link href={dashboardUrl("/sign-up")} className="text-ink underline">
             Start free
           </Link>
         </p>

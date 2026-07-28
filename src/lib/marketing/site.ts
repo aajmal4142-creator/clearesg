@@ -14,6 +14,15 @@ export function absoluteUrl(path: string): string {
   return siteUrl(path);
 }
 
+/** Product app (dashboard repo). Marketing CTAs open here. */
+export function dashboardUrl(path = "/"): string {
+  const base = (
+    process.env.NEXT_PUBLIC_DASHBOARD_URL ?? "https://app.clearesg.com"
+  ).replace(/\/$/, "");
+  if (!path || path === "/") return base;
+  return `${base}${path.startsWith("/") ? path : `/${path}`}`;
+}
+
 export const organizationJsonLd = {
   "@context": "https://schema.org",
   "@type": "Organization",

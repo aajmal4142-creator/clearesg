@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 
 import { MarketingLayout } from "@/components/marketing/MarketingLayout";
 import { DEADLINES, deadlineBySlug } from "@/lib/marketing/programmatic";
-import { absoluteUrl, SITE_NAME } from "@/lib/marketing/site";
+import { absoluteUrl, SITE_NAME, dashboardUrl } from "@/lib/marketing/site";
 
 type Props = { params: Promise<{ country: string }> };
 
@@ -54,7 +54,7 @@ export default async function DeadlinePage({ params }: Props) {
           <Link href="/answers/does-csrd-apply-outside-eu" className="sand-link">
             Does CSRD apply outside the EU?
           </Link>
-          <Link href="/dashboard" className="sand-link">
+          <Link href={dashboardUrl("/")} className="sand-link">
             Open runway
           </Link>
         </p>

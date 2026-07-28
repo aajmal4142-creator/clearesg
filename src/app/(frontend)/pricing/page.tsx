@@ -5,7 +5,7 @@ import { MarketingLayout } from "@/components/marketing/MarketingLayout";
 import { Button } from "@/components/ui/button";
 import { Metric } from "@/components/ui/metric";
 import { PLAN_LIMITS } from "@/lib/billing/plans";
-import { SITE_NAME, softwareApplicationJsonLd } from "@/lib/marketing/site";
+import { SITE_NAME, softwareApplicationJsonLd, dashboardUrl } from "@/lib/marketing/site";
 
 export const metadata: Metadata = {
   title: `Pricing — ${SITE_NAME}`,
@@ -68,7 +68,7 @@ export default function PricingPage() {
                 ))}
               </ul>
               <Button asChild className="mt-6 rounded-full" size="sm">
-                <Link href="/sign-up">Start</Link>
+                <Link href={dashboardUrl("/sign-up")}>Start</Link>
               </Button>
             </li>
           ))}

@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { dashboardUrl } from "@/lib/marketing/site";
 import Link from "next/link";
 
 import { MarketingLayout } from "@/components/marketing/MarketingLayout";
@@ -120,7 +121,7 @@ export default function PriceEstimatePage() {
             ClearESG list: Free €0 · Pro €49/mo · Consultant €199/mo. Sector: {sector}.
           </p>
           <p className="mt-6">
-            <Link href="/sign-up" className="acid-link">
+            <Link href={dashboardUrl("/sign-up")} className="acid-link">
               Start free
             </Link>
             {" · "}

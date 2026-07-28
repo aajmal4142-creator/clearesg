@@ -39,7 +39,7 @@ type ThemeToggleProps = {
   className?: string;
 };
 
-/** shadcn-style sun/moon theme toggle. */
+/** Marketing theme toggle — cookie `clearesg-theme`, no auth. */
 export function ThemeToggle({ className }: ThemeToggleProps) {
   const theme = useSyncExternalStore(subscribe, readTheme, () => "light" as const);
   const isDark = theme === "dark";

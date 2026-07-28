@@ -1,4 +1,3 @@
-import { ClerkProvider } from "@clerk/nextjs";
 import type { Metadata } from "next";
 import { cookies } from "next/headers";
 import {
@@ -70,27 +69,6 @@ export const metadata: Metadata = {
   },
 };
 
-const hasClerk = Boolean(
-  process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY && process.env.CLERK_SECRET_KEY,
-);
-
-const clerkAppearance = {
-  variables: {
-    colorPrimary: "#7A2E2E",
-    colorBackground: "#FBF9F5",
-    colorText: "#1A1714",
-    colorInputBackground: "#F5F2EC",
-    colorInputText: "#1A1714",
-    borderRadius: "0.25rem",
-    fontFamily: "var(--font-inter-tight)",
-  },
-  elements: {
-    card: "bg-surface-1 border border-rule shadow-none",
-    headerTitle: "font-display text-ink",
-    formButtonPrimary: "bg-accent text-canvas hover:bg-accent-hover",
-  },
-};
-
 export default async function RootLayout({
   children,
 }: Readonly<{
@@ -99,14 +77,6 @@ export default async function RootLayout({
   const jar = await cookies();
   const raw = jar.get("clearesg-theme")?.value;
   const theme: Theme = isTheme(raw) ? raw : "light";
-
-  const content = hasClerk ? (
-    <ClerkProvider appearance={clerkAppearance} afterSignOutUrl="/">
-      {children}
-    </ClerkProvider>
-  ) : (
-    children
-  );
 
   return (
     <html
@@ -127,7 +97,7 @@ export default async function RootLayout({
           shadow={false}
         />
         <div className="noise-overlay" aria-hidden />
-        {content}
+        {children}
       </body>
     </html>
   );

@@ -11,16 +11,7 @@
     "format": "prettier --write .",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:calc": "vitest run src/lib/calc src/lib/narrative",
-    "test:obligations": "vitest run src/lib/obligations",
     "test:e2e": "playwright test",
-    "seed": "cross-env NODE_OPTIONS=--no-deprecation tsx src/seed/seed.ts",
-    "inspect-esrs": "cross-env NODE_OPTIONS=--no-deprecation tsx scripts/inspect-esrs.ts",
-    "parse-esrs": "cross-env NODE_OPTIONS=--no-deprecation tsx scripts/parse-esrs.ts",
-    "propose-mappings": "cross-env NODE_OPTIONS=--no-deprecation tsx scripts/propose-mappings.ts",
-    "generate:types": "cross-env NODE_OPTIONS=--no-deprecation payload generate:types",
-    "generate:importmap": "cross-env NODE_OPTIONS=--no-deprecation payload generate:importmap",
-    "payload": "cross-env NODE_OPTIONS=--no-deprecation payload",
     "prepare": "husky"
   },
   "lint-staged": {

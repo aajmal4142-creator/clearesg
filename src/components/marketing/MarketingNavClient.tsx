@@ -4,7 +4,7 @@ import Link from "next/link";
 
 import { MarketingAuthActions } from "@/components/marketing/MarketingAuthActions";
 import { Assemble, RuleDraw } from "@/components/motion";
-import { ThemeToggle } from "@/components/shell/ThemeToggle";
+import { ThemeToggle } from "@/components/marketing/ThemeToggle";
 
 export function MarketingNavClient() {
   return (

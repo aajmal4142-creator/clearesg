@@ -1,7 +1,7 @@
 import { ANSWERS } from "@/lib/marketing/answers";
 import { GLOSSARY } from "@/lib/marketing/glossary";
 import { COMPETITORS, CSRD_SECTORS, DEADLINES } from "@/lib/marketing/programmatic";
-import { SITE_NAME, SITE_TAGLINE, siteUrl } from "@/lib/marketing/site";
+import { SITE_NAME, SITE_TAGLINE, dashboardUrl, siteUrl } from "@/lib/marketing/site";
 
 export function GET() {
   const lines = [
@@ -13,7 +13,7 @@ export function GET() {
     "",
     "## Product",
     `- Pricing: ${siteUrl("/pricing")}`,
-    `- App: ${siteUrl("/dashboard")}`,
+    `- App: ${dashboardUrl("/")}`,
     "",
     "## Free tools (ungated)",
     `- CSRD scope checker: ${siteUrl("/tools/csrd-scope")}`,
